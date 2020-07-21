@@ -20,7 +20,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'ngb*u#08l$9*g!yqyu31t7vx)jkw4rh^(ut0)lp&u&!q6b^0gp' # TODO
+# TODO
+SECRET_KEY = 'ngb*u#08l$9*g!yqyu31t7vx)jkw4rh^(ut0)lp&u&!q6b^0gp'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -38,15 +39,19 @@ INSTALLED_APPS = [
 
     # extra package
     'rest_framework',
-    'django-filter',
+    'django_filters',
     'corsheaders',
+
+    # chenobyl
+    'common',
+    'timeline'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
 
-    # cors header 
+    # cors header
     'corsheaders.middleware.CorsMiddleware',
 
     'django.middleware.common.CommonMiddleware',
@@ -120,6 +125,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+MEDIA_URL = "media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
@@ -128,3 +135,12 @@ REST_FRAMEWORK = {
 }
 
 CORS_ORIGIN_ALLOW_ALL = True
+
+LANGUAGES = [
+    ('fr', 'Français'),
+    ('en', 'English'),
+]
+
+LANGUAGES_DEFAULT = 'en' 
+
+LANGUAGES.sort(key=lambda l: l[1])
