@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'corsheaders',
+    'django_extensions',
 
     # chenobyl
     'common',
@@ -141,6 +142,6 @@ LANGUAGES = [
     ('en', 'English'),
 ]
 
-LANGUAGES_DEFAULT = 'en' 
+LANGUAGES_DEFAULT = 'en'
 
 LANGUAGES.sort(key=lambda l: l[1])

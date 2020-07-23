@@ -1,8 +1,8 @@
 from rest_framework import serializers
-from .models import Timeline
+from .models import Event
 
 
-class TimelineSerializer(serializers.ModelSerializer):
+class EventSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Timeline
+        model = Event
         fields = ['id',]

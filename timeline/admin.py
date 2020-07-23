@@ -1,47 +1,68 @@
 from django.contrib import admin
-from .models import Picture, Document, Video, Article, LangEvent, Event
+from .models import Picture, Document, Video, Article, \
+    PictureLang, DocumentLang, VideoLang, ArticleLang, EventLang, Event
+from common.admin import AdminBase, AdminInlineBase
 
 
-class PictureAdmin(admin.ModelAdmin):
-    list_display = ()
-    list_filter = ()
-    search_fields = ()
+class PictureLangInline(AdminInlineBase):
+    model = PictureLang
 
 
-class DocumentAdmin(admin.ModelAdmin):
-    list_display = ()
-    list_filter = ()
-    search_fields = ()
+class PictureAdmin(AdminBase):
+    list_display = ('image', 'photographer')
+    inlines = [
+        PictureLangInline
+    ]
 
 
-class VideoAdmin(admin.ModelAdmin):
-    list_display = ()
-    list_filter = ()
-    search_fields = ()
+class DocumentLangInline(AdminInlineBase):
+    model = DocumentLang
 
 
-class ArticleAdmin(admin.ModelAdmin):
-    list_display = ()
-    list_filter = ()
-    search_fields = ()
+class DocumentAdmin(AdminBase):
+    list_display = ('image', 'doc')
+    inlines = [
+        DocumentLangInline
+    ]
 
 
-class LangEventAdmin(admin.ModelAdmin):
-    list_display = ()
-    list_filter = ()
-    search_fields = ()
+class VideoLangInline(AdminInlineBase):
+    model = VideoLang
 
 
-class EventAdmin(admin.ModelAdmin):
-    list_display = ()
-    list_filter = ()
-    search_fields = ()
+class VideoAdmin(AdminBase):
+    list_display = ('video', )
+    inlines = [
+        VideoLangInline
+    ]
 
+
+class ArticleLangInline(AdminInlineBase):
+    model = ArticleLang
+
+
+class ArticleAdmin(AdminBase):
+    list_display = ('link', )
+    inlines = [
+        ArticleLangInline
+    ]
 
 
 admin.site.register(Picture, PictureAdmin)
 admin.site.register(Document, DocumentAdmin)
 admin.site.register(Video, VideoAdmin)
 admin.site.register(Article, ArticleAdmin)
-admin.site.register(LangEvent, LangEventAdmin)
+
+
+class EventLangInline(AdminInlineBase):
+    model = EventLang
+
+
+class EventAdmin(AdminBase):
+    list_display = ('title', 'date')
+    inlines = [
+        EventLangInline
+    ]
+
+
 admin.site.register(Event, EventAdmin)

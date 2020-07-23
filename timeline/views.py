@@ -1,8 +1,8 @@
 from rest_framework import viewsets
-from .models import Timeline
-from .serializer import TimelineSerializer
+from .models import Event
+from .serializer import EventSerializer
 
 
-class TimelineViewSet(viewsets.ModelViewSet):
-    queryset = Timeline.objects.all()
-    serializer_class = TimelineSerializer
+class EventViewSet(viewsets.ModelViewSet):
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer

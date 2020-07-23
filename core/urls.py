@@ -16,11 +16,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
-import timeline
+from timeline.views import EventViewSet
 
 # restframework url router
 router = routers.DefaultRouter()
-router.register('timeline', timeline.views.TimelineView)
+router.register('event', EventViewSet)
 
 
 urlpatterns = [
