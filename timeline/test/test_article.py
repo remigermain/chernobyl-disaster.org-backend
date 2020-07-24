@@ -20,7 +20,7 @@ class ArticleTestCase(TestCase):
             )
         self.assertIsNotNone(obj.id)
 
-    def test_link(self):
+    def test_wrong_link(self):
         obj = Article(
             title="test",
             event=self.event,

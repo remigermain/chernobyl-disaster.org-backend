@@ -6,14 +6,23 @@ from rest_framework import routers
 
 router = routers.DefaultRouter()
 
-for r in common_urls:
-    router.register(*r)
+apps = [
+    common_urls,
+    timeline_urls
+]
 
-for r in timeline_urls:
-    router.register(*r)
-
+for app in apps:
+    for url in app:
+        router.register(*url)
 
 urlpatterns = [
+    # api models
     path('', include(router.urls)),
+
+    # auth api
+    path('auth/', include('dj_rest_auth.urls')),
+    path('auth/registration/', include('dj_rest_auth.registration.urls')),
+
+    # admin
     path('admin/', admin.site.urls),
 ]

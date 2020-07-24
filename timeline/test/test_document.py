@@ -82,6 +82,7 @@ class DocumentTestCase(TestCase):
         obj = serializer.save()
         self.assertEqual(obj.title, data['title'])
         self.assertEqual(obj.event.pk, data['event'])
+        obj.delete()
 
         data.pop('doc')
         data['image'] = self.image
@@ -93,6 +94,7 @@ class DocumentTestCase(TestCase):
         obj = serializer.save()
         self.assertEqual(obj.title, data['title'])
         self.assertEqual(obj.event.pk, data['event'])
+        obj.delete()
 
     @tag('serializer')
     def test_serializer_create_both(self):

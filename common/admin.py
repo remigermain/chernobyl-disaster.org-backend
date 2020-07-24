@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import Tag, TagLang, People
-from core.settings import LANGUAGES
+from django.conf import settings
 
 
 class AdminBase(admin.ModelAdmin):
@@ -39,7 +39,7 @@ class AdminInlineBase(admin.TabularInline):
         extra = 1
         if obj:
             _count = obj.langs.count()
-            return extra if len(LANGUAGES) - _count != 0 else 1
+            return extra if len(settings.LANGUAGES) - _count != 0 else 1
         return extra
 
 
