@@ -22,7 +22,7 @@ def fnc_extra_path(instance, filename):
         the path is:
             50/Picture/10/my_pictures.png
     """
-    return f"{instance.event.id}/{instance.__class__.__name__}/{instance.id}/{filename}"
+    return f"{instance.event.id}/{instance.__class__.__name__}/{filename}"
 
 
 class Picture(EventExtraAbstract):
@@ -62,6 +62,8 @@ class Article(EventExtraAbstract):
 class EventExtraLangAbstract(LanguageAbstract):
     title = models.CharField(max_length=50, blank=True, null=True)
 
+    get_parent_lang = 'extra'
+
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['extra', 'language'], name="%(class)s_unique")
@@ -97,6 +99,7 @@ class EventLang(LanguageAbstract):
     title = models.CharField(max_length=100)
     description = models.TextField()
     event = models.ForeignKey('timeline.Event', on_delete=models.CASCADE, related_name="langs")
+    get_parent_lang = 'event'
 
     class Meta:
         constraints = [
@@ -115,7 +118,7 @@ class Event(ContributorAbstract):
     """
     title = models.CharField(max_length=100)
     tags = models.ManyToManyField('common.Tag', related_name="events", blank=True)
-    date = models.DateTimeField(null=False, blank=False)
+    date = models.DateTimeField(null=False, blank=False, unique=True)
 
     class Meta:
         constraints = [

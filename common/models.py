@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from core import settings
+from django.core.exceptions import ValidationError
 
 
 class ChernobylModelBase(models.Model):
@@ -64,6 +65,7 @@ class TagLang(LanguageAbstract):
     """
     name = models.CharField(max_length=50)
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE, related_name="langs")
+    get_parent_lang = 'tag'
 
     class Meta:
         constraints = [
