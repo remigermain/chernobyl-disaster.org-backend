@@ -1,26 +1,18 @@
-from django.urls import path, include
-from rest_framework import routers
 from timeline import views
 
-# restframework url router
-router = routers.DefaultRouter()
+drf_routers = (
+    ('picture/lang', views.PictureLangViewSet),
+    ('picture', views.PictureViewSet),
 
-# router.register('picture/lang', views.EventLangViewSet)
-router.register('picture', views.PictureViewSet)
+    ('document/lang', views.DocumentLangViewSet),
+    ('document', views.DocumentViewSet),
 
-# router.register('document/lang', views.EventLangViewSet)
-router.register('document', views.DocumentViewSet)
+    ('article/lang', views.ArticleLangViewSet),
+    ('article', views.ArticleViewSet),
 
-# router.register('article/lang', views.EventLangViewSet)
-router.register('article', views.ArticleViewSet)
+    ('video/lang', views.VideoLangViewSet),
+    ('video', views.VideoViewSet),
 
-# router.register('video/lang', views.EventLangViewSet)
-router.register('video', views.VideoViewSet)
-
-router.register('lang', views.EventLangViewSet)
-router.register('', views.EventViewSet)
-
-
-urlpatterns = [
-    path('/', include(router.urls)),
-]
+    ('event/lang', views.EventLangViewSet),
+    ('event', views.EventViewSet),
+)

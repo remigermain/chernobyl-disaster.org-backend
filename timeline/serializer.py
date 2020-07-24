@@ -1,12 +1,13 @@
 from core.drf import ModelSerializerBase
-from timeline.models import Event, EventLang, Picture, Document, Video, Article
+from timeline.models import Event, EventLang, Picture, Document, Video, \
+    Article, PictureLang, DocumentLang, VideoLang, ArticleLang
 from django.core.exceptions import ValidationError
 
 
 class EventSerializer(ModelSerializerBase):
     class Meta:
         model = Event
-        fields = ['id', 'title', 'date', 'tags']
+        fields = ['title', 'date', 'tags']
 
 
 class EventLangSerializer(ModelSerializerBase):
@@ -44,3 +45,27 @@ class ArticleSerializer(ModelSerializerBase):
     class Meta:
         model = Article
         fields = ['title', 'tags', 'event', 'link']
+
+
+class PictureLangSerializer(ModelSerializerBase):
+    class Meta:
+        model = PictureLang
+        fields = ['title', 'extra']
+
+
+class DocumentLangSerializer(ModelSerializerBase):
+    class Meta:
+        model = DocumentLang
+        fields = ['title', 'extra']
+
+
+class VideoLangSerializer(ModelSerializerBase):
+    class Meta:
+        model = VideoLang
+        fields = ['title', 'extra']
+
+
+class ArticleLangSerializer(ModelSerializerBase):
+    class Meta:
+        model = ArticleLang
+        fields = ['title', 'extra']

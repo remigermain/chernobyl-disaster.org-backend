@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from core import settings
-from django.core.exceptions import ValidationError
 
 
 class ChernobylModelBase(models.Model):
