@@ -37,7 +37,8 @@ class ChernobylModelAbstract(models.Model):
 
     @property
     def updated(self):
-        return self.get_commit().order_by('-created').first() or self.created
+        obj = self.get_commit().order_by('-created').first()
+        return obj.created if obj else self.created
 
     def save(self, *args, **kwargs):
         # override the save for check every time the field

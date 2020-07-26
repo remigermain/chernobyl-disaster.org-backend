@@ -8,6 +8,7 @@ class PictureLangInline(AdminInlineBase):
     model = PictureLang
 
 
+@admin.register(Picture)
 class PictureAdmin(AdminBase):
     list_display = ('image', 'photographer')
     inlines = [
@@ -19,6 +20,7 @@ class DocumentLangInline(AdminInlineBase):
     model = DocumentLang
 
 
+@admin.register(Document)
 class DocumentAdmin(AdminBase):
     list_display = ('image', 'doc')
     inlines = [
@@ -30,6 +32,7 @@ class VideoLangInline(AdminInlineBase):
     model = VideoLang
 
 
+@admin.register(Video)
 class VideoAdmin(AdminBase):
     list_display = ('video', )
     inlines = [
@@ -40,7 +43,7 @@ class VideoAdmin(AdminBase):
 class ArticleLangInline(AdminInlineBase):
     model = ArticleLang
 
-
+@admin.register(Article)
 class ArticleAdmin(AdminBase):
     list_display = ('link', )
     inlines = [
@@ -48,21 +51,13 @@ class ArticleAdmin(AdminBase):
     ]
 
 
-admin.site.register(Picture, PictureAdmin)
-admin.site.register(Document, DocumentAdmin)
-admin.site.register(Video, VideoAdmin)
-admin.site.register(Article, ArticleAdmin)
-
-
 class EventLangInline(AdminInlineBase):
     model = EventLang
 
 
+@admin.register(Event)
 class EventAdmin(AdminBase):
     list_display = ('title', 'date')
     inlines = [
         EventLangInline
     ]
-
-
-admin.site.register(Event, EventAdmin)

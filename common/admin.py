@@ -3,11 +3,13 @@ from .models import Tag, TagLang, People, Issue, Commit
 from lib.admin import AdminBase, AdminInlineBase
 
 
+@admin.register(Issue)
 class IssueAdmin(admin.ModelAdmin):
     list_display = ('id', 'creator', 'content_type', 'content_object', 'created')
     exclude = ('uuid',)
 
 
+@admin.register(Commit)
 class CommitAdmin(admin.ModelAdmin):
     list_display = ('id', 'creator', 'content_type', 'content_object', 'created')
     exclude = ('uuid',)
@@ -17,6 +19,7 @@ class TagLangInline(AdminInlineBase):
     model = TagLang
 
 
+@admin.register(Tag)
 class TagAdmin(AdminBase):
     list_display = ('name',)
     search_fields = ('name',)
@@ -25,14 +28,9 @@ class TagAdmin(AdminBase):
     ]
 
 
+@admin.register(People)
 class PeopleAdmin(AdminBase):
     list_display = ('name', 'pictures')
 
     def pictures(self, obj):
         return obj.pictures.count() if obj else 0
-
-
-admin.site.register(Issue, IssueAdmin)
-admin.site.register(Commit, CommitAdmin)
-admin.site.register(Tag, TagAdmin)
-admin.site.register(People, PeopleAdmin)

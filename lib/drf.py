@@ -14,6 +14,8 @@ class ModelSerializerBase(serializers.ModelSerializer):
     def __init__(self, *args, **kwargs):
 
         if hasattr(self.Meta.model, NAME_LANG):
+
+            self.Meta.fields.append(NAME_LANG)
             # we allway add the validatos for languages
             if not hasattr(self.Meta, 'validators'):
                 self.Meta.validators = []
@@ -28,35 +30,35 @@ class ModelSerializerBase(serializers.ModelSerializer):
             # automatic add 'id' in fields and created, updated, contributors count methods
             self.Meta.fields.insert(0, 'id')
             self.Meta.fields.extend([
-                NAME_LANG,
                 'created',
                 'updated',
-                'contributors_count'
+                'commit_count'
                 ])
 
         super().__init__(*args, **kwargs)
 
-    contributors_count = serializers.SerializerMethodField()
+    commit_count = serializers.SerializerMethodField()
 
-    def get_contributors_count(self, obj):
-        # if obj has annotate contributures count we return it or by queryset
-        if hasattr(obj, 'ann_contributors_count'):
-            return obj.ann_contributors_count
-        return obj.contributors.count()
+    def get_commit_count(self, obj):
+        # obj has annotate contributures count we return it or by queryset
+        return getattr(obj, 'ann_commit_count', obj.commit_count)
+
+    def updated(self, obj):
+        # obj has annotate contributures count we return it or by queryset
+        return getattr(obj, 'ann_updated', obj.updated)
 
     def save(self):
-        contributor = False
         if not self.instance:
             # we add the creator
             self.validated_data['creator'] = self.context['request'].user
-        elif self.instance.id:
-            contributor = True
-        # TODO
-        obj = super().save()
-        if contributor:
-            # we add the contributor
-            obj.contributors.add(self.context['request'].user)
-        return obj
+            return super().save()
+        else:
+            obj = super().save()
+            print('----alalala----', obj)
+            # we create a commit with contributor
+            from common.models import Commit
+            Commit.objects.create(creator=self.context['request'].user, content_object=obj)
+            return obj
 
 
 class ModelViewSetBase(viewsets.ModelViewSet):
@@ -77,7 +79,7 @@ class ModelViewSetBase(viewsets.ModelViewSet):
             self.search_fields.append('tags__name')
             self.search_fields.append('tags')
 
-        self.ordering_fields.extend(['created', 'updated'])
+        #self.ordering_fields.extend(['created', 'updated'])
 
         super().__init__(*args, **kwargs)
 
