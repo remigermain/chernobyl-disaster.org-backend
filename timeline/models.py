@@ -1,12 +1,12 @@
 from django.db import models
-from common.models import ContributorAbstract, LanguageAbstract
+from lib.models import CreatorAbstract, LanguageAbstract
 from django.core.exceptions import ValidationError
 
 
-class EventExtraAbstract(ContributorAbstract):
+class EventExtraAbstract(CreatorAbstract):
     title = models.CharField(max_length=50)
     tags = models.ManyToManyField("common.Tag", related_name="%(class)s_extra", blank=True)
-    event = models.ForeignKey("timeline.Event", on_delete=models.SET_NULL, null=True, related_name="%(class)s")
+    event = models.ForeignKey("timeline.Event", on_delete=models.SET_NULL, null=True, related_name="%(class)ss")
 
     class Meta:
         abstract = True
@@ -110,7 +110,7 @@ class EventLang(LanguageAbstract):
         return f"{self.event} {self.language}"
 
 
-class Event(ContributorAbstract):
+class Event(CreatorAbstract):
     """
         event models is a date event on chernobyl
         the title is for indication , tags for easy find here, and the date ...

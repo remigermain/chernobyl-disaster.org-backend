@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import Picture, Document, Video, Article, \
     PictureLang, DocumentLang, VideoLang, ArticleLang, EventLang, Event
-from common.admin import AdminBase, AdminInlineBase
+from lib.admin import AdminBase, AdminInlineBase
 
 
 class PictureLangInline(AdminInlineBase):

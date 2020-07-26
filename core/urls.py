@@ -6,11 +6,13 @@ from rest_framework import routers
 
 router = routers.DefaultRouter()
 
+# load the url of all app
 apps = [
     common_urls,
     timeline_urls
 ]
 
+# register all urls in all apps
 for app in apps:
     for url in app:
         router.register(*url)

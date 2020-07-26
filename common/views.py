@@ -1,18 +1,22 @@
-from core.drf import ModelViewSetBase
+from lib.drf import ModelViewSetBase
 from .models import Tag, TagLang, People
-from .serializer import TagLangSerializer, TagSerializer, PeopleSerializer
+from .serializer import TagLangSerializer, TagSerializer, PeopleSerializer, \
+    TagSerializerSafe
 
 
 class TagViewSet(ModelViewSetBase):
     queryset = Tag.objects.all()
-    serializer = TagSerializer
+    serializer_class = TagSerializer
+    serializer_class_safe = TagSerializerSafe
+    filterset_fields = ['name']
+    search_fields = ['name']
 
 
 class TagLangViewSet(ModelViewSetBase):
     queryset = TagLang.objects.all()
-    serializer = TagLangSerializer
+    serializer_class = TagLangSerializer
 
 
 class PeopleViewSet(ModelViewSetBase):
     queryset = People.objects.all()
-    serializer = PeopleSerializer
+    serializer_class = PeopleSerializer

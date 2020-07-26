@@ -1,54 +1,22 @@
 from django.db import models
-from django.contrib.auth import get_user_model
-from django.conf import settings
+from lib.models import CreatorAbstract, LanguageAbstract, LogAbstract
 
 
-class ChernobylModelBase(models.Model):
-    class Meta:
-        abstract = True
-
-    def save(self, *args, **kwargs):
-        # override the save for check every time the field
-        self.full_clean()
-        super(ChernobylModelBase, self).save(*args, **kwargs)
-        return self
-
-
-class ContributorAbstract(ChernobylModelBase):
+class Issue(LogAbstract):
     """
-        creator is the original user would creat the models
-        contributors is all user would modify/update the models
+        model to report probleme on every models
     """
-    created = models.DateField(auto_now_add=True)
-    creator = models.ForeignKey(
-        get_user_model(),
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name="%(class)s_creator"
-        )
-
-    updated = models.DateField(auto_now=True)
-    contributors = models.ManyToManyField(get_user_model(), related_name="%(class)s_contributor", blank=True)
-
-    class Meta:
-        abstract = True
+    message = models.TextField()
 
 
-class LanguageAbstract(ContributorAbstract):
+class Commit(LogAbstract):
     """
-        models for internationalisation all content with
-        language is small idetifation for lang ( ex :  french  are  fr )
+        model to commit all modification on evry models
     """
-    lang_choices = settings.LANGUAGES
-    lang_default = settings.LANGUAGES_DEFAULT
-
-    language = models.CharField(choices=lang_choices, default=lang_default, max_length=4)
-
-    class Meta:
-        abstract = True
+    pass
 
 
-class Tag(ContributorAbstract):
+class Tag(CreatorAbstract):
     """
         tags content for easy to find element by tag
     """
@@ -75,7 +43,7 @@ class TagLang(LanguageAbstract):
         return f"{self.name} {self.language}"
 
 
-class People(ContributorAbstract):
+class People(CreatorAbstract):
     """
         models for personality of chernobyl
     """
