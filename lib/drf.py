@@ -54,7 +54,6 @@ class ModelSerializerBase(serializers.ModelSerializer):
             return super().save()
         else:
             obj = super().save()
-            print('----alalala----', obj)
             # we create a commit with contributor
             from common.models import Commit
             Commit.objects.create(creator=self.context['request'].user, content_object=obj)
@@ -74,12 +73,19 @@ class ModelViewSetBase(viewsets.ModelViewSet):
         if not hasattr(self, 'ordering_fields'):
             self.ordering_fields = []
         # we allway ad tags if models is not tags
-        from common.models import Tag, TagLang
-        if self.get_model not in [Tag, TagLang]:
-            self.search_fields.append('tags__name')
-            self.search_fields.append('tags')
+        fields = ['created']
 
-        #self.ordering_fields.extend(['created', 'updated'])
+        from common.models import Tag, TagLang
+        if self.get_model not in [Tag, TagLang] and hasattr(self.get_model, 'tags'):
+            fields.extend(['tags__name'])
+        if hasattr(self.get_model, 'language'):
+            fields.append('language')
+        if hasattr(self.get_model, 'langs'):
+            fields.extend(['langs__language'])
+
+        self.ordering_fields.extend(fields)
+        self.search_fields.extend(fields)
+        self.filterset_fields.extend(fields)
 
         super().__init__(*args, **kwargs)
 

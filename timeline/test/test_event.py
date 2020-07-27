@@ -5,6 +5,8 @@ from django.db.utils import IntegrityError
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from timeline.serializer import EventSerializer, EventLangSerializer
+from lib.utils import contenttypes_uuid
+from common.models import Commit
 
 
 @tag('models', 'event')
@@ -52,7 +54,8 @@ class EventTestCase(TestCase):
     def test_serializer_update(self):
         self.test_create()
         event = Event.objects.first()
-        self.assertEqual(event.contributors.count(), 0)
+        commit = Commit.objects.filter(uuid=contenttypes_uuid(Commit, event))
+        self.assertEqual(commit.count(), 0)
 
         data = {
             'title': event.title + '--test--',
@@ -66,13 +69,16 @@ class EventTestCase(TestCase):
         self.assertEqual(obj.id, event.id)
         self.assertEqual(obj.title, data['title'])
         self.assertEqual(obj.creator, self.user)
-        self.assertIn(self.user, obj.contributors.all())
+        commit = Commit.objects.filter(uuid=contenttypes_uuid(Commit, obj))
+        self.assertEqual(commit.count(), 1)
+        self.assertEqual(commit.first().creator, self.user)
 
     @tag('serializer')
     def test_serializer_create_same_date(self):
         self.test_create()
         event = Event.objects.first()
-        self.assertEqual(event.contributors.count(), 0)
+        commit = Commit.objects.filter(uuid=contenttypes_uuid(Commit, event))
+        self.assertEqual(commit.count(), 0)
 
         data = {
             'title': event.title + '--test--',
@@ -222,7 +228,9 @@ class EventLangTestCase(TestCase):
         self.assertTrue(serializer.is_valid())
         obj = serializer.save()
         self.assertIsNotNone(obj.title, data['title'])
-        self.assertIn(self.user, obj.contributors.all())
+        commit = Commit.objects.filter(uuid=contenttypes_uuid(Commit, obj))
+        self.assertEqual(commit.count(), 1)
+        self.assertEqual(commit.first().creator, self.user)
 
     @tag('serializer')
     def test_serializer_update_wrong_lang(self):

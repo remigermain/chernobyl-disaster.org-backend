@@ -15,8 +15,12 @@ class TagViewSet(ModelViewSetBase):
 class TagLangViewSet(ModelViewSetBase):
     queryset = TagLang.objects.all()
     serializer_class = TagLangSerializer
+    filterset_fields = ['name']
+    search_fields = ['name']
 
 
 class PeopleViewSet(ModelViewSetBase):
     queryset = People.objects.all()
     serializer_class = PeopleSerializer
+    filterset_fields = ['name']
+    search_fields = ['name']

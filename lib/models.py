@@ -63,10 +63,16 @@ class CreatorAbstract(ChernobylModelAbstract):
     class Meta:
         abstract = True
 
+    def date_delta(self):
+        return self.updated - self.created
+
 
 class LogAbstract(CreatorAbstract):
     """
         models to repport or log every change
+        uuid is the unique field , easy to filter by queryset
+        uuid is define like :
+        "Model_class | contenttype_app_label | contenttype_class | primarykey "
     """
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()

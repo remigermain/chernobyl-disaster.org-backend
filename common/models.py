@@ -11,7 +11,7 @@ class Issue(LogAbstract):
 
 class Commit(LogAbstract):
     """
-        model to commit all modification on evry models
+        model to commit all modification on every models
     """
     pass
 

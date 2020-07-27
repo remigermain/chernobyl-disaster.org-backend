@@ -35,8 +35,8 @@ class AdminBase(admin.ModelAdmin):
 
 class AdminInlineBase(admin.TabularInline):
     def get_extra(self, request, obj=None, **kwargs):
-        extra = 1
-        if obj:
-            _count = obj.langs.count()
-            return extra if len(settings.LANGUAGES) - _count != 0 else 1
-        return extra
+        """
+            return minimuin of laungage availables
+        """
+        _min = obj.langs.count() if obj else 1
+        return min(_min, len(settings.LANGUAGES))

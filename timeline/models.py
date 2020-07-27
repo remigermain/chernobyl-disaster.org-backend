@@ -92,24 +92,6 @@ class ArticleLang(EventExtraLangAbstract):
 
 # Event Models
 
-class EventLang(LanguageAbstract):
-    """
-        models for i18n Event
-    """
-    title = models.CharField(max_length=100)
-    description = models.TextField()
-    event = models.ForeignKey('timeline.Event', on_delete=models.CASCADE, related_name="langs")
-    get_parent_lang = 'event'
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['language', 'event'], name="%(class)s_unique")
-        ]
-
-    def __str__(self):
-        return f"{self.event} {self.language}"
-
-
 class Event(CreatorAbstract):
     """
         event models is a date event on chernobyl
@@ -127,3 +109,21 @@ class Event(CreatorAbstract):
 
     def __str__(self):
         return f"{self.title} {self.date}"
+
+
+class EventLang(LanguageAbstract):
+    """
+        models for i18n Event
+    """
+    title = models.CharField(max_length=100)
+    description = models.TextField()
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="langs")
+    get_parent_lang = 'event'
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['language', 'event'], name="%(class)s_unique")
+        ]
+
+    def __str__(self):
+        return f"{self.event} {self.language}"
