@@ -33,11 +33,10 @@ class AdminBase(admin.ModelAdmin):
         return " | ".join(lst) or None
 
     def issue_count(self, obj):
-        return obj.objects.issue_count
+        return obj.issue_count
 
     def commit_count(self, obj):
-        return obj.objects.icommit_count
-
+        return obj.icommit_count
 
 
 class AdminInlineBase(admin.TabularInline):

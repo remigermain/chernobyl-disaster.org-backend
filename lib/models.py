@@ -4,17 +4,37 @@ from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from lib.utils import contenttypes_uuid
-from .managers import CherManager
 
 
 class ChernobylModelAbstract(models.Model):
     """
         chernobyl base models
     """
-    objects = CherManager()
 
     class Meta:
         abstract = True
+
+    def get_issue(self):
+        """
+            return all issues on this models
+        """
+        from common.models import Issue
+        return Issue.objects.filter(uuid=contenttypes_uuid(Issue, self))
+
+    @property
+    def issue_count(self):
+        return self.get_issue().count()
+
+    def get_commit(self):
+        """
+            return all commits from this models
+        """
+        from common.models import Commit
+        return Commit.objects.filter(uuid=contenttypes_uuid(Commit, self))
+
+    @property
+    def commit_count(self):
+        return self.get_commit().count()
 
     @property
     def updated(self):

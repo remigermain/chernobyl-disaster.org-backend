@@ -15,7 +15,7 @@ class Auth(TestCase):
             'password2': 'ApasswordAb123',
         }
         # check response
-        response = self.client.post(reverse('api:rest_register'), data)
+        response = self.client.post(reverse('rest_register'), data)
         self.assertEqual(response.status_code, 201)
         self.assertIsNotNone(response.data)
         self.assertIsNotNone(response.data['detail'])
@@ -29,12 +29,8 @@ class Auth(TestCase):
 
         email = EmailAddress.objects.filter(email=user.email)
         self.assertEqual(email.count(), 1)
-        email = email.first()
 
-        confirm = EmailConfirmation.objects.filter(email_address=email)
-        self.assertEqual(confirm.count(), 1)
-
-    def etest_register_exsit(self):
+    def test_register_exsit(self):
         self.test_register()
         data = {
             'username': 'username',
@@ -43,7 +39,7 @@ class Auth(TestCase):
             'password2': 'ApasswordAb123',
         }
         # check response
-        response = self.client.post(reverse('api:rest_register'), data)
+        response = self.client.post(reverse('rest_register'), data)
         self.assertEqual(response.status_code, 400)
 
     def test_register_wrong_password(self):
@@ -54,7 +50,7 @@ class Auth(TestCase):
             'password2': 'ApasswogggggrdAb123',
         }
         # wrong password 2
-        response = self.client.post(reverse('api:rest_register'), data)
+        response = self.client.post(reverse('rest_register'), data)
         self.assertEqual(response.status_code, 400)
         self.assertIsNotNone(response.data)
         self.assertIsNotNone(response.data['non_field_errors'])
@@ -67,7 +63,7 @@ class Auth(TestCase):
             'password2': 'password',
         }
         # wrong password 2
-        response = self.client.post(reverse('api:rest_register'), data)
+        response = self.client.post(reverse('rest_register'), data)
         self.assertEqual(response.status_code, 400)
         self.assertIsNotNone(response.data)
         self.assertIsNotNone(response.data['password1'])
@@ -80,7 +76,7 @@ class Auth(TestCase):
             'password2': 'ApasswordAb123',
         }
         # wrong password 2
-        response = self.client.post(reverse('api:rest_register'), data)
+        response = self.client.post(reverse('rest_register'), data)
         self.assertEqual(response.status_code, 400)
         self.assertIsNotNone(response.data)
         self.assertIsNotNone(response.data['email'])
@@ -93,7 +89,7 @@ class Auth(TestCase):
             'password2': 'ApasswordAb123',
         }
         # wrong password 2
-        response = self.client.post(reverse('api:rest_register'), data)
+        response = self.client.post(reverse('rest_register'), data)
         self.assertEqual(response.status_code, 400)
         self.assertIsNotNone(response.data)
         self.assertIsNotNone(response.data['username'])
@@ -101,7 +97,7 @@ class Auth(TestCase):
     def test_register_no_data(self):
         data = {}
         # wrong password 2
-        response = self.client.post(reverse('api:rest_register'), data)
+        response = self.client.post(reverse('rest_register'), data)
         self.assertEqual(response.status_code, 400)
         self.assertIsNotNone(response.data)
         self.assertIsNotNone(response.data['username'])
@@ -115,7 +111,7 @@ class Auth(TestCase):
             'password2': 'ApasswordAb123',
         }
         # wrong password 2
-        response = self.client.post(reverse('api:rest_register'), data)
+        response = self.client.post(reverse('rest_register'), data)
         self.assertEqual(response.status_code, 400)
         self.assertIsNotNone(response.data)
         self.assertIsNotNone(response.data['email'])

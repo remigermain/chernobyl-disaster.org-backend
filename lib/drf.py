@@ -41,6 +41,7 @@ class ModelSerializerBase(serializers.ModelSerializer):
 
     def get_commit_count(self, obj):
         # obj has annotate contributures count we return it or by queryset
+        print(type(obj))
         return getattr(obj, 'ann_commit_count', obj.commit_count)
 
     def updated(self, obj):
