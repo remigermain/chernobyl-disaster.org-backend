@@ -22,7 +22,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 # TODO
 SECRET_KEY = 'ngb*u#08l$9*g!yqyu31t7vx)jkw4rh^(ut0)lp&u&!q6b^0gp'
 
+
 SITE_ID = 1
+DOMAIN_NAME = "chernobyl.org"
+SITE_NAME = "chernobyl"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
@@ -39,18 +42,17 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'dj_rest_auth',
-
     'allauth',
     'allauth.account',
+    'allauth.socialaccount',
     'dj_rest_auth.registration',
-
-
     'django_filters',
     'corsheaders',
     'django_extensions',
 
     # chenobyl
     'common',
+    'api',
     'timeline',
 
     # extra package
@@ -76,7 +78,7 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -121,32 +123,31 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
-USE_I18N = True
-
-USE_L10N = True
-
-USE_TZ = True
-
-
 STATIC_URL = '/static/'
 
 MEDIA_URL = "media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
+#
+# local i18n
+#
+
+TIME_ZONE = 'UTC'
+USE_I18N = True
+USE_L10N = True
+USE_TZ = True
+
+LANGUAGE_CODE = 'en-us'
 LANGUAGES = [
     ('fr', 'Français'),
     ('en', 'English'),
 ]
-
 LANGUAGES_DEFAULT = 'en'
-
 LANGUAGES.sort(key=lambda l: l[1])
 
+#
+# rest framework
+#
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
@@ -163,12 +164,24 @@ REST_FRAMEWORK = {
     ]
 }
 
+#
+# email backend
+#
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'localhost'
-EMAIL_PORT = 25
+EMAIL_PORT = 1025
 EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 DEFAULT_FROM_EMAIL = 'Chernobyl <no-reply@chernobyl.org>'
+
+
+#
+# rest auth / allauth
+#
+
+# ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'

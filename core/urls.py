@@ -1,8 +1,10 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from common.urls import drf_routers as common_urls
 from timeline.urls import drf_routers as timeline_urls
 from rest_framework import routers
+from dj_rest_auth.registration.views import VerifyEmailView
+
 
 router = routers.DefaultRouter()
 
@@ -21,9 +23,10 @@ urlpatterns = [
     # api models
     path('', include(router.urls)),
 
-    # auth api
-    path('auth/', include('dj_rest_auth.urls')),
-    path('auth/registration/', include('dj_rest_auth.registration.urls')),
+    # account / auth
+    path('auth/', include('api.urls')),
+    re_path(r'^account-confirm-email/(?P<key>[-:\w]+)/$', VerifyEmailView.as_view(), name='account_confirm_email'),
+    re_path(r'^account-confirm-email/', VerifyEmailView.as_view(), name='account_email_verification_sent'),
 
     # admin
     path('admin/', admin.site.urls),

@@ -32,6 +32,13 @@ class AdminBase(admin.ModelAdmin):
         lst = [obj['language'] for obj in obj.langs.values('language')]
         return " | ".join(lst) or None
 
+    def issue_count(self, obj):
+        return obj.objects.issue_count
+
+    def commit_count(self, obj):
+        return obj.objects.icommit_count
+
+
 
 class AdminInlineBase(admin.TabularInline):
     def get_extra(self, request, obj=None, **kwargs):
