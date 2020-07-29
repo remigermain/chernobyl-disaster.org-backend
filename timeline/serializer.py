@@ -2,6 +2,7 @@ from lib.drf import ModelSerializerBase
 from timeline.models import Event, EventLang, Picture, Document, Video, \
     Article, PictureLang, DocumentLang, VideoLang, ArticleLang
 from django.core.exceptions import ValidationError
+from rest_framework.serializers import DateField
 
 
 class PictureLangSerializer(ModelSerializerBase):
@@ -13,7 +14,7 @@ class PictureLangSerializer(ModelSerializerBase):
 class PictureSerializer(ModelSerializerBase):
     class Meta:
         model = Picture
-        fields = ['title', 'tags', 'event', 'image', 'photographer']
+        fields = ['title', 'tags', 'event', 'picture', 'photographer']
 
 
 class PictureSerializerSafe(ModelSerializerBase):
@@ -37,14 +38,7 @@ class DocumentLangSerializer(ModelSerializerBase):
 class DocumentSerializer(ModelSerializerBase):
     class Meta:
         model = Document
-        fields = ['title', 'tags', 'event', 'image', 'doc']
-
-    def validate(self, data):
-        if 'image' not in data and 'doc' not in data:
-            raise ValidationError("OneNotNothing")
-        if 'image' in data and data['image'] and 'doc' in data and data['doc']:
-            raise ValidationError("OneNotBoth")
-        return data
+        fields = ['title', 'tags', 'event', 'doc']
 
 
 class DocumentSerializerSafe(ModelSerializerBase):

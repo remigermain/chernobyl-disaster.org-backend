@@ -1,92 +1,81 @@
-from django.test import TestCase, tag
-from timeline.models import Video, VideoLang, Event
-from django.utils import timezone
-from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
+from django.test import tag
+from timeline.models import Event
+from timeline.serializer import VideoSerializer
+from lib.test import BaseTest
 
 
-@tag('models', 'video')
-class VideoTestCase(TestCase):
+@tag('model', 'video')
+class VideoTest(BaseTest):
     def setUp(self):
-        self.user = get_user_model().objects.get_or_create(username="test", password="test")[0]
-        self.event = Event.objects.create(title="test", creator=self.user, date=timezone.now())
+        super().setUp()
+        self.event = Event.objects.create(
+            title='good',
+            date=self.time,
+            creator=self.user
+        )
 
-    def test_create(self):
-        obj = Video.objects.create(
-            title="test",
-            event=self.event,
-            creator=self.user,
-            video="https://test.fr"
-            )
+    @tag('serializer')
+    def test_create_serializer(self):
+        data = {
+            'title': 'title',
+            'event': self.event.pk,
+            'video': self.link
+        }
+        serializer = VideoSerializer(data=data, context=self.context)
+        self.assertTrue(serializer.is_valid())
+        obj = serializer.save()
         self.assertIsNotNone(obj.id)
+        self.assertEqual(obj.title, data['title'])
+        self.assertEqual(obj.video, data['video'])
+        self.assertEqual(obj.event.pk, data['event'])
+        self.check_creator(obj)
+        return obj
 
-    def test_video(self):
-        obj = Video(
-            title="test",
-            event=self.event,
-            creator=self.user,
-            video="wrong_link"
-            )
+    @tag('serializer')
+    def test_create_serializer_empty(self):
+        data = {}
 
-        try:
-            obj.save()
-        except Exception as e:
-            self.assertNotEqual(e, ValidationError)
-            self.assertIsNotNone(e.error_dict['video'])
+        serializer = VideoSerializer(data=data, context=self.context)
+        self.assertFalse(serializer.is_valid())
 
+    @tag('serializer')
+    def test_create_serializer_wrong_event(self):
+        data = {
+            'title': 'title',
+            'event': self.event.pk + 99,
+            'video': self.link
+        }
+        serializer = VideoSerializer(data=data, context=self.context)
+        self.assertFalse(serializer.is_valid())
 
-@tag('models', 'video', 'lang')
-class VideoLangTestCase(TestCase):
-    def setUp(self):
-        self.user = get_user_model().objects.get_or_create(username="test", password="test")[0]
-        self.event = Event.objects.create(title="test", creator=self.user, date=timezone.now())
-        self.video = Video.objects.create(
-            title="test",
-            event=self.event,
-            creator=self.user,
-            video="https://test.fr"
-            )
+    @tag('serializer')
+    def test_create_serializer_same_link(self):
+        obj = self.test_create_serializer()
+        data = {
+            'title': 'title',
+            'event': obj.event.pk,
+            'video': obj.video
+        }
+        serializer = VideoSerializer(data=data, context=self.context)
+        self.assertFalse(serializer.is_valid())
 
-    def test_create(self):
-        obj = VideoLang.objects.create(
-            title="test",
-            creator=self.user,
-            extra=self.video
-            )
-        self.assertIsNotNone(obj.id)
-        self.assertIsNotNone(obj.language, VideoLang.lang_default)
-
-    def test_same_lang(self):
-        self.test_create()
-        lang = VideoLang.objects.first()
-        lang.id = None
-
-        try:
-            lang.save()
-            self.assertIsNotNone(lang.id)
-        except Exception as e:
-            self.assertNotEqual(e, ValidationError)
-            self.assertIsNotNone(e.error_dict['__all__'])
-
-    def test_lang_not_exist(self):
-        self.test_create()
-        lang = VideoLang.objects.first()
-        lang.id = None
-        lang.language = "xx",
-
-        try:
-            lang.save()
-            self.assertIsNotNone(lang.id)
-        except Exception as e:
-            self.assertNotEqual(e, ValidationError)
-            self.assertIsNotNone(e.error_dict['language'])
-
-    def test_new_lang(self):
-        self.test_create()
-        lang = VideoLang.objects.first()
-        lang.id = None
-        lang.language = "fr"
-
-        lang.save()
-        self.assertIsNotNone(lang.id)
-        self.assertEqual(lang.language, "fr")
+    @tag('serializer')
+    def test_create_serializer_update(self):
+        obj = self.test_create_serializer()
+        obj_id = obj.id
+        obj_video = obj.video
+        obj_title = obj.title
+        data = {
+            'title': 'update-title',
+            'event': obj.event.pk,
+            'video': self.link2
+        }
+        serializer = VideoSerializer(instance=obj, data=data, context=self.context, partial=True)
+        self.assertTrue(serializer.is_valid())
+        obj = serializer.save()
+        self.assertEqual(obj.id, obj_id)
+        self.assertNotEqual(obj_video, obj.video)
+        self.assertEqual(obj.video, data['video'])
+        self.assertNotEqual(obj_title, obj.title)
+        self.assertEqual(obj.title, data['title'])
+        self.check_commit(obj)

@@ -20,7 +20,7 @@ class Tag(CreatorAbstract):
     """
         tags content for easy to find element by tag
     """
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
         return self.name
@@ -47,7 +47,14 @@ class People(CreatorAbstract):
     """
         models for personality of chernobyl
     """
-    name = models.CharField(max_length=80)
+    name = models.CharField(max_length=80, unique=True)
 
     def __str__(self):
         return self.name
+
+
+class Contact(CreatorAbstract):
+    message = models.TextField(null=False, blank=False)
+
+    def __str__(self):
+        return f"{self.creator} | {self.created}"

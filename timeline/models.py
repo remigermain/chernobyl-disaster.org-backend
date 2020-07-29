@@ -26,7 +26,7 @@ def fnc_extra_path(instance, filename):
 
 
 class Picture(EventExtraAbstract):
-    image = models.ImageField(upload_to=fnc_extra_path)
+    picture = models.ImageField(upload_to=fnc_extra_path)
     photographer = models.ForeignKey(
         "common.People",
         null=True,
@@ -37,24 +37,29 @@ class Picture(EventExtraAbstract):
 
 
 class Document(EventExtraAbstract):
-    image = models.ImageField(upload_to=fnc_extra_path, null=True, blank=True)
-    doc = models.FileField(upload_to=fnc_extra_path, null=True, blank=True)
-
-    def clean(self):
-        # need to be one of image or doc set
-        if self.image and self.doc:
-            raise ValidationError("OneNotBoth")
-        if not self.image and not self.doc:
-            raise ValidationError("OneNotNothing")
-        super().clean()
+    doc = models.FileField(upload_to=fnc_extra_path)
 
 
 class Video(EventExtraAbstract):
     video = models.URLField()
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['video', 'event'], name="%(class)s_extra_video")
+        ]
+        # fix for drf
+        unique_together = ['video', 'event']
+
 
 class Article(EventExtraAbstract):
     link = models.URLField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['link', 'event'], name="%(class)s_extra_article")
+        ]
+        # fix for drf
+        unique_together = ['link', 'event']
 
 
 # Extra i18n
@@ -65,10 +70,12 @@ class EventExtraLangAbstract(LanguageAbstract):
     get_parent_lang = 'extra'
 
     class Meta:
+        abstract = True
         constraints = [
             models.UniqueConstraint(fields=['extra', 'language'], name="%(class)s_unique")
         ]
-        abstract = True
+        # fix drf
+        unique_together = ['extra', 'language']
 
     def __str__(self):
         return f"{self.extra} {self.language}"
@@ -102,11 +109,6 @@ class Event(CreatorAbstract):
     tags = models.ManyToManyField('common.Tag', related_name="events", blank=True)
     date = models.DateTimeField(null=False, blank=False, unique=True)
 
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['date'], name="%(class)s_date_unique")
-        ]
-
     def __str__(self):
         return f"{self.title} {self.date}"
 
@@ -124,6 +126,8 @@ class EventLang(LanguageAbstract):
         constraints = [
             models.UniqueConstraint(fields=['language', 'event'], name="%(class)s_unique")
         ]
+        # fix drf
+        unique_together = ['language', 'event']
 
     def __str__(self):
         return f"{self.event} {self.language}"

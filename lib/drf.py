@@ -16,15 +16,15 @@ class ModelSerializerBase(serializers.ModelSerializer):
         if hasattr(self.Meta.model, NAME_LANG):
 
             self.Meta.fields.append(NAME_LANG)
-            # we allway add the validatos for languages
-            if not hasattr(self.Meta, 'validators'):
-                self.Meta.validators = []
-            self.Meta.validators.append(
-                serializers.UniqueTogetherValidator(
-                    queryset=self.Meta.model.objects.all(),
-                    fields=(NAME_LANG, self.Meta.model.get_parent_lang),
-                )
-            )
+        #     # we allway add the validatos for languages
+        #     if not hasattr(self.Meta, 'validators'):
+        #         self.Meta.validators = []
+        #     self.Meta.validators.append(
+        #         serializers.UniqueTogetherValidator(
+        #             queryset=self.Meta.model.objects.all(),
+        #             fields=(NAME_LANG, self.Meta.model.get_parent_lang),
+        #         )
+        #     )
 
         if hasattr(self.Meta, 'fields'):
             # automatic add 'id' in fields and created, updated, contributors count methods
@@ -41,24 +41,23 @@ class ModelSerializerBase(serializers.ModelSerializer):
 
     def get_commit_count(self, obj):
         # obj has annotate contributures count we return it or by queryset
-        print(type(obj))
         return getattr(obj, 'ann_commit_count', obj.commit_count)
 
     def updated(self, obj):
         # obj has annotate contributures count we return it or by queryset
         return getattr(obj, 'ann_updated', obj.updated)
 
-    def save(self):
-        if not self.instance:
-            # we add the creator
-            self.validated_data['creator'] = self.context['request'].user
-            return super().save()
-        else:
-            obj = super().save()
-            # we create a commit with contributor
-            from common.models import Commit
-            Commit.objects.create(creator=self.context['request'].user, content_object=obj)
-            return obj
+    def create(self, validated_data):
+        validated_data['creator'] = self.context['request'].user
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        obj = super().update(instance, validated_data)
+
+        from common.models import Commit
+        # we create a commit with contributor
+        Commit.objects.create(creator=self.context['request'].user, content_object=obj)
+        return obj
 
 
 class ModelViewSetBase(viewsets.ModelViewSet):

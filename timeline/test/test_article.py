@@ -1,92 +1,81 @@
-from django.test import TestCase, tag
-from timeline.models import Article, ArticleLang, Event
-from django.utils import timezone
-from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
+from django.test import tag
+from timeline.models import Event
+from timeline.serializer import ArticleSerializer
+from lib.test import BaseTest
 
 
-@tag('models', 'article')
-class ArticleTestCase(TestCase):
+@tag('model', 'article')
+class ArticleTest(BaseTest):
     def setUp(self):
-        self.user = get_user_model().objects.get_or_create(username="test", password="test")[0]
-        self.event = Event.objects.create(title="test", creator=self.user, date=timezone.now())
+        super().setUp()
+        self.event = Event.objects.create(
+            title='good',
+            date=self.time,
+            creator=self.user
+        )
 
-    def test_create(self):
-        obj = Article.objects.create(
-            title="test",
-            event=self.event,
-            creator=self.user,
-            link="https://test.fr"
-            )
+    @tag('serializer')
+    def test_create_serializer(self):
+        data = {
+            'title': 'title',
+            'event': self.event.pk,
+            'link': self.link
+        }
+        serializer = ArticleSerializer(data=data, context=self.context)
+        self.assertTrue(serializer.is_valid())
+        obj = serializer.save()
         self.assertIsNotNone(obj.id)
+        self.assertEqual(obj.title, data['title'])
+        self.assertEqual(obj.link, data['link'])
+        self.assertEqual(obj.event.pk, data['event'])
+        self.check_creator(obj)
+        return obj
 
-    def test_wrong_link(self):
-        obj = Article(
-            title="test",
-            event=self.event,
-            creator=self.user,
-            link="wrong_link"
-            )
+    @tag('serializer')
+    def test_create_serializer_empty(self):
+        data = {}
 
-        try:
-            obj.save()
-        except Exception as e:
-            self.assertNotEqual(e, ValidationError)
-            self.assertIsNotNone(e.error_dict['link'])
+        serializer = ArticleSerializer(data=data, context=self.context)
+        self.assertFalse(serializer.is_valid())
 
+    @tag('serializer')
+    def test_create_serializer_wrong_event(self):
+        data = {
+            'title': 'title',
+            'event': self.event.pk + 99,
+            'link': self.link
+        }
+        serializer = ArticleSerializer(data=data, context=self.context)
+        self.assertFalse(serializer.is_valid())
 
-@tag('models', 'article', 'lang')
-class ArticleLangTestCase(TestCase):
-    def setUp(self):
-        self.user = get_user_model().objects.get_or_create(username="test", password="test")[0]
-        self.event = Event.objects.create(title="test", creator=self.user, date=timezone.now())
-        self.article = Article.objects.create(
-            title="test",
-            event=self.event,
-            creator=self.user,
-            link="https://test.fr"
-            )
+    @tag('serializer')
+    def test_create_serializer_same_link(self):
+        obj = self.test_create_serializer()
+        data = {
+            'title': 'title',
+            'event': obj.event.pk,
+            'link': obj.link
+        }
+        serializer = ArticleSerializer(data=data, context=self.context)
+        self.assertFalse(serializer.is_valid())
 
-    def test_create(self):
-        obj = ArticleLang.objects.create(
-            title="test",
-            creator=self.user,
-            extra=self.article
-            )
-        self.assertIsNotNone(obj.id)
-        self.assertIsNotNone(obj.language, ArticleLang.lang_default)
-
-    def test_same_lang(self):
-        self.test_create()
-        lang = ArticleLang.objects.first()
-        lang.id = None
-
-        try:
-            lang.save()
-            self.assertIsNotNone(lang.id)
-        except Exception as e:
-            self.assertNotEqual(e, ValidationError)
-            self.assertIsNotNone(e.error_dict['__all__'])
-
-    def test_lang_not_exist(self):
-        self.test_create()
-        lang = ArticleLang.objects.first()
-        lang.id = None
-        lang.language = "xx",
-
-        try:
-            lang.save()
-            self.assertIsNotNone(lang.id)
-        except Exception as e:
-            self.assertNotEqual(e, ValidationError)
-            self.assertIsNotNone(e.error_dict['language'])
-
-    def test_new_lang(self):
-        self.test_create()
-        lang = ArticleLang.objects.first()
-        lang.id = None
-        lang.language = "fr"
-
-        lang.save()
-        self.assertIsNotNone(lang.id)
-        self.assertEqual(lang.language, "fr")
+    @tag('serializer')
+    def test_create_serializer_update(self):
+        obj = self.test_create_serializer()
+        obj_id = obj.id
+        obj_video = obj.link
+        obj_title = obj.title
+        data = {
+            'title': 'update-title',
+            'event': obj.event.pk,
+            'link': self.link2
+        }
+        serializer = ArticleSerializer(instance=obj, data=data, context=self.context, partial=True)
+        self.assertTrue(serializer.is_valid())
+        obj = serializer.save()
+        self.assertEqual(obj.id, obj_id)
+        self.assertNotEqual(obj_video, obj.link)
+        self.assertEqual(obj.link, data['link'])
+        self.assertNotEqual(obj_title, obj.title)
+        self.assertEqual(obj.title, data['title'])
+        self.check_commit(obj)

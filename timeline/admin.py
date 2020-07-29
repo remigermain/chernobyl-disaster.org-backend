@@ -10,7 +10,7 @@ class PictureLangInline(AdminInlineBase):
 
 @admin.register(Picture)
 class PictureAdmin(AdminBase):
-    list_display = ('image', 'photographer')
+    list_display = ('picture', 'photographer')
     inlines = [
         PictureLangInline
     ]
@@ -22,7 +22,7 @@ class DocumentLangInline(AdminInlineBase):
 
 @admin.register(Document)
 class DocumentAdmin(AdminBase):
-    list_display = ('image', 'doc')
+    list_display = ('doc',)
     inlines = [
         DocumentLangInline
     ]

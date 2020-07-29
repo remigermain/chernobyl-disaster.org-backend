@@ -1,78 +1,77 @@
-from django.test import TestCase, tag
-from timeline.models import Picture, PictureLang, Event
-from django.utils import timezone
-from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
+from django.test import tag
+from django.core.files.uploadedfile import SimpleUploadedFile
+from timeline.models import Event
+from timeline.serializer import PictureSerializer
+from lib.test import BaseTest
 
 
-@tag('models', 'picture')
-class PictureTestCase(TestCase):
+@tag('model', 'picture')
+class PictureTest(BaseTest):
     def setUp(self):
-        self.user = get_user_model().objects.get_or_create(username="test", password="test")[0]
-        self.event = Event.objects.create(title="test", creator=self.user, date=timezone.now())
+        super().setUp()
+        self.event = Event.objects.create(
+            title='good',
+            date=self.time,
+            creator=self.user
+        )
+        image = (
+            b'\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x00\x00\x00\x21\xf9\x04'
+            b'\x01\x0a\x00\x01\x00\x2c\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02'
+            b'\x02\x4c\x01\x00\x3b'
+        )
+        self.picture = SimpleUploadedFile('small.gif', image, content_type='image/gif')
+        self.picture2 = SimpleUploadedFile('small2.gif', image, content_type='image/gif')
 
-    def test_create(self):
-        obj = Picture.objects.create(
-            title="test",
-            event=self.event,
-            creator=self.user,
-            image="test"
-            )
+    @tag('serializer')
+    def test_create_serializer(self):
+        data = {
+            'title': 'title',
+            'event': self.event.pk,
+            'picture': self.picture
+        }
+        serializer = PictureSerializer(data=data, context=self.context)
+        self.assertTrue(serializer.is_valid())
+        obj = serializer.save()
         self.assertIsNotNone(obj.id)
+        self.assertEqual(obj.title, data['title'])
+        self.assertIsNotNone(obj.picture)
+        self.assertEqual(obj.event.pk, data['event'])
+        self.check_creator(obj)
+        return obj
 
+    @tag('serializer')
+    def test_create_serializer_empty(self):
+        data = {}
 
-@tag('models', 'picture', 'lang')
-class PictureLangTestCase(TestCase):
-    def setUp(self):
-        self.user = get_user_model().objects.get_or_create(username="test", password="test")[0]
-        self.event = Event.objects.create(title="test", creator=self.user, date=timezone.now())
-        self.image = Picture.objects.create(
-            title="test",
-            event=self.event,
-            creator=self.user,
-            image="test"
-            )
+        serializer = PictureSerializer(data=data, context=self.context)
+        self.assertFalse(serializer.is_valid())
 
-    def test_create(self):
-        obj = PictureLang.objects.create(
-            title="test",
-            creator=self.user,
-            extra=self.image
-            )
-        self.assertIsNotNone(obj.id)
-        self.assertIsNotNone(obj.language, PictureLang.lang_default)
+    @tag('serializer')
+    def test_create_serializer_wrong_event(self):
+        data = {
+            'title': 'title',
+            'event': self.event.pk + 99,
+            'picture': self.picture
+        }
+        serializer = PictureSerializer(data=data, context=self.context)
+        self.assertFalse(serializer.is_valid())
 
-    def test_same_lang(self):
-        self.test_create()
-        lang = PictureLang.objects.first()
-        lang.id = None
-
-        try:
-            lang.save()
-            self.assertIsNotNone(lang.id)
-        except Exception as e:
-            self.assertNotEqual(e, ValidationError)
-            self.assertIsNotNone(e.error_dict['__all__'])
-
-    def test_lang_not_exist(self):
-        self.test_create()
-        lang = PictureLang.objects.first()
-        lang.id = None
-        lang.language = "xx",
-
-        try:
-            lang.save()
-            self.assertIsNotNone(lang.id)
-        except Exception as e:
-            self.assertNotEqual(e, ValidationError)
-            self.assertIsNotNone(e.error_dict['language'])
-
-    def test_new_lang(self):
-        self.test_create()
-        lang = PictureLang.objects.first()
-        lang.id = None
-        lang.language = "fr"
-
-        lang.save()
-        self.assertIsNotNone(lang.id)
-        self.assertEqual(lang.language, "fr")
+    @tag('serializer')
+    def test_create_serializer_update(self):
+        obj = self.test_create_serializer()
+        obj_id = obj.id
+        obj_video = obj.picture
+        obj_title = obj.title
+        data = {
+            'title': 'update-title',
+            'picture': self.picture2
+        }
+        serializer = PictureSerializer(instance=obj, data=data, context=self.context, partial=True)
+        self.assertTrue(serializer.is_valid())
+        obj = serializer.save()
+        self.assertEqual(obj.id, obj_id)
+        self.assertNotEqual(obj_video, obj.picture)
+        self.assertIsNotNone(obj.picture, data['picture'])
+        self.assertNotEqual(obj_title, obj.title)
+        self.assertEqual(obj.title, data['title'])
+        self.check_commit(obj)

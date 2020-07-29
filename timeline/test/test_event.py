@@ -1,264 +1,59 @@
-from django.test import TestCase, tag, RequestFactory
-from timeline.models import Event, EventLang
-from django.utils import timezone
-from django.db.utils import IntegrityError
-from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
-from timeline.serializer import EventSerializer, EventLangSerializer
-from lib.utils import contenttypes_uuid
-from common.models import Commit
+from django.test import tag
+from lib.test import BaseTest
+from timeline.serializer import EventSerializer
 
 
-@tag('models', 'event')
-class EventTestCase(TestCase):
-    def setUp(self):
-        self.user = get_user_model().objects.get_or_create(username="test", password="test")[0]
-        self.request = RequestFactory()
-        self.request.user = self.user
-
-    def test_create(self):
-        date = timezone.now()
-        event = Event.objects.create(title="good", date=date, creator=self.user)
-        self.assertIsNotNone(event.id)
-
-    def test_same_date(self):
-        """
-            check create event same date
-        """
-        self.test_create()
-        event = Event.objects.first()
-        event.id = None
-
-        try:
-            event.save()
-            self.assertIsNotNone(event.id)
-        except Exception as e:
-            self.assertNotEqual(e, IntegrityError)
+@tag('model', 'event')
+class EventTest(BaseTest):
 
     @tag('serializer')
-    def test_serializer_create(self):
+    def test_create_serializer(self):
         data = {
-            'title': 'good',
-            'date': timezone.now()
+            'title': 'test-title',
+            'date': str(self.time)
         }
-        context = {'request': self.request}
-        serializer = EventSerializer(data=data, context=context)
-
+        serializer = EventSerializer(data=data, context=self.context)
         self.assertTrue(serializer.is_valid())
         obj = serializer.save()
-        self.assertEqual(obj.date, data['date'])
+        self.assertIsNotNone(obj.id)
         self.assertEqual(obj.title, data['title'])
-        self.assertEqual(obj.creator, self.user)
+        self.assertEqual(obj.date, self.str_to_time(data['date']))
+        self.check_creator(obj)
+        return obj
 
     @tag('serializer')
-    def test_serializer_update(self):
-        self.test_create()
-        event = Event.objects.first()
-        commit = Commit.objects.filter(uuid=contenttypes_uuid(Commit, event))
-        self.assertEqual(commit.count(), 0)
-
+    def test_create_serializer_update(self):
+        obj = self.test_create_serializer()
+        obj_id = obj.id
+        obj_title = obj.title
+        obj_date = obj.date
         data = {
-            'title': event.title + '--test--',
+            'title': 'test-update',
+            'date': str(self.delta_time(days=2))
         }
-        context = {'request': self.request}
-        serializer = EventSerializer(instance=event, data=data, context=context, partial=True)
-
+        serializer = EventSerializer(instance=obj, data=data, context=self.context, partial=True)
         self.assertTrue(serializer.is_valid())
-        obj = serializer.save()
-
-        self.assertEqual(obj.id, event.id)
-        self.assertEqual(obj.title, data['title'])
-        self.assertEqual(obj.creator, self.user)
-        commit = Commit.objects.filter(uuid=contenttypes_uuid(Commit, obj))
-        self.assertEqual(commit.count(), 1)
-        self.assertEqual(commit.first().creator, self.user)
-
-    @tag('serializer')
-    def test_serializer_create_same_date(self):
-        self.test_create()
-        event = Event.objects.first()
-        commit = Commit.objects.filter(uuid=contenttypes_uuid(Commit, event))
-        self.assertEqual(commit.count(), 0)
-
-        data = {
-            'title': event.title + '--test--',
-            'date': event.date
-        }
-        context = {'request': self.request}
-        serializer = EventSerializer(data=data, context=context)
-
-        self.assertFalse(serializer.is_valid())
-        self.assertIsNotNone(serializer.errors['date'])
+        update_obj = serializer.save()
+        self.assertEqual(update_obj.id, obj_id)
+        self.assertNotEqual(update_obj.title, obj_title)
+        self.assertEqual(update_obj.title, data['title'])
+        self.assertNotEqual(obj_date, self.str_to_time(data['date']))
+        self.assertEqual(update_obj.date, self.str_to_time(data['date']))
+        self.check_commit(update_obj)
 
     @tag('serializer')
-    def test_serializer_update_same_date(self):
-        self.test_create()
-        event = Event.objects.first()
-
-        date = timezone.now()
-        newevent = Event.objects.create(title="lalla", date=date, creator=self.user)
-        self.assertIsNotNone(newevent.id)
-
+    def test_create_serializer_same_date(self):
+        obj = self.test_create_serializer()
         data = {
-            'title': event.title + '--test--',
-            'date': date
+            'title': 'test-title',
+            'date': str(obj.date)
         }
-        context = {'request': self.request}
-        serializer = EventSerializer(instance=event, data=data, context=context)
-
-        self.assertFalse(serializer.is_valid())
-        self.assertIsNotNone(serializer.errors['date'])
-
-
-@tag('models', 'event', 'lang')
-class EventLangTestCase(TestCase):
-    def setUp(self):
-        self.user = get_user_model().objects.get_or_create(username="test", password="test")[0]
-        self.event = Event.objects.create(title='good', date=timezone.now(), creator=self.user)
-        self.request = RequestFactory()
-        self.request.user = self.user
-
-    def test_create(self):
-        lang = EventLang.objects.create(
-            title="lallala",
-            description="lalal",
-            event=self.event,
-            creator=self.user
-        )
-
-        # check create
-        self.assertIsNotNone(lang.id)
-        # check language is default
-        self.assertEqual(lang.language, EventLang.lang_default)
-
-    def test_same_lang(self):
-        self.test_create()
-        lang = EventLang.objects.first()
-        lang.id = None
-
-        try:
-            lang.save()
-            self.assertIsNotNone(lang.id)
-        except Exception as e:
-            self.assertNotEqual(e, ValidationError)
-            self.assertIsNotNone(e.error_dict['__all__'])
-
-    def test_lang_not_exist(self):
-        self.test_create()
-        lang = EventLang.objects.first()
-        lang.id = None
-        lang.language = "xx",
-
-        try:
-            lang.save()
-            self.assertIsNotNone(lang.id)
-        except Exception as e:
-            self.assertNotEqual(e, ValidationError)
-            self.assertIsNotNone(e.error_dict['language'])
-
-    def test_new_lang(self):
-        self.test_create()
-        lang = EventLang.objects.first()
-        lang.id = None
-        lang.language = "fr"
-
-        lang.save()
-        self.assertIsNotNone(lang.id)
-        self.assertEqual(lang.language, "fr")
-
-    @tag('serializer')
-    def test_serializer_create(self):
-        self.test_create()
-        data = {
-            'title': 'title',
-            'description': 'description',
-            'event': self.event.pk,
-            'language': 'fr'
-        }
-        context = {'request': self.request}
-        serializer = EventLangSerializer(data=data, context=context)
-
-        self.assertTrue(serializer.is_valid())
-        obj = serializer.save()
-        self.assertEqual(obj.title, data['title'])
-        self.assertEqual(obj.description, data['description'])
-        self.assertEqual(obj.event.id, data['event'])
-        self.assertEqual(obj.creator, self.user)
-
-    @tag('serializer')
-    def test_serializer_create_wrong_lang(self):
-        self.test_create()
-        data = {
-            'title': 'title',
-            'description': 'description',
-            'event': self.event.pk,
-            'language': 'frr'
-        }
-        context = {'request': self.request}
-        serializer = EventLangSerializer(data=data, context=context)
-
+        serializer = EventSerializer(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     @tag('serializer')
-    def test_serializer_create_same_lang(self):
-        self.test_create()
-        data = {
-            'title': 'title',
-            'description': 'description',
-            'event': self.event.pk,
-            'language': EventLang.lang_default
-        }
-        context = {'request': self.request}
-        serializer = EventLangSerializer(data=data, context=context)
+    def test_create_serializer_empty(self):
+        data = {}
 
-        self.assertFalse(serializer.is_valid())
-        self.assertIsNotNone(serializer.errors)
-
-    @tag('serializer')
-    def test_serializer_update(self):
-        self.test_create()
-
-        eventlang = EventLang.objects.first()
-        data = {
-            'title': eventlang.title + '--test--'
-        }
-        context = {'request': self.request}
-        serializer = EventLangSerializer(instance=eventlang, data=data, context=context, partial=True)
-
-        self.assertTrue(serializer.is_valid())
-        obj = serializer.save()
-        self.assertIsNotNone(obj.title, data['title'])
-        commit = Commit.objects.filter(uuid=contenttypes_uuid(Commit, obj))
-        self.assertEqual(commit.count(), 1)
-        self.assertEqual(commit.first().creator, self.user)
-
-    @tag('serializer')
-    def test_serializer_update_wrong_lang(self):
-        self.test_create()
-
-        eventlang = EventLang.objects.first()
-        data = {
-            'title': eventlang.title + '--test--',
-            'language': 'xx'
-        }
-        context = {'request': self.request}
-        serializer = EventLangSerializer(instance=eventlang, data=data, context=context, partial=True)
-
-        self.assertFalse(serializer.is_valid())
-
-    @tag('serializer')
-    def test_serializer_update_same_lang(self):
-        self.test_create()
-        event = EventLang.objects.first()
-
-        new = EventLang.objects.create(title="tt", description="pp", creator=self.user, language="fr", event=self.event)
-        self.assertIsNotNone(new.id)
-
-        data = {
-            'title': event.title + '--test--',
-            'language': new.language
-        }
-        context = {'request': self.request}
-        serializer = EventLangSerializer(instance=event, data=data, context=context, partial=True)
-
+        serializer = EventSerializer(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
