@@ -36,11 +36,17 @@ class TagLang(LanguageAbstract):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['language', 'tag'], name="%(class)s_sunique")
+            models.UniqueConstraint(fields=['language', 'tag'], name="%(class)s_unique")
         ]
+        # fix drf
+        unique_together = ['language', 'tag']
 
     def __str__(self):
         return f"{self.name} {self.language}"
+
+
+def profil_path(instance, filename):
+    return f"people/{instance.id}/{filename}"
 
 
 class People(CreatorAbstract):
@@ -48,9 +54,25 @@ class People(CreatorAbstract):
         models for personality of chernobyl
     """
     name = models.CharField(max_length=80, unique=True)
+    born = models.DateField(null=True, blank=True)
+    death = models.DateField(null=True, blank=True)
+    profil = models.ImageField(upload_to=profil_path)
+    wikipedia = models.URLField(null=True, blank=True)
 
     def __str__(self):
         return self.name
+
+
+class PeopleLang(LanguageAbstract):
+    people = models.ForeignKey(People, on_delete=models.CASCADE, related_name="langs")
+    biography = models.TextField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['language', 'people'], name="%(class)s_unique")
+        ]
+        # fix drf
+        unique_together = ['language', 'people']
 
 
 class Contact(CreatorAbstract):

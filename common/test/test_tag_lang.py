@@ -49,10 +49,23 @@ class TagLangTest(BaseTest):
     def test_create_serializer_update_wrong_lang(self):
         obj = self.test_create_serializer()
         data = {
-            'language': 'testtest'
+            'language': 'testtest',
+
         }
 
         serialiser = TagLangSerializer(instance=obj, data=data, context=self.context, partial=True)
+        self.assertFalse(serialiser.is_valid())
+
+    @tag('serializer')
+    def test_create_serializer_same_lang(self):
+        obj = self.test_create_serializer()
+        data = {
+            'language': obj.language,
+            'name': 'test',
+            'tag': obj.tag.pk,
+        }
+
+        serialiser = TagLangSerializer(data=data, context=self.context)
         self.assertFalse(serialiser.is_valid())
 
     @tag('serializer')

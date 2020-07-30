@@ -2,8 +2,10 @@ from django.test import TestCase, RequestFactory
 from django.contrib.auth import get_user_model
 from lib.utils import contenttypes_uuid
 from django.conf import settings
-from django.utils import timezone
+from django.utils import timezone, datetime_safe
 from django.utils.dateparse import parse_datetime
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.urls import reverse
 
 ISO_8601 = 'iso-8601'
 
@@ -11,10 +13,14 @@ ISO_8601 = 'iso-8601'
 class BaseTest(TestCase):
 
     def setUp(self):
+        self.username = 'username'
+        self.email = 'email@email.email'
+        self.password = 'password'
         self.user = get_user_model().objects.create(
-            username='username',
-            email='email@email.email',
-            password='password'
+            username=self.username,
+            email=self.email,
+            password=self.password,
+            is_active=True
             )
         self.request = RequestFactory
         self.request.user = self.user
@@ -26,9 +32,24 @@ class BaseTest(TestCase):
         self.lang2 = [lang for lang in self.langs if lang is not self.lang][0]
         self.lang_wrong = 'wrong'
         self.time = timezone.now()
+        self.time2 = timezone.now() - timezone.timedelta(days=9)
+
+        self.date = datetime_safe.new_date(self.time)
+        self.date2 = datetime_safe.new_date(self.time2)
         self.link = 'https://chernobyl.org'
         self.link2 = 'https://chernobyl.com'
         self.link_wrong = 'wrong link'
+        self.reverse = reverse
+
+        self.image = (
+            b'\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x00\x00\x00\x21\xf9\x04'
+            b'\x01\x0a\x00\x01\x00\x2c\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02'
+            b'\x02\x4c\x01\x00\x3b'
+        )
+        self.document = SimpleUploadedFile('small.gif', self.image, content_type='image/gif')
+        self.document2 = SimpleUploadedFile('small2.gif', self.image, content_type='image/gif')
+        self.picture = self.document
+        self.picture2 = self.document2
 
     def delta_time(self, **kwargs):
         return self.time - timezone.timedelta(**kwargs)

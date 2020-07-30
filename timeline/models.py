@@ -22,7 +22,7 @@ def fnc_extra_path(instance, filename):
         the path is:
             50/Picture/10/my_pictures.png
     """
-    return f"{instance.event.id}/{instance.__class__.__name__}/{filename}"
+    return f"event/{instance.event.id}/{instance.__class__.__name__}/{filename}"
 
 
 class Picture(EventExtraAbstract):

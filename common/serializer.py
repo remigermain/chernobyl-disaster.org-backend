@@ -1,5 +1,5 @@
 from lib.drf import ModelSerializerBase
-from .models import Tag, TagLang, People, Issue, Contact
+from .models import Tag, TagLang, People, Issue, Contact, PeopleLang
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
 
@@ -23,10 +23,24 @@ class TagSerializerSafe(ModelSerializerBase):
         fields = TagSerializer.Meta.fields + ['langs']
 
 
+class PeopleLangSerializer(ModelSerializerBase):
+    class Meta:
+        model = PeopleLang
+        fields = ['biography', 'people']
+
+
 class PeopleSerializer(ModelSerializerBase):
     class Meta:
         model = People
-        fields = ['name']
+        fields = ['name', 'born', 'death', 'profil', 'wikipedia']
+
+
+class PeopleSerializerSafe(ModelSerializerBase):
+    langs = PeopleLangSerializer(many=True)
+
+    class Meta(PeopleSerializer.Meta):
+        model = People
+        fields = PeopleSerializer.Meta.fields + ['langs']
 
 
 class IssueSerializer(ModelSerializerBase):
