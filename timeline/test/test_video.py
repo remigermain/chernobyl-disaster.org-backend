@@ -32,6 +32,21 @@ class VideoTest(BaseTest):
         return obj
 
     @tag('serializer')
+    def test_create_serializer_without_event(self):
+        data = {
+            'title': 'title',
+            'video': self.link
+        }
+        serializer = VideoSerializer(data=data, context=self.context)
+        self.assertTrue(serializer.is_valid())
+        obj = serializer.save()
+        self.assertIsNotNone(obj.id)
+        self.assertEqual(obj.title, data['title'])
+        self.assertEqual(obj.video, data['video'])
+        self.check_creator(obj)
+        return obj
+
+    @tag('serializer')
     def test_create_serializer_empty(self):
         data = {}
 

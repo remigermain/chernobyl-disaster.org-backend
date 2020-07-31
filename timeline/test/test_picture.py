@@ -32,6 +32,21 @@ class PictureTest(BaseTest):
         return obj
 
     @tag('serializer')
+    def test_create_serializer_without_event(self):
+        data = {
+            'title': 'title',
+            'picture': self.picture
+        }
+        serializer = PictureSerializer(data=data, context=self.context)
+        self.assertTrue(serializer.is_valid())
+        obj = serializer.save()
+        self.assertIsNotNone(obj.id)
+        self.assertEqual(obj.title, data['title'])
+        self.assertIsNotNone(obj.picture)
+        self.check_creator(obj)
+        return obj
+
+    @tag('serializer')
     def test_create_serializer_empty(self):
         data = {}
 

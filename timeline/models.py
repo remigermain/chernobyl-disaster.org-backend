@@ -1,12 +1,17 @@
 from django.db import models
 from lib.models import CreatorAbstract, LanguageAbstract
-from django.core.exceptions import ValidationError
 
 
 class EventExtraAbstract(CreatorAbstract):
     title = models.CharField(max_length=50)
     tags = models.ManyToManyField("common.Tag", related_name="%(class)s_extra", blank=True)
-    event = models.ForeignKey("timeline.Event", on_delete=models.SET_NULL, null=True, related_name="%(class)ss")
+    event = models.ForeignKey(
+        "timeline.Event",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="%(class)s_event"
+    )
 
     class Meta:
         abstract = True
@@ -22,7 +27,13 @@ def fnc_extra_path(instance, filename):
         the path is:
             50/Picture/10/my_pictures.png
     """
-    return f"event/{instance.event.id}/{instance.__class__.__name__}/{filename}"
+    if instance.event:
+        folder = "event"
+        uuid = instance.event.id
+    else:
+        folder = "extra"
+        uuid = instance.id
+    return f"{folder}/{uuid}/{instance.__class__.__name__}/{filename}"
 
 
 class Picture(EventExtraAbstract):
@@ -41,25 +52,11 @@ class Document(EventExtraAbstract):
 
 
 class Video(EventExtraAbstract):
-    video = models.URLField()
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['video', 'event'], name="%(class)s_extra_video")
-        ]
-        # fix for drf
-        unique_together = ['video', 'event']
+    video = models.URLField(unique=True)
 
 
 class Article(EventExtraAbstract):
-    link = models.URLField()
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['link', 'event'], name="%(class)s_extra_article")
-        ]
-        # fix for drf
-        unique_together = ['link', 'event']
+    link = models.URLField(unique=True)
 
 
 # Extra i18n

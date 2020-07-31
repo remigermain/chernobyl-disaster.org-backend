@@ -33,6 +33,21 @@ class DocumentTest(BaseTest):
         return obj
 
     @tag('serializer')
+    def test_create_serializer_without_event(self):
+        data = {
+            'title': 'title',
+            'doc': self.document
+        }
+        serializer = DocumentSerializer(data=data, context=self.context)
+        self.assertTrue(serializer.is_valid())
+        obj = serializer.save()
+        self.assertIsNotNone(obj.id)
+        self.assertEqual(obj.title, data['title'])
+        self.assertIsNotNone(obj.doc)
+        self.check_creator(obj)
+        return obj
+
+    @tag('serializer')
     def test_create_serializer_empty(self):
         data = {}
 
