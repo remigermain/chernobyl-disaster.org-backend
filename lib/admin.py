@@ -36,7 +36,7 @@ class AdminBase(admin.ModelAdmin):
         return obj.issue_count
 
     def commit_count(self, obj):
-        return obj.icommit_count
+        return obj.commit_count
 
 
 class AdminInlineBase(admin.TabularInline):

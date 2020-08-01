@@ -1,8 +1,8 @@
 from lib.drf import ModelSerializerBase
 from timeline.models import Event, EventLang, Picture, Document, Video, \
     Article, PictureLang, DocumentLang, VideoLang, ArticleLang
-from django.core.exceptions import ValidationError
-from rest_framework.serializers import DateField
+from rest_framework.serializers import SerializerMethodField
+from common.serializer import TagSerializerSafe
 
 
 class PictureLangSerializer(ModelSerializerBase):
@@ -18,10 +18,21 @@ class PictureSerializer(ModelSerializerBase):
 
 
 class PictureSerializerSafe(ModelSerializerBase):
+    picture = SerializerMethodField()
     langs = PictureLangSerializer(many=True)
+    tags = TagSerializerSafe(many=True)
+    date = SerializerMethodField()
 
     class Meta(PictureSerializer.Meta):
-        fields = PictureSerializer.Meta.fields + ['langs']
+        fields = PictureSerializer.Meta.fields + ['langs', 'date']
+
+    def get_picture(self, obj):
+        return obj.picture.url
+
+    def get_date(self, obj):
+        if obj.event:
+            return obj.event.date
+        return None
 
 
 """

@@ -28,12 +28,10 @@ def fnc_extra_path(instance, filename):
             50/Picture/10/my_pictures.png
     """
     if instance.event:
-        folder = "event"
         uuid = instance.event.id
     else:
-        folder = "extra"
-        uuid = instance.id
-    return f"{folder}/{uuid}/{instance.__class__.__name__}/{filename}"
+        uuid = instance.__class__.objects.count() + 1
+    return f"{uuid}/{filename}"
 
 
 class Picture(EventExtraAbstract):
