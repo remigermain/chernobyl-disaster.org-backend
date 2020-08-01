@@ -32,12 +32,22 @@ class ModelSerializerBase(serializers.ModelSerializer):
             self.Meta.fields.extend([
                 'created',
                 'updated',
-                'commit_count'
+                'commit_count',
+                'available_languages'
                 ])
 
         super().__init__(*args, **kwargs)
 
     commit_count = serializers.SerializerMethodField()
+    available_languages = serializers.SerializerMethodField()
+
+    def get_available_languages(self, obj):
+        # return all language available
+        if hasattr(obj, "langs"):
+            if hasattr(obj, "ann_langs_availabe"):
+                return obj.ann_langs_availabe
+            return "|".join([lang.language for lang in obj.langs.all().values("language")])
+        return None
 
     def get_commit_count(self, obj):
         # obj has annotate contributures count we return it or by queryset
@@ -73,7 +83,7 @@ class ModelViewSetBase(viewsets.ModelViewSet):
         if not hasattr(self, 'ordering_fields'):
             self.ordering_fields = []
         # we allway ad tags if models is not tags
-        fields = ['created']
+        fields = ['id', 'created']
 
         from common.models import Tag, TagLang
         if self.get_model not in [Tag, TagLang] and hasattr(self.get_model, 'tags'):
@@ -93,6 +103,11 @@ class ModelViewSetBase(viewsets.ModelViewSet):
     def get_model(self):
         # return model of class
         return self.serializer_class.Meta.model
+
+    def paginate_queryset(self, queryset):
+        if 'no_page' in self.request.query_params:
+            return None
+        return super().paginate_queryset(queryset)
 
     def get_serializer_class(self, *args):
         """
