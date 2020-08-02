@@ -1,10 +1,26 @@
-from rest_framework import serializers, viewsets
+from rest_framework import serializers, viewsets, metadata, relations, status
+from rest_framework.response import Response
+from collections import OrderedDict
 
 NAME_REVERSE_LANG = 'langs'
 NAME_LANG = 'language'
 
 
 class ModelSerializerBase(serializers.ModelSerializer):
+    def create(self, validated_data):
+        validated_data['creator'] = self.context['request'].user
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        obj = super().update(instance, validated_data)
+
+        from common.models import Commit
+        # we create a commit with contributor
+        Commit.objects.create(creator=self.context['request'].user, content_object=obj)
+        return obj
+
+
+class ModelSerializerBaseSafe(ModelSerializerBase):
     """
         base class for serializer,
         is add the creator when models will created,
@@ -14,17 +30,7 @@ class ModelSerializerBase(serializers.ModelSerializer):
     def __init__(self, *args, **kwargs):
 
         if hasattr(self.Meta.model, NAME_LANG):
-
             self.Meta.fields.append(NAME_LANG)
-        #     # we allway add the validatos for languages
-        #     if not hasattr(self.Meta, 'validators'):
-        #         self.Meta.validators = []
-        #     self.Meta.validators.append(
-        #         serializers.UniqueTogetherValidator(
-        #             queryset=self.Meta.model.objects.all(),
-        #             fields=(NAME_LANG, self.Meta.model.get_parent_lang),
-        #         )
-        #     )
 
         if hasattr(self.Meta, 'fields'):
             # automatic add 'id' in fields and created, updated, contributors count methods
@@ -72,23 +78,48 @@ class ModelSerializerBase(serializers.ModelSerializer):
         # obj has annotate contributures count we return it or by queryset
         return getattr(obj, 'ann_updated', obj.updated)
 
-    def create(self, validated_data):
-        validated_data['creator'] = self.context['request'].user
-        return super().create(validated_data)
 
-    def update(self, instance, validated_data):
-        obj = super().update(instance, validated_data)
+class MetadataBase(metadata.SimpleMetadata):
 
-        from common.models import Commit
-        # we create a commit with contributor
-        Commit.objects.create(creator=self.context['request'].user, content_object=obj)
-        return obj
+    def __init__(self, model):
+        self.model = model
+        return super().__init__()
+
+    def get_queryet(self, field):
+        if hasattr(field, 'child_relation'):
+            return field.child_relation.get_queryset()
+        return field.get_queryset()
+
+    def get_choices(self, field):
+        queryset = self.get_queryet(field)
+        if queryset is None:
+            return {}
+
+        return OrderedDict([
+                {
+                    'id': item.pk,
+                    'value': str(item)
+                }
+                for item in queryset
+            ])
+
+    def get_field_info(self, field):
+        meta = super().get_field_info(field)
+        if field.__class__ is relations.ManyRelatedField:
+            meta['type'] = "many field"
+            meta['choices'] = self.get_choices(field)
+            meta['model'] = field.child_relation.queryset.model.__name__.lower()
+        if field.__class__ is relations.PrimaryKeyRelatedField:
+            meta['choices'] = self.get_choices(field)
+            meta['model'] = field.queryset.model.__name__.lower()
+        return meta
 
 
 class ModelViewSetBase(viewsets.ModelViewSet):
     # remove delete method
-    http_method_names = ['get', 'post', 'put', 'patch', 'head', 'options', 'trace']
+    # http_method_names = ['get', 'post', 'put', 'patch', 'head', 'options', 'trace']
     SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS']
+    metadata_class = MetadataBase
 
     def __init__(self, *args, **kwargs):
         if not hasattr(self, 'filterset_fields'):
@@ -128,8 +159,18 @@ class ModelViewSetBase(viewsets.ModelViewSet):
         """
             add new property in modelViewSet
             serializer_class_safe is the serializer for safe methods
-            we change the serializer for SAFE methods
+            we change the serializer for GET methods
         """
-        if self.request.method in self.SAFE_METHODS and hasattr(self, 'serializer_class_safe'):
+        if self.request.method.upper() == 'GET' and hasattr(self, 'serializer_class_safe'):
             return self.serializer_class_safe
         return super().get_serializer_class()
+
+    def options(self, request, *args, **kwargs):
+        """
+        Handler method for HTTP 'OPTIONS' request.
+        """
+        if self.metadata_class is None:
+            return self.http_method_not_allowed(request, *args, **kwargs)
+        model = self.get_serializer_class().Meta.model
+        data = self.metadata_class(model).determine_metadata(request, self)
+        return Response(data, status=status.HTTP_200_OK)

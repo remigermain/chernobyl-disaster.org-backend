@@ -1,4 +1,4 @@
-from lib.drf import ModelSerializerBase
+from lib.drf import ModelSerializerBase, ModelSerializerBaseSafe
 from timeline.models import Event, EventLang, Picture, Document, Video, \
     Article, PictureLang, DocumentLang, VideoLang, ArticleLang
 from rest_framework.serializers import SerializerMethodField
@@ -12,19 +12,20 @@ class PictureLangSerializer(ModelSerializerBase):
 
 
 class PictureSerializer(ModelSerializerBase):
-    class Meta:
-        model = Picture
-        fields = ['title', 'tags', 'event', 'picture', 'photographer']
-
-
-class PictureSerializerSafe(ModelSerializerBase):
-    picture = SerializerMethodField()
     langs = PictureLangSerializer(many=True)
     tags = TagSerializerSafe(many=True)
+
+    class Meta:
+        model = Picture
+        fields = ['title', 'tags', 'event', 'picture', 'photographer', 'langs']
+
+
+class PictureSerializerSafe(ModelSerializerBaseSafe):
+    picture = SerializerMethodField()
     date = SerializerMethodField()
 
     class Meta(PictureSerializer.Meta):
-        fields = PictureSerializer.Meta.fields + ['langs', 'date']
+        fields = PictureSerializer.Meta.fields + ['date']
 
     def get_picture(self, obj):
         return obj.picture.url
@@ -52,7 +53,7 @@ class DocumentSerializer(ModelSerializerBase):
         fields = ['title', 'tags', 'event', 'doc']
 
 
-class DocumentSerializerSafe(ModelSerializerBase):
+class DocumentSerializerSafe(ModelSerializerBaseSafe):
     langs = DocumentLangSerializer(many=True)
 
     class Meta(DocumentSerializer.Meta):
@@ -76,7 +77,7 @@ class VideoSerializer(ModelSerializerBase):
         fields = ['title', 'tags', 'event', 'video']
 
 
-class VideoSerializerSafe(ModelSerializerBase):
+class VideoSerializerSafe(ModelSerializerBaseSafe):
     langs = VideoLangSerializer(many=True)
 
     class Meta(VideoSerializer.Meta):
@@ -100,7 +101,7 @@ class ArticleSerializer(ModelSerializerBase):
         fields = ['title', 'tags', 'event', 'link']
 
 
-class ArticleSerializerSafe(ModelSerializerBase):
+class ArticleSerializerSafe(ModelSerializerBaseSafe):
     langs = ArticleLangSerializer(many=True)
 
     class Meta(ArticleSerializer.Meta):
@@ -124,7 +125,7 @@ class EventSerializer(ModelSerializerBase):
         fields = ['title', 'date', 'tags']
 
 
-class EventSerializerSafe(EventSerializer):
+class EventSerializerSafe(ModelSerializerBaseSafe):
     langs = EventLangSerializer(many=True)
     pictures = PictureSerializerSafe(many=True)
     documents = DocumentSerializerSafe(many=True)
