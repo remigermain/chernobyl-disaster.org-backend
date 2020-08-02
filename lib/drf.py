@@ -33,13 +33,28 @@ class ModelSerializerBase(serializers.ModelSerializer):
                 'created',
                 'updated',
                 'commit_count',
-                'available_languages'
+                'available_languages',
+                'not_available_languages'
                 ])
 
         super().__init__(*args, **kwargs)
 
     commit_count = serializers.SerializerMethodField()
     available_languages = serializers.SerializerMethodField()
+    not_available_languages = serializers.SerializerMethodField()
+
+    def get_not_available_languages(self, obj):
+        # return all language available
+        if hasattr(obj, "langs"):
+            if hasattr(obj, "ann_langs_not_availabe"):
+                return obj.ann_langs_not_availabe
+            # get all langs available
+            langs = [lang[0] for lang in obj.langs.model.lang_choices]
+            # remove languages exsits
+            for lang in obj.langs.all().values("language"):
+                langs.pop(lang, None)
+            return "|".join(langs)
+        return None
 
     def get_available_languages(self, obj):
         # return all language available
