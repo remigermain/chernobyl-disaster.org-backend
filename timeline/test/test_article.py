@@ -1,6 +1,6 @@
 from django.test import tag
 from timeline.models import Event
-from timeline.serializer import ArticleSerializer
+from timeline.serializers.article import ArticleSerializer
 from lib.test import BaseTest
 
 

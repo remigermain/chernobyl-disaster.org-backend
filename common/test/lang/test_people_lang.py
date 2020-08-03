@@ -1,7 +1,7 @@
 from django.test import tag
 from lib.test import BaseTest
 from common.models import People
-from common.serializer import PeopleLangSerializer
+from common.serializers.people import PeopleLangSerializer
 
 
 @tag('model', 'lang', 'people')

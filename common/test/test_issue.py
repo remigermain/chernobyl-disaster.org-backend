@@ -1,5 +1,5 @@
 from django.test import tag
-from common.serializer import IssueSerializer
+from common.serializers.issue import IssueSerializer
 from common.models import Issue
 from lib.utils import contenttypes_uuid
 from lib.test import BaseTest

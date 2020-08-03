@@ -1,7 +1,7 @@
 from django.test import tag
 from django.core.files.uploadedfile import SimpleUploadedFile
 from timeline.models import Event
-from timeline.serializer import DocumentSerializer
+from timeline.serializers.document import DocumentSerializer
 from lib.test import BaseTest
 
 

@@ -1,6 +1,6 @@
 from django.test import tag
 from lib.test import BaseTest
-from timeline.serializer import EventSerializer
+from timeline.serializers.event import EventSerializer
 
 
 @tag('model', 'event')

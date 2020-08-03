@@ -1,7 +1,7 @@
 from django.test import tag
 from lib.test import BaseTest
 from timeline.models import Event
-from timeline.serializer import EventLangSerializer
+from timeline.serializers.event import EventLangSerializer
 
 
 @tag('model', 'event', 'lang')

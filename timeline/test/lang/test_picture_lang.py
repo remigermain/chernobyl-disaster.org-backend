@@ -1,11 +1,12 @@
 from django.test import tag
-from timeline.models import Event, Video
-from timeline.serializer import VideoLangSerializer
+from django.core.files.uploadedfile import SimpleUploadedFile
+from timeline.models import Event, Picture
+from timeline.serializers.picture import PictureLangSerializer
 from lib.test import BaseTest
 
 
-@tag('model', 'video', 'lang')
-class VideoLangTest(BaseTest):
+@tag('model', 'picture', 'lang')
+class PictureLangTest(BaseTest):
     def setUp(self):
         super().setUp()
         self.event = Event.objects.create(
@@ -13,10 +14,17 @@ class VideoLangTest(BaseTest):
             date=self.time,
             creator=self.user
         )
-        self.extra = Video.objects.create(
+        image = (
+            b'\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x00\x00\x00\x21\xf9\x04'
+            b'\x01\x0a\x00\x01\x00\x2c\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02'
+            b'\x02\x4c\x01\x00\x3b'
+        )
+        self.picture = SimpleUploadedFile('small.gif', image, content_type='image/gif')
+        self.picture2 = SimpleUploadedFile('small2.gif', image, content_type='image/gif')
+        self.extra = Picture.objects.create(
             title='title',
             event=self.event,
-            video=self.link,
+            picture=SimpleUploadedFile('base.gif', image, content_type='image/gif'),
             creator=self.user
         )
 
@@ -27,7 +35,7 @@ class VideoLangTest(BaseTest):
             'title': 'title',
             'language': self.lang
         }
-        serializer = VideoLangSerializer(data=data, context=self.context)
+        serializer = PictureLangSerializer(data=data, context=self.context)
         self.assertTrue(serializer.is_valid())
         obj = serializer.save()
         self.assertIsNotNone(obj.id)
@@ -45,7 +53,7 @@ class VideoLangTest(BaseTest):
             'title': 'title',
             'language': obj.language
         }
-        serializer = VideoLangSerializer(data=data, context=self.context)
+        serializer = PictureLangSerializer(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     @tag('serializer')
@@ -55,14 +63,14 @@ class VideoLangTest(BaseTest):
             'title': 'title',
             'language': self.lang_wrong
         }
-        serializer = VideoLangSerializer(data=data, context=self.context)
+        serializer = PictureLangSerializer(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     @tag('serializer')
     def test_create_serializer_empty(self):
         data = {}
 
-        serializer = VideoLangSerializer(data=data, context=self.context)
+        serializer = PictureLangSerializer(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     @tag('serializer')
@@ -72,7 +80,7 @@ class VideoLangTest(BaseTest):
             'title': 'title',
             'language': self.lang_wrong
         }
-        serializer = VideoLangSerializer(data=data, context=self.context)
+        serializer = PictureLangSerializer(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     @tag('serializer')
@@ -85,7 +93,7 @@ class VideoLangTest(BaseTest):
             'title': 'update-title',
             'language': self.lang2
         }
-        serializer = VideoLangSerializer(instance=obj, data=data, context=self.context, partial=True)
+        serializer = PictureLangSerializer(instance=obj, data=data, context=self.context, partial=True)
         self.assertTrue(serializer.is_valid())
         updated = serializer.save()
         self.assertEqual(updated.id, obj_id)

@@ -1,5 +1,5 @@
 from django.test import tag
-from common.serializer import ContactSerializer
+from common.serializers.contact import ContactSerializer
 from lib.test import BaseTest
 
 

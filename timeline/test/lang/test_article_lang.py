@@ -1,12 +1,11 @@
 from django.test import tag
-from django.core.files.uploadedfile import SimpleUploadedFile
-from timeline.models import Event, Document
-from timeline.serializer import DocumentLangSerializer
+from timeline.models import Event, Article
+from timeline.serializers.article import ArticleLangSerializer
 from lib.test import BaseTest
 
 
-@tag('model', 'document', 'lang')
-class DocumentLangTest(BaseTest):
+@tag('model', 'article', 'lang')
+class ArticleLangTest(BaseTest):
     def setUp(self):
         super().setUp()
         self.event = Event.objects.create(
@@ -14,10 +13,10 @@ class DocumentLangTest(BaseTest):
             date=self.time,
             creator=self.user
         )
-        self.extra = Document.objects.create(
+        self.extra = Article.objects.create(
             title='title',
             event=self.event,
-            doc=SimpleUploadedFile('base.gif', self.image, content_type='image/gif'),
+            link=self.link,
             creator=self.user
         )
 
@@ -28,7 +27,7 @@ class DocumentLangTest(BaseTest):
             'title': 'title',
             'language': self.lang
         }
-        serializer = DocumentLangSerializer(data=data, context=self.context)
+        serializer = ArticleLangSerializer(data=data, context=self.context)
         self.assertTrue(serializer.is_valid())
         obj = serializer.save()
         self.assertIsNotNone(obj.id)
@@ -46,7 +45,7 @@ class DocumentLangTest(BaseTest):
             'title': 'title',
             'language': obj.language
         }
-        serializer = DocumentLangSerializer(data=data, context=self.context)
+        serializer = ArticleLangSerializer(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     @tag('serializer')
@@ -56,14 +55,14 @@ class DocumentLangTest(BaseTest):
             'title': 'title',
             'language': self.lang_wrong
         }
-        serializer = DocumentLangSerializer(data=data, context=self.context)
+        serializer = ArticleLangSerializer(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     @tag('serializer')
     def test_create_serializer_empty(self):
         data = {}
 
-        serializer = DocumentLangSerializer(data=data, context=self.context)
+        serializer = ArticleLangSerializer(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     @tag('serializer')
@@ -73,7 +72,7 @@ class DocumentLangTest(BaseTest):
             'title': 'title',
             'language': self.lang_wrong
         }
-        serializer = DocumentLangSerializer(data=data, context=self.context)
+        serializer = ArticleLangSerializer(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     @tag('serializer')
@@ -86,7 +85,7 @@ class DocumentLangTest(BaseTest):
             'title': 'update-title',
             'language': self.lang2
         }
-        serializer = DocumentLangSerializer(instance=obj, data=data, context=self.context, partial=True)
+        serializer = ArticleLangSerializer(instance=obj, data=data, context=self.context, partial=True)
         self.assertTrue(serializer.is_valid())
         updated = serializer.save()
         self.assertEqual(updated.id, obj_id)

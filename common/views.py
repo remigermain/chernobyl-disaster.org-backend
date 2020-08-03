@@ -1,44 +1,44 @@
 from rest_framework.viewsets import ModelViewSet
-from lib.drf import ModelViewSetBase
-from .models import Tag, TagLang, People, Issue, Contact, PeopleLang
-from .serializer import TagLangSerializer, TagSerializer, PeopleSerializer, \
-    TagSerializerSafe, IssueSerializer, ContactSerializer, PeopleLangSerializer, \
-    PeopleSerializerSafe
+from lib.viewset import ModelViewSetBase
+from common.models import Tag, TagLang, People, Issue, Contact, PeopleLang
+from common.serializers import people, tag, issue, contact
 
 
 class TagViewSet(ModelViewSetBase):
     queryset = Tag.objects.all()
-    serializer_class = TagSerializer
-    serializer_class_safe = TagSerializerSafe
+    serializer_class = tag.TagSerializer
+    serializer_class_get = tag.TagSerializerGet
+    serializer_class_post = tag.TagSerializerPost
     filterset_fields = ['name']
     search_fields = ['name']
 
 
 class TagLangViewSet(ModelViewSetBase):
     queryset = TagLang.objects.all()
-    serializer_class = TagLangSerializer
+    serializer_class = tag.TagSerializer
     filterset_fields = ['name']
     search_fields = ['name']
 
 
 class PeopleViewSet(ModelViewSetBase):
     queryset = People.objects.all()
-    serializer_class = PeopleSerializer
-    serializer_class_safe = PeopleSerializerSafe
+    serializer_class = people.PeopleSerializer
+    serializer_class_get = people.PeopleSerializerGet
+    serializer_class_post = people.PeopleSerializerPost
     filterset_fields = ['name', 'born', 'death']
     search_fields = ['name', 'born', 'death']
 
 
 class PeopleLangViewSet(ModelViewSetBase):
     queryset = PeopleLang.objects.all()
-    serializer_class = PeopleLangSerializer
+    serializer_class = people.PeopleLangSerializer
     filterset_fields = ['biography']
     search_fields = ['biography']
 
 
 class IssueViewSet(ModelViewSet):
     queryset = Issue.objects.none()
-    serializer_class = IssueSerializer
+    serializer_class = issue.IssueSerializer
 
     def get_queryset(self):
         # you can only delete/update/get yourqueryset
@@ -48,4 +48,4 @@ class IssueViewSet(ModelViewSet):
 class ContactViewSet(ModelViewSet):
     http_method_names = [r'post']
     queryset = Contact.objects.none()
-    serializer_class = ContactSerializer
+    serializer_class = contact.ContactSerializer

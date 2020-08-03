@@ -1,17 +1,14 @@
-from lib.drf import ModelViewSetBase
-from .models import Event, EventLang, Picture, Document, Video, Article, \
+from lib.viewset import ModelViewSetBase
+from timeline.models import Event, EventLang, Picture, Document, Video, Article, \
     PictureLang, DocumentLang, VideoLang, ArticleLang
-from .serializer import EventSerializer, EventLangSerializer, \
-    PictureSerializer, DocumentSerializer, VideoSerializer, ArticleSerializer, \
-    PictureLangSerializer, DocumentLangSerializer, VideoLangSerializer, ArticleLangSerializer, \
-    EventSerializerSafe, PictureSerializerSafe, DocumentSerializerSafe, \
-    ArticleSerializerSafe, VideoSerializerSafe
+from timeline.serializers import picture, article, document, event, video
 
 
 class EventViewSet(ModelViewSetBase):
     queryset = Event.objects.all()
-    serializer_class = EventSerializer
-    serializer_class_safe = EventSerializerSafe
+    serializer_class = event.EventSerializer
+    serializer_class_get = event.EventSerializerGet
+    serializer_class_post = event.EventSerializerPost
     filterset_fields = ['title', 'date']
     search_fields = ['title', 'date']
     ordering_fields = ['title', 'date']
@@ -19,7 +16,7 @@ class EventViewSet(ModelViewSetBase):
 
 class EventLangViewSet(ModelViewSetBase):
     queryset = EventLang.objects.all()
-    serializer_class = EventLangSerializer
+    serializer_class = event.EventLangSerializer
     filterset_fields = ['title', 'event']
     search_fields = ['title', 'event']
     ordering_fields = ['title']
@@ -27,11 +24,16 @@ class EventLangViewSet(ModelViewSetBase):
 
 # extra in event
 
+from drf_nested_forms.parsers import NestedMultiPartParser
+from rest_framework.parsers import FormParser
+
 
 class PictureViewSet(ModelViewSetBase):
     queryset = Picture.objects.all()
-    serializer_class = PictureSerializer
-    serializer_class_safe = PictureSerializerSafe
+    serializer_class = picture.PictureSerializer
+    serializer_class_get = picture.PictureSerializerGet
+    serializer_class_post = picture.PictureSerializerPost
+    parser_classes = (NestedMultiPartParser, FormParser)
     filterset_fields = ['title', 'event', 'photographer']
     search_fields = ['title', 'event', 'photographer']
     ordering_fields = ['title']
@@ -39,7 +41,7 @@ class PictureViewSet(ModelViewSetBase):
 
 class PictureLangViewSet(ModelViewSetBase):
     queryset = PictureLang.objects.all()
-    serializer_class = PictureLangSerializer
+    serializer_class = picture.PictureLangSerializer
     filterset_fields = ['title', 'extra']
     search_fields = ['title', 'extra']
     ordering_fields = ['title']
@@ -47,8 +49,9 @@ class PictureLangViewSet(ModelViewSetBase):
 
 class DocumentViewSet(ModelViewSetBase):
     queryset = Document.objects.all()
-    serializer_class = DocumentSerializer
-    serializer_class_safe = DocumentSerializerSafe
+    serializer_class = document.DocumentSerializer
+    serializer_class_get = document.DocumentSerializerGet
+    serializer_class_post = document.DocumentSerializerPost
     filterset_fields = ['title', 'event']
     search_fields = ['title', 'event']
     ordering_fields = ['title']
@@ -56,7 +59,7 @@ class DocumentViewSet(ModelViewSetBase):
 
 class DocumentLangViewSet(ModelViewSetBase):
     queryset = DocumentLang.objects.all()
-    serializer_class = DocumentLangSerializer
+    serializer_class = picture.PictureLangSerializer
     filterset_fields = ['title', 'extra']
     search_fields = ['title', 'extra']
     ordering_fields = ['title']
@@ -64,8 +67,9 @@ class DocumentLangViewSet(ModelViewSetBase):
 
 class VideoViewSet(ModelViewSetBase):
     queryset = Video.objects.all()
-    serializer_class = VideoSerializer
-    serializer_class_safe = VideoSerializerSafe
+    serializer_class = video.VideoSerializer
+    serializer_class_get = video.VideoSerializerGet
+    serializer_class_post = video.VideoSerializerPost
     filterset_fields = ['title', 'event']
     search_fields = ['title', 'event']
     ordering_fields = ['title']
@@ -73,7 +77,7 @@ class VideoViewSet(ModelViewSetBase):
 
 class VideoLangViewSet(ModelViewSetBase):
     queryset = VideoLang.objects.all()
-    serializer_class = VideoLangSerializer
+    serializer_class = video.VideoLangSerializer
     filterset_fields = ['title', 'extra']
     search_fields = ['title', 'extra']
     ordering_fields = ['title']
@@ -81,8 +85,9 @@ class VideoLangViewSet(ModelViewSetBase):
 
 class ArticleViewSet(ModelViewSetBase):
     queryset = Article.objects.all()
-    serializer_class = ArticleSerializer
-    serializer_class_safe = ArticleSerializerSafe
+    serializer_class = article.ArticleSerializer
+    serializer_class_get = article.ArticleSerializerGet
+    serializer_class_post = article.ArticleSerializerPost
     filterset_fields = ['title', 'event']
     search_fields = ['title', 'event']
     ordering_fields = ['title']
@@ -90,7 +95,7 @@ class ArticleViewSet(ModelViewSetBase):
 
 class ArticleLangViewSet(ModelViewSetBase):
     queryset = ArticleLang.objects.all()
-    serializer_class = ArticleLangSerializer
+    serializer_class = article.ArticleLangSerializer
     filterset_fields = ['title', 'extra']
     search_fields = ['title', 'extra']
     ordering_fields = ['title']

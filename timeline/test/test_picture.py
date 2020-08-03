@@ -1,6 +1,6 @@
 from django.test import tag
 from timeline.models import Event
-from timeline.serializer import PictureSerializer
+from timeline.serializers.picture import PictureSerializer
 from lib.test import BaseTest
 
 

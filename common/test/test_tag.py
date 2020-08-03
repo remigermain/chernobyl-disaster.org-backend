@@ -1,6 +1,6 @@
 from django.test import tag
 from lib.test import BaseTest
-from common.serializer import TagSerializer
+from common.serializers.tag import TagSerializer
 
 
 @tag('model', 'tag')
