@@ -34,13 +34,6 @@ class TagLang(LanguageAbstract):
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE, related_name="langs")
     get_parent_lang = 'tag'
 
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['language', 'tag'], name="%(class)s_unique")
-        ]
-        # fix drf
-        unique_together = ['language', 'tag']
-
     def __str__(self):
         return f"{self.name} {self.language}"
 
@@ -66,13 +59,6 @@ class People(CreatorAbstract):
 class PeopleLang(LanguageAbstract):
     people = models.ForeignKey(People, on_delete=models.CASCADE, related_name="langs")
     biography = models.TextField()
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['language', 'people'], name="%(class)s_unique")
-        ]
-        # fix drf
-        unique_together = ['language', 'people']
 
 
 class Contact(CreatorAbstract):

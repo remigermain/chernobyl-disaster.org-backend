@@ -66,11 +66,6 @@ class EventExtraLangAbstract(LanguageAbstract):
 
     class Meta:
         abstract = True
-        constraints = [
-            models.UniqueConstraint(fields=['extra', 'language'], name="%(class)s_unique")
-        ]
-        # fix drf
-        unique_together = ['extra', 'language']
 
     def __str__(self):
         return f"{self.extra} {self.language}"
@@ -117,12 +112,6 @@ class EventLang(LanguageAbstract):
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="langs")
     get_parent_lang = 'event'
 
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['language', 'event'], name="%(class)s_unique")
-        ]
-        # fix drf
-        unique_together = ['language', 'event']
 
     def __str__(self):
         return f"{self.event} {self.language}"

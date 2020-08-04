@@ -1,13 +1,40 @@
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
+from django.db.models import UniqueConstraint
+from drf_writable_nested.serializers import WritableNestedModelSerializer
+from django.core.exceptions import ValidationError
+from django.utils.text import capfirst
 
 
-class ModelSerializerBase(ModelSerializer):
+class ModelSerializerBase(WritableNestedModelSerializer):
     def __init__(self, *args, **kwargs):
-        if hasattr(self.Meta, 'fields'):
-            # automatic add 'id' in fields and created, updated, contributors count methods
-            self.Meta.fields.insert(0, 'id')
+        if hasattr(self.Meta, 'fields') and 'id' not in self.Meta.fields:
+            self.Meta.fields.insert(0, 'id')  # allway add id
         super().__init__(*args, **kwargs)
+
+    def validate_langs(self, data):
+        """
+            replace of unique together and constaits for language
+        """
+        objects = self.get_initial().get('langs', None)
+        if self.instance:
+            for lang in self.instance.langs.values('id', 'language'):
+                ret = list(filter(lambda obj: 'id' in obj and lang['id'] == obj['id'], objects))
+                if not ret:
+                    objects.append(lang)
+        unique = list(set([obj['language'] for obj in objects]))
+        if len(unique) != len(objects):
+            field = self.Meta.model.langs.field.model.language.field
+            params = {
+                'model_name': self.Meta.model.__name__,
+                'field_label': capfirst(field.verbose_name)
+            }
+            raise ValidationError(
+                message=field.error_messages['unique'],
+                code='unique',
+                params=params,
+            )
+        return data
 
     def create(self, validated_data):
         validated_data['creator'] = self.context['request'].user

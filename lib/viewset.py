@@ -56,12 +56,6 @@ class ModelViewSetBase(viewsets.ModelViewSet):
             {'method': 'PUT', 'serializer': 'serializer_class_post'},
             {'method': 'PATCH', 'serializer': 'serializer_class_post'},
         ]
-        print(self.request.data)
-        print("\n")
-        #if 'langs' in self.request.data:
-            # import json
-            # print(json.loads(self.request.data['langs'])['title'])
-            # print(type(self.request.data['langs']))
         method = self.request.method.upper()
         for action in actions:
             if method == action['method'] and hasattr(self, action['serializer']):
