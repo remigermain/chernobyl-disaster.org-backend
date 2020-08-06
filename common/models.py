@@ -33,6 +33,7 @@ class TagLang(LanguageAbstract):
     name = models.CharField(max_length=50)
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE, related_name="langs")
     get_parent_lang = 'tag'
+    select_std = ['tag']
 
     def __str__(self):
         return f"{self.name} {self.language}"
@@ -59,6 +60,8 @@ class People(CreatorAbstract):
 class PeopleLang(LanguageAbstract):
     people = models.ForeignKey(People, on_delete=models.CASCADE, related_name="langs")
     biography = models.TextField()
+
+    select_std = ['people']
 
 
 class Contact(CreatorAbstract):

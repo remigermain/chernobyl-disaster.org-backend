@@ -24,18 +24,13 @@ class EventLangViewSet(ModelViewSetBase):
 
 # extra in event
 
-from drf_nested_forms.parsers import NestedMultiPartParser
-from rest_framework.parsers import FormParser
-
-
 class PictureViewSet(ModelViewSetBase):
     queryset = Picture.objects.all()
     serializer_class = picture.PictureSerializer
     serializer_class_get = picture.PictureSerializerGet
     serializer_class_post = picture.PictureSerializerPost
-    parser_classes = (NestedMultiPartParser, FormParser)
     filterset_fields = ['title', 'event', 'photographer']
-    search_fields = ['title', 'event', 'photographer']
+    search_fields = ['title', 'event__title', 'tags__name', 'photographer__name']
     ordering_fields = ['title']
 
 

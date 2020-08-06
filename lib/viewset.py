@@ -1,11 +1,16 @@
 from rest_framework import viewsets
 from lib.metadata import MetadataBase
 
+from drf_nested_forms.parsers import NestedMultiPartParser
+from rest_framework.parsers import JSONParser, FormParser, MultiPartParser
+from distutils.util import strtobool
+
 
 class ModelViewSetBase(viewsets.ModelViewSet):
     # remove delete method
     http_method_names = ['get', 'post', 'put', 'patch', 'head', 'options', 'trace']
     metadata_class = MetadataBase
+    parser_classes = (NestedMultiPartParser, FormParser, MultiPartParser, JSONParser)
 
     def __init__(self, *args, **kwargs):
         if not hasattr(self, 'filterset_fields'):
@@ -19,11 +24,10 @@ class ModelViewSetBase(viewsets.ModelViewSet):
 
         from common.models import Tag, TagLang
         if self.get_model not in [Tag, TagLang] and hasattr(self.get_model, 'tags'):
-            fields.extend(['tags__name'])
-        if hasattr(self.get_model, 'language'):
-            fields.append('language')
-        if hasattr(self.get_model, 'langs'):
-            fields.extend(['langs__language'])
+            fields.extend(['tags__name', 'tags__langs__name'])
+
+        if hasattr(self.get_model, "langs"):
+            self.search_fields.append('langs__language')
 
         self.ordering_fields.extend(fields)
         self.search_fields.extend(fields)
@@ -43,6 +47,24 @@ class ModelViewSetBase(viewsets.ModelViewSet):
         if 'no_page' in self.request.query_params:
             return None
         return super().paginate_queryset(queryset)
+
+    def get_queryset(self):
+        """
+            get queryset and filter on models if models has all languages availables
+            with query params "completed"
+            if true , you get all models has all languages,
+            if false, you get all models need translate,
+            if None , you get all
+        """
+        completed = self.request.query_params.get('completed', None)
+        queryset = super().get_queryset()
+        if completed is not None:
+            completed = bool(strtobool(completed))
+            if completed:
+                queryset = queryset.completed()
+            else:
+                queryset = queryset.uncompleted()
+        return queryset.prefetch_std()
 
     def get_serializer_class(self, *args):
         """

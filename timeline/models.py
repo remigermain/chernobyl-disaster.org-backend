@@ -13,6 +13,8 @@ class EventExtraAbstract(CreatorAbstract):
         related_name="%(class)s_event"
     )
 
+    select_std = ['event']
+
     class Meta:
         abstract = True
 
@@ -43,6 +45,7 @@ class Picture(EventExtraAbstract):
         on_delete=models.SET_NULL,
         related_name="pictures"
     )
+    select_std = EventExtraAbstract.select_std + ['photographer']
 
 
 class Document(EventExtraAbstract):
@@ -63,6 +66,7 @@ class EventExtraLangAbstract(LanguageAbstract):
     title = models.CharField(max_length=50, blank=True, null=True)
 
     get_parent_lang = 'extra'
+    select_std = ['extra']
 
     class Meta:
         abstract = True
@@ -110,8 +114,9 @@ class EventLang(LanguageAbstract):
     title = models.CharField(max_length=100)
     description = models.TextField()
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="langs")
-    get_parent_lang = 'event'
 
+    get_parent_lang = 'event'
+    select_std = ['event']
 
     def __str__(self):
         return f"{self.event} {self.language}"

@@ -6,10 +6,11 @@ from django.core.exceptions import ValidationError
 from django.utils.text import capfirst
 
 
-class ModelSerializerBase(WritableNestedModelSerializer):
+class ModelSerializerBaseNested(WritableNestedModelSerializer):
     def __init__(self, *args, **kwargs):
-        if hasattr(self.Meta, 'fields') and 'id' not in self.Meta.fields:
-            self.Meta.fields.insert(0, 'id')  # allway add id
+        if hasattr(self.Meta, 'fields'):
+            if 'id' not in self.Meta.fields:
+                self.Meta.fields.insert(0, 'id')  # allway add id
         super().__init__(*args, **kwargs)
 
     def validate_langs(self, data):
@@ -17,13 +18,24 @@ class ModelSerializerBase(WritableNestedModelSerializer):
             replace of unique together and constaits for language
         """
         objects = self.get_initial().get('langs', None)
+        _raise = False
+
         if self.instance:
+            list_id = list(filter(lambda obj: 'id' in obj, objects))
+            list_id_exist = []
             for lang in self.instance.langs.values('id', 'language'):
-                ret = list(filter(lambda obj: 'id' in obj and lang['id'] == obj['id'], objects))
-                if not ret:
+                current = list(filter(lambda obj: obj['id'] == lang['id'], list_id))
+                if not current:
                     objects.append(lang)
+                else:
+                    list_id_exist.append(lang['id'])
+
+            # if other id refered by not in this instance, raise error
+            if len(list_id_exist) != len(list_id):
+                _raise = True
+
         unique = list(set([obj['language'] for obj in objects]))
-        if len(unique) != len(objects):
+        if _raise or len(unique) != len(objects):
             field = self.Meta.model.langs.field.model.language.field
             params = {
                 'model_name': self.Meta.model.__name__,
@@ -43,26 +55,20 @@ class ModelSerializerBase(WritableNestedModelSerializer):
     def update(self, instance, validated_data):
         obj = super().update(instance, validated_data)
 
+        # clean multi select tags
+        if hasattr(self.Meta.model, 'tags') and 'tags' not in validated_data:
+            obj.tags.clear()
+
         from common.models import Commit
         # we create a commit with contributor
         Commit.objects.create(creator=self.context['request'].user, content_object=obj)
         return obj
 
 
-class ModelSerializerBaseGet(ModelSerializerBase):
-    """
-        base class for serializer,
-        is add the creator when models will created,
-        and add the contributors when models will updated
-    """
-
+class ModelSerializerBase(ModelSerializerBaseNested):
     def __init__(self, *args, **kwargs):
-
-        if hasattr(self.Meta, 'fields'):
+        if hasattr(self.Meta, 'fields') and hasattr(self.Meta.model, "langs"):
             self.Meta.fields.extend([
-                'created',
-                'updated',
-                'commit_count',
                 'available_languages',
                 'not_available_languages'
                 ])
@@ -75,24 +81,18 @@ class ModelSerializerBaseGet(ModelSerializerBase):
 
     def get_not_available_languages(self, obj):
         # return all language available
-        if hasattr(obj, "langs"):
-            if hasattr(obj, "ann_langs_not_availabe"):
-                return obj.ann_langs_not_availabe
-            # get all langs available
-            langs = [lang[0] for lang in obj.langs.model.lang_choices]
-            # remove languages exsits
-            for lang in obj.langs.all().values("language"):
-                langs.pop(lang, None)
-            return "|".join(langs)
-        return None
+        if hasattr(obj, "ann_langs_not_availabe"):
+            return obj.ann_langs_not_availabe
+        # get all langs available
+        langs = [lang[0] for lang in obj.langs.model.lang_choices]
+        # remove languages exsits
+        return set(obj.langs.values_list("language", flat=True).order_by('language')) ^ set(langs)
 
     def get_available_languages(self, obj):
         # return all language available
-        if hasattr(obj, "langs"):
-            if hasattr(obj, "ann_langs_availabe"):
-                return obj.ann_langs_availabe
-            return "|".join([lang.language for lang in obj.langs.all().values("language")])
-        return None
+        if hasattr(obj, "ann_langs_availabe"):
+            return obj.ann_langs_availabe
+        return obj.langs.values_list("language", flat=True).order_by('language')
 
     def get_commit_count(self, obj):
         # obj has annotate contributures count we return it or by queryset

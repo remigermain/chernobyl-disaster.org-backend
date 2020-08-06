@@ -8,6 +8,7 @@ class AdminBase(admin.ModelAdmin):
     """
 
     empty_value_display = "- empty -"
+    list_per_page = 20
 
     def __init__(self, model, admin_site):
 
@@ -38,6 +39,9 @@ class AdminBase(admin.ModelAdmin):
     def commit_count(self, obj):
         return obj.commit_count
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_std()
+
 
 class AdminInlineBase(admin.TabularInline):
     def get_extra(self, request, obj=None, **kwargs):
@@ -46,3 +50,6 @@ class AdminInlineBase(admin.TabularInline):
         """
         _min = obj.langs.count() if obj else 1
         return min(_min, len(settings.LANGUAGES))
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_std()

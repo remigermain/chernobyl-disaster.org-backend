@@ -4,12 +4,15 @@ from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from lib.utils import contenttypes_uuid
+from lib.manager import QuerySetBase
 
 
 class ChernobylModelAbstract(models.Model):
     """
         chernobyl base models
     """
+
+    objects = QuerySetBase.as_manager()
 
     class Meta:
         abstract = True
@@ -103,3 +106,4 @@ class LanguageAbstract(CreatorAbstract):
 
     class Meta:
         abstract = True
+        ordering = ['language']

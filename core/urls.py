@@ -8,14 +8,11 @@ from django.conf import settings
 
 
 router = routers.DefaultRouter()
-
 # load the url of all app
 apps = [
     common_urls,
     timeline_urls
 ]
-
-# register all urls in all apps
 for app in apps:
     for url in app:
         router.register(*url)
@@ -35,3 +32,7 @@ urlpatterns = [
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    import debug_toolbar
+    urlpatterns = [
+        path('__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns

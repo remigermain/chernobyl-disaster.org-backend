@@ -1,9 +1,5 @@
 from lib.serializers import ModelSerializerBase
 from timeline.models import Picture, PictureLang
-from drf_writable_nested.mixins import UniqueFieldsMixin
-from drf_writable_nested.serializers import WritableNestedModelSerializer
-from rest_framework.serializers import PrimaryKeyRelatedField
-from django.core.exceptions import ValidationError
 
 
 class PictureLangSerializer(ModelSerializerBase):
@@ -17,7 +13,7 @@ class PictureSerializer(ModelSerializerBase):
 
     class Meta:
         model = Picture
-        fields = ['title', 'tags', 'event', 'picture', 'photographer', 'langs']
+        fields = ['title', 'event', 'picture', 'photographer', 'langs', 'tags']
 
 
 class PictureSerializerPost(PictureSerializer):
