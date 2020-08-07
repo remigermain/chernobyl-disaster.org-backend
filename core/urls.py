@@ -20,6 +20,7 @@ for app in apps:
 urlpatterns = [
     # api models
     path('', include(router.urls)),
+    path('populate/', include('populate.urls'), name="populate"),
 
     # account / auth
     path('auth/', include('api.urls')),

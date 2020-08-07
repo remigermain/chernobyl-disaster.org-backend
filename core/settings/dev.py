@@ -10,6 +10,8 @@ INTERNAL_IPS = [
   '127.0.0.1'
 ]
 
+SITE_URL = "http://localhost:8000"
+
 
 DEBUG = True
 

@@ -22,22 +22,26 @@ class EventExtraAbstract(CreatorAbstract):
         return f"{self.event} {self.__class__.__name__}"
 
 
-def fnc_extra_path(instance, filename):
+def uuid_path(instance, filename):
     """
         function to generate path file name
         ex: for Picture models as imagefiled named "my_pictures.png"
         the path is:
             50/Picture/10/my_pictures.png
     """
-    if instance.event:
-        uuid = instance.event.id
-    else:
-        uuid = instance.__class__.objects.count() + 1
-    return f"{uuid}/{filename}"
+    return instance.pk if instance.pk else instance.__class__.objects.count() + 1
+
+
+def picture_path(instance, filename):
+    return f"pictures/{uuid_path(instance, filename)}/{filename}"
+
+
+def document_path(instance, filename):
+    return f"document/{uuid_path(instance, filename)}/{filename}"
 
 
 class Picture(EventExtraAbstract):
-    picture = models.ImageField(upload_to=fnc_extra_path)
+    picture = models.ImageField(upload_to=picture_path)
     photographer = models.ForeignKey(
         "common.People",
         null=True,
@@ -49,7 +53,7 @@ class Picture(EventExtraAbstract):
 
 
 class Document(EventExtraAbstract):
-    doc = models.FileField(upload_to=fnc_extra_path)
+    doc = models.FileField(upload_to=document_path)
 
 
 class Video(EventExtraAbstract):
