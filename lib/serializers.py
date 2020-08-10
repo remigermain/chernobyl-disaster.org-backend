@@ -48,8 +48,12 @@ class ModelSerializerBaseNested(WritableNestedModelSerializer):
             )
         return data
 
-    def create(self, validated_data):
+    def add_validated_data(self, validated_data):
         validated_data['creator'] = self.context['request'].user
+        return validated_data
+
+    def create(self, validated_data):
+        validated_data = self.add_validated_data(validated_data)
         return super().create(validated_data)
 
     def update(self, instance, validated_data):

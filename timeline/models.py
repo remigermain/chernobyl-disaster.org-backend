@@ -5,6 +5,7 @@ from lib.models import CreatorAbstract, LanguageAbstract
 class EventExtraAbstract(CreatorAbstract):
     title = models.CharField(max_length=50)
     tags = models.ManyToManyField("common.Tag", related_name="%(class)s_extra", blank=True)
+    date = models.DateTimeField(blank=True, null=True)
     event = models.ForeignKey(
         "timeline.Event",
         on_delete=models.SET_NULL,

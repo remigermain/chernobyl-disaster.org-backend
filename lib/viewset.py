@@ -33,6 +33,10 @@ class ModelViewSetBase(viewsets.ModelViewSet):
         self.search_fields.extend(fields)
         self.filterset_fields.extend(fields)
 
+        self.ordering_fields = list(set(self.ordering_fields))
+        self.search_fields = list(set(self.search_fields))
+        self.filterset_fields = list(set(self.filterset_fields))
+
         super().__init__(*args, **kwargs)
 
     @property

@@ -1,21 +1,20 @@
 from lib.serializers  import ModelSerializerBase
 from common.models import Issue
 from django.core.exceptions import ValidationError
-from rest_framework import serializers
 
 
 class IssueSerializer(ModelSerializerBase):
-    model = serializers.CharField()
-    pk = serializers.IntegerField()
-
     class Meta:
         model = Issue
-        fields = ['model', 'message', 'pk']
+        fields = ['uuid', 'message', 'object_id']
 
     def get_contenttype(self, model, pk):
         return model.objects.get(pk=pk)
 
-    def validate_model(self, value):
+    def get_model(self, obj):
+        return obj.contenttype.__class__ if obj.contenttype else None
+
+    def validate_uuid(self, value):
         from django.contrib.contenttypes.models import ContentType
 
         try:
@@ -26,8 +25,12 @@ class IssueSerializer(ModelSerializerBase):
     def validate(self, data):
         try:
             return {
-                'content_object': self.get_contenttype(data['model'], data['pk']),
+                'content_object': self.get_contenttype(data['uuid'], data['object_id']),
                 'message': data['message']
             }
-        except data['model'].DoesNotExist as e:
+        except data['uuid'].DoesNotExist as e:
             raise ValidationError(e)
+
+    def create(self, validated_data):
+        validated_data['creator'] = self.context['request'].user
+        return Issue.objects.create(**validated_data)

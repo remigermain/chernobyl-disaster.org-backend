@@ -16,7 +16,7 @@ class PictureSerializer(ModelSerializerBase):
 
     class Meta:
         model = Picture
-        fields = ['title', 'event', 'picture', 'photographer', 'langs', 'tags']
+        fields = ['title', 'event', 'picture', 'photographer', 'langs', 'tags', 'date']
 
 
 class PictureSerializerPost(PictureSerializer):

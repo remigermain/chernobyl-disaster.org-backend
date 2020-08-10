@@ -30,8 +30,8 @@ class PictureViewSet(ModelViewSetBase):
     serializer_class_get = picture.PictureSerializerGet
     serializer_class_post = picture.PictureSerializerPost
     filterset_fields = ['title', 'event', 'photographer']
-    search_fields = ['title', 'event__title', 'tags__name', 'photographer__name']
-    ordering_fields = ['title']
+    search_fields = ['title', 'event__title', 'photographer__name']
+    ordering_fields = ['title', 'date']
 
 
 class PictureLangViewSet(ModelViewSetBase):
