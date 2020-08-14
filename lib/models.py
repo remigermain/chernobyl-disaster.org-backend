@@ -81,7 +81,7 @@ class LogAbstract(CreatorAbstract):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
-    uuid = models.CharField(max_length=200, null=True, blank=True)
+    uuid = models.CharField(max_length=200)
 
     def __str__(self):
         return f"{self._meta.model_name} {self.creator} {self.uuid} {self.created}"

@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.conf import settings
 from timeline.models import Event
-from common.models import Tag, People
+from common.models import Tag, People, Commit
 
 
 def serialize(obj, display_name):
@@ -30,3 +30,9 @@ class PopulateView(APIView):
             'tags': tags,
             'events': events
         })
+
+
+class ContributorView(APIView):
+    def get(self, request, format=None):
+        contributors = Commit.objects.values_list('creator__username', flat=True).distinct()
+        return Response({'results': contributors})

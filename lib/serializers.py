@@ -11,7 +11,9 @@ class ModelSerializerBaseNested(WritableNestedModelSerializer):
         if hasattr(self.Meta, 'fields'):
             if 'id' not in self.Meta.fields:
                 self.Meta.fields.insert(0, 'id')  # allway add id
+
         super().__init__(*args, **kwargs)
+        print(args, kwargs)
 
     def validate_langs(self, data):
         """
@@ -19,12 +21,18 @@ class ModelSerializerBaseNested(WritableNestedModelSerializer):
         """
         objects = self.get_initial().get('langs', None)
         _raise = False
+        print("-------------validate_langs------------------")
+
+        def check_obj(obj):
+            if isinstance(obj['id'], str) and not obj['id'].isdigit():
+                return False
+            return int(obj['id']) == lang['id']
 
         if self.instance:
             list_id = list(filter(lambda obj: 'id' in obj, objects))
             list_id_exist = []
             for lang in self.instance.langs.values('id', 'language'):
-                current = list(filter(lambda obj: obj['id'] == lang['id'], list_id))
+                current = list(filter(check_obj, list_id))
                 if not current:
                     objects.append(lang)
                 else:
@@ -57,6 +65,8 @@ class ModelSerializerBaseNested(WritableNestedModelSerializer):
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
+        print(f"-------{instance.__class__}------\n\n")
+        print(validated_data)
         obj = super().update(instance, validated_data)
 
         # clean multi select tags

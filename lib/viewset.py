@@ -1,16 +1,15 @@
 from rest_framework import viewsets
-from lib.metadata import MetadataBase
 
-from drf_nested_forms.parsers import NestedMultiPartParser
+#from drf_nested_forms.parsers import NestedMultiPartParser
+from lib.parser.core.parser import NestedMultiPartParser
 from rest_framework.parsers import JSONParser, FormParser, MultiPartParser
 from distutils.util import strtobool
 
 
 class ModelViewSetBase(viewsets.ModelViewSet):
-    # remove delete method
-    http_method_names = ['get', 'post', 'put', 'patch', 'head', 'options', 'trace']
-    metadata_class = MetadataBase
-    parser_classes = (NestedMultiPartParser, FormParser, MultiPartParser, JSONParser)
+    # remove delete and put method
+    http_method_names = ['get', 'post', 'patch', 'head', 'options', 'trace']
+    parser_classes = (NestedMultiPartParser,)
 
     def __init__(self, *args, **kwargs):
         if not hasattr(self, 'filterset_fields'):
@@ -83,6 +82,8 @@ class ModelViewSetBase(viewsets.ModelViewSet):
             {'method': 'PATCH', 'serializer': 'serializer_class_post'},
         ]
         method = self.request.method.upper()
+        print("========== lib ===========")
+        print(f"================{self.request.data}===================")
         for action in actions:
             if method == action['method'] and hasattr(self, action['serializer']):
                 return getattr(self, action['serializer'])

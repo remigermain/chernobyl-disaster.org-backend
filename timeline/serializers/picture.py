@@ -12,7 +12,7 @@ class PictureLangSerializer(ModelSerializerBase):
 
 
 class PictureSerializer(ModelSerializerBase):
-    langs = PictureLangSerializer(many=True, required=False)
+    langs = PictureLangSerializer(many=True, required=True)
 
     class Meta:
         model = Picture
@@ -20,7 +20,7 @@ class PictureSerializer(ModelSerializerBase):
 
 
 class PictureSerializerPost(PictureSerializer):
-    langs = PictureLangSerializer(many=True, required=False)
+    langs = PictureLangSerializer(many=True, required=True)
 
     class Meta(PictureSerializer.Meta):
         pass
