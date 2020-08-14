@@ -1,9 +1,16 @@
 from rest_framework import serializers
-from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import ModelSerializer, ListSerializer
 from django.db.models import UniqueConstraint
 from drf_writable_nested.serializers import WritableNestedModelSerializer
 from django.core.exceptions import ValidationError
 from django.utils.text import capfirst
+from rest_framework.fields import empty
+
+
+class ListSerialierbase(ListSerializer):
+
+    def get_value(self, data):
+        return data.get(self.field_name, super().get_value(data))
 
 
 class ModelSerializerBaseNested(WritableNestedModelSerializer):
@@ -11,17 +18,18 @@ class ModelSerializerBaseNested(WritableNestedModelSerializer):
         if hasattr(self.Meta, 'fields'):
             if 'id' not in self.Meta.fields:
                 self.Meta.fields.insert(0, 'id')  # allway add id
+        if not hasattr(self.Meta, 'list_serializer_class'):
+            self.Meta.list_serializer_class = ListSerialierbase
 
         super().__init__(*args, **kwargs)
-        print(args, kwargs)
 
     def validate_langs(self, data):
         """
             replace of unique together and constaits for language
         """
+        print("++++++++validate_langs++++++++++++++++")
         objects = self.get_initial().get('langs', None)
         _raise = False
-        print("-------------validate_langs------------------")
 
         def check_obj(obj):
             if isinstance(obj['id'], str) and not obj['id'].isdigit():
@@ -60,12 +68,23 @@ class ModelSerializerBaseNested(WritableNestedModelSerializer):
         validated_data['creator'] = self.context['request'].user
         return validated_data
 
+    def get_value(self, dictionary):
+        print(f"-----get_value  {self.field_name}----")
+        if hasattr(dictionary, 'getlist'):
+            return dictionary.getlist(self.field_name, empty)
+        return dictionary.get(self.field_name, empty)
+    
+    def to_internal_value(self, val):
+        print(f"-----to_internal_value  {val}----")
+
+        return super().to_internal_value(val)
+
     def create(self, validated_data):
         validated_data = self.add_validated_data(validated_data)
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
-        print(f"-------{instance.__class__}------\n\n")
+        print(f"-------UPDATE {instance.__class__}------\n\n")
         print(validated_data)
         obj = super().update(instance, validated_data)
 

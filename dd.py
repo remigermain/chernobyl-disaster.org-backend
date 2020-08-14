@@ -10,4 +10,8 @@ s = PictureSerializerPost(instance, data=data)
 s.is_valid()
 s.errors
 
-        
+from timeline.serializers.picture import PictureLangSerializer
+p = PictureLangSerializer(many=True, required=True)
+d = {'title': 'wrgwegwegwegwe', 'tags': '1', 'event': '', 'date': '2020-08-14T17:52:00.000Z', 'photographer': '', 'langs': [{'title': 'fefwe', 'language': 'fr'}]}
+data = [{'title': 'fwefwe', 'language': 'fr'}]
+p.get_value(d)

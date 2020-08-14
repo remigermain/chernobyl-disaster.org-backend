@@ -10,6 +10,10 @@ class PictureLangSerializer(ModelSerializerBase):
         model = PictureLang
         fields = ['id', 'title', 'language']
 
+    def get_value(self, data):
+        print("-=============== PictureLangSerializer")
+        return ""
+
 
 class PictureSerializer(ModelSerializerBase):
     langs = PictureLangSerializer(many=True, required=True)
