@@ -23,7 +23,7 @@ class PopulateView(APIView):
         langs = [{'value': lang[0], 'display_name': lang[1]} for lang in settings.LANGUAGES]
 
         tags = [serialize(tag, 'name') for tag in Tag.objects.all()]
-        events = [serialize(event, 'name') for event in Event.objects.all()]
+        events = [serialize(event, 'title') for event in Event.objects.all()]
 
         return Response({
             'langs': langs,

@@ -26,10 +26,10 @@ class EventSerializerPost(EventSerializer):
 
 
 class EventSerializerGet(EventSerializerPost):
-    pictures = PictureSerializerGet(many=True)
-    documents = DocumentSerializerGet(many=True)
-    videos = VideoSerializerGet(many=True)
-    articles = ArticleSerializerGet(many=True)
+    pictures = PictureSerializerGet(many=True, required=False)
+    documents = DocumentSerializerGet(many=True, required=False)
+    videos = VideoSerializerGet(many=True, required=False)
+    articles = ArticleSerializerGet(many=True, required=False)
 
     class Meta(EventSerializerPost.Meta):
         fields = EventSerializerPost.Meta.fields + \

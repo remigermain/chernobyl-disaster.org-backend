@@ -4,7 +4,7 @@ from lib.models import CreatorAbstract, LanguageAbstract
 
 class EventExtraAbstract(CreatorAbstract):
     title = models.CharField(max_length=50)
-    tags = models.ManyToManyField("common.Tag", related_name="%(class)s_extra", blank=True)
+    tags = models.ManyToManyField("common.Tag", related_name="%(class)s", blank=True)
     date = models.DateTimeField(blank=True, null=True)
     event = models.ForeignKey(
         "timeline.Event",
@@ -68,7 +68,7 @@ class Article(EventExtraAbstract):
 # Extra i18n
 
 class EventExtraLangAbstract(LanguageAbstract):
-    title = models.CharField(max_length=50, blank=True, null=True)
+    title = models.CharField(max_length=50)
 
     get_parent_lang = 'extra'
     select_std = ['extra']
