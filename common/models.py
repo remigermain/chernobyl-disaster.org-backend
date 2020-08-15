@@ -1,5 +1,6 @@
 from django.db import models
 from lib.models import CreatorAbstract, LanguageAbstract, LogAbstract
+import re
 
 
 class Issue(LogAbstract):
@@ -40,7 +41,9 @@ class TagLang(LanguageAbstract):
 
 
 def profil_path(instance, filename):
-    return f"people/{instance.id}/{filename}"
+    name = re.sub(r"[^a-zA-Z0-9]+", "", instance.name)
+    extentions = filename.split('.')[-1]
+    return f"people/{instance.id}/{name}.{extentions}"
 
 
 class People(CreatorAbstract):

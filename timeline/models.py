@@ -20,7 +20,9 @@ class EventExtraAbstract(CreatorAbstract):
         abstract = True
 
     def __str__(self):
-        return f"{self.event} {self.__class__.__name__}"
+        if self.event:
+            return f"{self.event} {self.__class__.__name__} {self.title}"
+        return f"{self.__class__.__name__} {self.title}"
 
 
 def uuid_path(instance, filename):

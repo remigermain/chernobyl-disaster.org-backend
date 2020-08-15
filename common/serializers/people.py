@@ -1,4 +1,5 @@
 from lib.serializers  import ModelSerializerBase
+from rest_framework.serializers import SerializerMethodField
 from common.models import People, PeopleLang
 from django.conf import settings
 import os
@@ -17,11 +18,6 @@ class PeopleSerializer(ModelSerializerBase):
         model = People
         fields = ['name', 'born', 'death', 'profil', 'wikipedia', 'langs', 'tags']
 
-    def get_profil(self, obj):
-        if not obj.profil:
-            return None
-        return os.path.join(settings.SITE_URL, obj.profil.url)
-
 
 class PeopleSerializerPost(PeopleSerializer):
     class Meta(PeopleSerializer.Meta):
@@ -29,5 +25,11 @@ class PeopleSerializerPost(PeopleSerializer):
 
 
 class PeopleSerializerGet(PeopleSerializerPost):
+    profil = SerializerMethodField()
+
     class Meta(PeopleSerializerPost.Meta):
         pass
+
+    def get_profil(self, obj):
+        return os.path.join(settings.SITE_URL, obj.profil.url)
+
