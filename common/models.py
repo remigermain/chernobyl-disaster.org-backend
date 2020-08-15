@@ -50,8 +50,9 @@ class People(CreatorAbstract):
     name = models.CharField(max_length=80, unique=True)
     born = models.DateField(null=True, blank=True)
     death = models.DateField(null=True, blank=True)
-    profil = models.ImageField(upload_to=profil_path)
+    profil = models.ImageField(upload_to=profil_path, null=True, blank=True)
     wikipedia = models.URLField(null=True, blank=True)
+    tags = models.ManyToManyField(Tag, related_name="peoples", blank=True)
 
     def __str__(self):
         return self.name

@@ -7,7 +7,7 @@ import os
 class PeopleLangSerializer(ModelSerializerBase):
     class Meta:
         model = PeopleLang
-        fields = ['biography', 'people']
+        fields = ['biography', 'language']
 
 
 class PeopleSerializer(ModelSerializerBase):
@@ -15,7 +15,7 @@ class PeopleSerializer(ModelSerializerBase):
 
     class Meta:
         model = People
-        fields = ['name', 'born', 'death', 'profil', 'wikipedia', 'langs']
+        fields = ['name', 'born', 'death', 'profil', 'wikipedia', 'langs', 'tags']
 
     def get_profil(self, obj):
         if not obj.profil:
@@ -23,7 +23,7 @@ class PeopleSerializer(ModelSerializerBase):
         return os.path.join(settings.SITE_URL, obj.profil.url)
 
 
-class PeopleSerializerPost(ModelSerializerBase):
+class PeopleSerializerPost(PeopleSerializer):
     class Meta(PeopleSerializer.Meta):
         pass
 
