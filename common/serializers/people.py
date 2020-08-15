@@ -1,5 +1,7 @@
 from lib.serializers  import ModelSerializerBase
 from common.models import People, PeopleLang
+from django.conf import settings
+import os
 
 
 class PeopleLangSerializer(ModelSerializerBase):
@@ -14,6 +16,11 @@ class PeopleSerializer(ModelSerializerBase):
     class Meta:
         model = People
         fields = ['name', 'born', 'death', 'profil', 'wikipedia', 'langs']
+
+    def get_profil(self, obj):
+        if not obj.profil:
+            return None
+        return os.path.join(settings.SITE_URL, obj.profil.url)
 
 
 class PeopleSerializerPost(ModelSerializerBase):

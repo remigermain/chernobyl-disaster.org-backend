@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 
-#from lib.parser import NestedMultiPartParser
-from lib.parser.parser import NestedMultiPartParser
+from drf_nested_forms.parsers import NestedMultiPartParser
+from lib.parser.parser import NestedMultiPartParser as n
 from rest_framework.parsers import JSONParser, FormParser, MultiPartParser
 from distutils.util import strtobool
 
@@ -9,7 +9,7 @@ from distutils.util import strtobool
 class ModelViewSetBase(viewsets.ModelViewSet):
     # remove delete and put method
     http_method_names = ['get', 'post', 'patch', 'head', 'options', 'trace']
-    parser_classes = (NestedMultiPartParser,)
+    parser_classes = (n, NestedMultiPartParser, MultiPartParser, FormParser, JSONParser)
 
     def __init__(self, *args, **kwargs):
         if not hasattr(self, 'filterset_fields'):
@@ -78,10 +78,10 @@ class ModelViewSetBase(viewsets.ModelViewSet):
         actions = [
             {'method': 'GET', 'serializer': 'serializer_class_get'},
             {'method': 'POST', 'serializer': 'serializer_class_post'},
-            {'method': 'PUT', 'serializer': 'serializer_class_post'},
             {'method': 'PATCH', 'serializer': 'serializer_class_post'},
         ]
         method = self.request.method.upper()
+        print(self.request.data)
         for action in actions:
             if method == action['method'] and hasattr(self, action['serializer']):
                 return getattr(self, action['serializer'])

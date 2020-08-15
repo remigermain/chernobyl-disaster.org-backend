@@ -46,7 +46,8 @@ class ChernobylModelAbstract(models.Model):
 
     def save(self, *args, **kwargs):
         # override the save for check every time the field
-        self.full_clean()
+        if settings.DEBUG:
+            self.full_clean()
         super(ChernobylModelAbstract, self).save(*args, **kwargs)
         return self
 

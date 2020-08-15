@@ -10,21 +10,21 @@ class PictureLangSerializer(ModelSerializerBase):
         model = PictureLang
         fields = ['id', 'title', 'language']
 
-    def get_value(self, data):
-        print("-=============== PictureLangSerializer")
-        return ""
-
 
 class PictureSerializer(ModelSerializerBase):
-    langs = PictureLangSerializer(many=True, required=True)
+    langs = PictureLangSerializer(many=True, required=False)
 
     class Meta:
         model = Picture
         fields = ['title', 'event', 'picture', 'photographer', 'langs', 'tags', 'date']
 
+    def get_picture(self, obj):
+        return os.path.join(settings.SITE_URL, obj.picture.url)
+
+
 
 class PictureSerializerPost(PictureSerializer):
-    langs = PictureLangSerializer(many=True, required=True)
+    langs = PictureLangSerializer(many=True, required=False)
 
     class Meta(PictureSerializer.Meta):
         pass
@@ -35,6 +35,3 @@ class PictureSerializerGet(PictureSerializerPost):
 
     class Meta(PictureSerializerPost.Meta):
         pass
-
-    def get_picture(self, obj):
-        return os.path.join(settings.SITE_URL, obj.picture.url)

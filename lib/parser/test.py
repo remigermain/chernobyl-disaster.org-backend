@@ -1,28 +1,30 @@
 from .mixins import ParserKeyDimensional
-from .exeptions import OutOfRange, UnknowKey, UnknowType, ParserError
+from .exeptions import ParserError
 import unittest
 
 
 class Parser(unittest.TestCase):
 
-    # def test_is_list(self):
-    #     self.assertTrue(parser.is_list(""))
-    #     self.assertTrue(parser.is_list(None))
-    #     self.assertTrue(parser.is_list("55555"))
-    #     self.assertTrue(parser.is_list("0"))
-    #     self.assertFalse(parser.is_list("-0"))
-    #     self.assertFalse(parser.is_list("dd"))
+    def test_is_list(self):
+        parser = ParserKeyDimensional()
+        self.assertTrue(parser.is_list(""))
+        self.assertTrue(parser.is_list(None))
+        self.assertTrue(parser.is_list("55555"))
+        self.assertTrue(parser.is_list("0"))
+        self.assertFalse(parser.is_list("-0"))
+        self.assertFalse(parser.is_list("dd"))
 
-    # def test_is_object(self):
-    #     self.assertFalse(parser.is_object(""))
-    #     self.assertFalse(parser.is_object(None))
-    #     self.assertFalse(parser.is_object("55555"))
-    #     self.assertTrue(parser.is_object("ferfef"))
-    #     self.assertTrue(parser.is_object("dfFFRGRtrgrt"))
-    #     self.assertTrue(parser.is_object("f"))
-    #     self.assertTrue(parser.is_object("f4"))
-    #     self.assertTrue(parser.is_object("F4"))
-    #     self.assertFalse(parser.is_object("effef+fe"))
+    def test_is_object(self):
+        parser = ParserKeyDimensional()
+        self.assertFalse(parser.is_object(""))
+        self.assertFalse(parser.is_object(None))
+        self.assertFalse(parser.is_object("55555"))
+        self.assertTrue(parser.is_object("ferfef"))
+        self.assertTrue(parser.is_object("dfFFRGRtrgrt"))
+        self.assertTrue(parser.is_object("f"))
+        self.assertTrue(parser.is_object("f4"))
+        self.assertTrue(parser.is_object("F4"))
+        self.assertFalse(parser.is_object("effef+fe"))
 
     def test_list(self):
         data = "data[0]"
@@ -123,17 +125,6 @@ class Parser(unittest.TestCase):
         except Exception as e:
             self.assertIsInstance(e, ParserError)
 
-    def test_index_out_of_range(self):
-        data = "data[5]"
-        parser = ParserKeyDimensional(data)
-        ret = parser.split()
-        self.assertEqual(ret, ['data', '[5]'])
-        self.assertTrue(parser.is_valid(ret))
-        try:
-            parser.construct({}, ret, "value")
-        except Exception as e:
-            self.assertIsInstance(e, OutOfRange)
-
     def test_before_valid(self):
         data = "data[++fer]"
         parser = ParserKeyDimensional(data)
@@ -142,12 +133,6 @@ class Parser(unittest.TestCase):
             parser.construct({}, ret, "value")
         except Exception as e:
             self.assertIsInstance(e, ValueError)
-
-
-# class ParserMultiDimensional(unittest.TestCase):
-
-#     def test(self):
-#         data = {}
 
 
 if __name__ == '__main__':
