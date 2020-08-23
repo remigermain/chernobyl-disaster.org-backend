@@ -1,5 +1,7 @@
 from django.db import models
 from lib.models import CreatorAbstract, LanguageAbstract
+from imagekit.models import ImageSpecField
+from imagekit.processors import ResizeToFill
 
 
 class EventExtraAbstract(CreatorAbstract):
@@ -45,6 +47,11 @@ def document_path(instance, filename):
 
 class Picture(EventExtraAbstract):
     picture = models.ImageField(upload_to=picture_path)
+    picture_thumbnail = ImageSpecField(source='picture',
+                                       processors=[ResizeToFill(250, 160)],
+                                       format='JPEG',
+                                       options={'quality': 60})
+
     photographer = models.ForeignKey(
         "common.People",
         null=True,

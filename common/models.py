@@ -1,7 +1,8 @@
 from django.db import models
 from lib.models import CreatorAbstract, LanguageAbstract, LogAbstract
+from imagekit.models import ImageSpecField
+from imagekit.processors import ResizeToFill
 import re
-
 
 class Issue(LogAbstract):
     """
@@ -54,6 +55,11 @@ class People(CreatorAbstract):
     born = models.DateField(null=True, blank=True)
     death = models.DateField(null=True, blank=True)
     profil = models.ImageField(upload_to=profil_path, null=True, blank=True)
+    picture_thumbnail = ImageSpecField(source='profil',
+                                       processors=[ResizeToFill(250, 160)],
+                                       format='JPEG',
+                                       options={'quality': 60})
+
     wikipedia = models.URLField(null=True, blank=True)
     tags = models.ManyToManyField(Tag, related_name="peoples", blank=True)
 

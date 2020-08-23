@@ -1,7 +1,5 @@
-from lib.serializers  import ModelSerializerBase
+from lib.serializers import ModelSerializerBase
 from timeline.models import Document, DocumentLang
-from django.conf import settings
-import os
 
 
 class DocumentLangSerializer(ModelSerializerBase):
@@ -17,8 +15,11 @@ class DocumentSerializer(ModelSerializerBase):
         model = Document
         fields = ['title', 'tags', 'event', 'doc', 'langs']
 
-    def get_doc(self, obj):
-        return os.path.join(settings.SITE_URL, obj.doc.url)
+    def get_picture(self, obj):
+        return {
+            'full': obj.to_url('doc'),
+            'thumbnail': obj.to_url('doc_thumbnail'),
+        }
 
 
 class DocumentSerializerPost(DocumentSerializer):

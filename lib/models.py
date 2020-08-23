@@ -5,6 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from lib.utils import contenttypes_uuid
 from lib.manager import QuerySetBase
+import os
 
 
 class ChernobylModelAbstract(models.Model):
@@ -43,6 +44,9 @@ class ChernobylModelAbstract(models.Model):
     def updated(self):
         obj = self.get_commit().order_by('-created').first()
         return obj.created if obj else self.created
+
+    def to_url(self, field):
+        return os.path.join(settings.SITE_URL, getattr(self, field).url)
 
     def save(self, *args, **kwargs):
         # override the save for check every time the field

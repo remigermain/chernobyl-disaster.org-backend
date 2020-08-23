@@ -1,8 +1,6 @@
 from lib.serializers import ModelSerializerBase
 from timeline.models import Picture, PictureLang
 from rest_framework.serializers import SerializerMethodField
-import os
-from django.conf import settings
 
 
 class PictureLangSerializer(ModelSerializerBase):
@@ -19,8 +17,10 @@ class PictureSerializer(ModelSerializerBase):
         fields = ['title', 'event', 'picture', 'photographer', 'langs', 'tags', 'date']
 
     def get_picture(self, obj):
-        return os.path.join(settings.SITE_URL, obj.picture.url)
-
+        return {
+            'full': obj.to_url('picture'),
+            'thumbnail': obj.to_url('picture_thumbnail'),
+        }
 
 
 class PictureSerializerPost(PictureSerializer):
