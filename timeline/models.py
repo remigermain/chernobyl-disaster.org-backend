@@ -13,7 +13,7 @@ class EventExtraAbstract(CreatorAbstract):
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
-        related_name="%(class)s_event"
+        related_name="%(class)ss"
     )
 
     select_std = ['event']
@@ -49,7 +49,7 @@ class Picture(EventExtraAbstract):
     picture = models.ImageField(upload_to=picture_path)
     picture_thumbnail = ImageSpecField(source='picture',
                                        processors=[ResizeToFill(250, 160)],
-                                       format='JPEG',
+                                       format='WEBP',
                                        options={'quality': 60})
 
     photographer = models.ForeignKey(

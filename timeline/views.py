@@ -5,7 +5,7 @@ from timeline.serializers import picture, article, document, event, video
 
 
 class EventViewSet(ModelViewSetBase):
-    queryset = Event.objects.all()
+    queryset = Event.objects.all().order_by('date')
     serializer_class = event.EventSerializer
     serializer_class_get = event.EventSerializerGet
     serializer_class_post = event.EventSerializerPost
