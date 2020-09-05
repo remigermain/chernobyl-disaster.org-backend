@@ -1,4 +1,4 @@
-from lib.serializers  import ModelSerializerBase
+from lib.serializers import ModelSerializerBase
 from timeline.models import Video, VideoLang
 
 

@@ -1,4 +1,4 @@
-from lib.serializers  import ModelSerializerBase
+from lib.serializers import ModelSerializerBase
 from rest_framework.serializers import SerializerMethodField
 from common.models import People, PeopleLang, Tag
 

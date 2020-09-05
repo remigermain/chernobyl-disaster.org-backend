@@ -1,10 +1,7 @@
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.response import Response
-from rest_framework.views import APIView
 from lib.viewset import ModelViewSetBase
 from common.models import Tag, TagLang, People, Issue, Contact, PeopleLang
 from common.serializers import people, tag, issue, contact
-from django.conf import settings
 
 
 class TagViewSet(ModelViewSetBase):

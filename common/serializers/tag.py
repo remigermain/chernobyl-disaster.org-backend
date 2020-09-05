@@ -1,4 +1,4 @@
-from lib.serializers  import ModelSerializerBase
+from lib.serializers import ModelSerializerBase
 from common.models import Tag, TagLang
 
 

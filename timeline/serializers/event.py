@@ -1,4 +1,4 @@
-from lib.serializers  import ModelSerializerBase
+from lib.serializers import ModelSerializerBase
 from timeline.models import Event, EventLang
 from timeline.serializers.picture import PictureSerializerGet
 from timeline.serializers.document import DocumentSerializerGet
@@ -33,4 +33,4 @@ class EventSerializerGet(EventSerializerPost):
 
     class Meta(EventSerializerPost.Meta):
         fields = EventSerializerPost.Meta.fields + \
-            ['pictures', 'documents', 'videos', 'articles']
+            ['pictures', 'documents', 'videos', 'articles', 'slug']

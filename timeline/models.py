@@ -2,6 +2,7 @@ from django.db import models
 from lib.models import CreatorAbstract, LanguageAbstract
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
+from django.template.defaultfilters import slugify
 
 
 class EventExtraAbstract(CreatorAbstract):
@@ -116,9 +117,14 @@ class Event(CreatorAbstract):
     title = models.CharField(max_length=100)
     tags = models.ManyToManyField('common.Tag', related_name="events", blank=True)
     date = models.DateTimeField(null=False, blank=False, unique=True)
+    slug = models.SlugField(max_length=100)
 
     def __str__(self):
         return f"{self.title} {self.date}"
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.title)
+        super().save(*args, **kwargs)
 
 
 class EventLang(LanguageAbstract):
