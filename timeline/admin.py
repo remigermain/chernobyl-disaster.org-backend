@@ -1,6 +1,6 @@
 from django.contrib import admin
-from .models import Picture, Document, Video, Article, \
-    PictureLang, DocumentLang, VideoLang, ArticleLang, EventLang, Event
+from .models import Picture, Video, \
+    PictureLang, VideoLang, EventLang, Event
 from lib.admin import AdminBase, AdminInlineBase
 
 
@@ -16,18 +16,6 @@ class PictureAdmin(AdminBase):
     ]
 
 
-class DocumentLangInline(AdminInlineBase):
-    model = DocumentLang
-
-
-@admin.register(Document)
-class DocumentAdmin(AdminBase):
-    list_display = ('doc',)
-    inlines = [
-        DocumentLangInline
-    ]
-
-
 class VideoLangInline(AdminInlineBase):
     model = VideoLang
 
@@ -37,17 +25,6 @@ class VideoAdmin(AdminBase):
     list_display = ('video', )
     inlines = [
         VideoLangInline
-    ]
-
-
-class ArticleLangInline(AdminInlineBase):
-    model = ArticleLang
-
-@admin.register(Article)
-class ArticleAdmin(AdminBase):
-    list_display = ('link', )
-    inlines = [
-        ArticleLangInline
     ]
 
 

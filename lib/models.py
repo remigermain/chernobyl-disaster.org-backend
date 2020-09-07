@@ -66,6 +66,7 @@ class CreatorAbstract(ChernobylModelAbstract):
         get_user_model(),
         on_delete=models.SET_NULL,
         null=True,
+        blank=True,
         related_name="%(class)s_creator"
         )
 

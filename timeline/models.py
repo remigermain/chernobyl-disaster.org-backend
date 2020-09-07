@@ -63,17 +63,8 @@ class Picture(EventExtraAbstract):
     select_std = EventExtraAbstract.select_std + ['photographer']
 
 
-class Document(EventExtraAbstract):
-    doc = models.FileField(upload_to=document_path)
-
-
 class Video(EventExtraAbstract):
     video = models.URLField(unique=True)
-
-
-class Article(EventExtraAbstract):
-    link = models.URLField(unique=True)
-
 
 # Extra i18n
 
@@ -94,16 +85,8 @@ class PictureLang(EventExtraLangAbstract):
     extra = models.ForeignKey(Picture, on_delete=models.CASCADE, related_name="langs")
 
 
-class DocumentLang(EventExtraLangAbstract):
-    extra = models.ForeignKey(Document, on_delete=models.CASCADE, related_name="langs")
-
-
 class VideoLang(EventExtraLangAbstract):
     extra = models.ForeignKey(Video, on_delete=models.CASCADE, related_name="langs")
-
-
-class ArticleLang(EventExtraLangAbstract):
-    extra = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="langs")
 
 
 # Event Models

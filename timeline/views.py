@@ -1,7 +1,7 @@
 from lib.viewset import ModelViewSetBase
-from timeline.models import Event, EventLang, Picture, Document, Video, Article, \
-    PictureLang, DocumentLang, VideoLang, ArticleLang
-from timeline.serializers import picture, article, document, event, video
+from timeline.models import Event, EventLang, Picture, Video, \
+    PictureLang, VideoLang
+from timeline.serializers import picture, event, video
 
 
 class EventViewSet(ModelViewSetBase):
@@ -42,24 +42,6 @@ class PictureLangViewSet(ModelViewSetBase):
     ordering_fields = ['title']
 
 
-class DocumentViewSet(ModelViewSetBase):
-    queryset = Document.objects.all()
-    serializer_class = document.DocumentSerializer
-    serializer_class_get = document.DocumentSerializerGet
-    serializer_class_post = document.DocumentSerializerPost
-    filterset_fields = ['title', 'event']
-    search_fields = ['title', 'event__title', 'event__langs__title', 'event__langs__description', 'langs__title']
-    ordering_fields = ['title']
-
-
-class DocumentLangViewSet(ModelViewSetBase):
-    queryset = DocumentLang.objects.all()
-    serializer_class = picture.PictureLangSerializer
-    filterset_fields = ['title', 'extra']
-    search_fields = ['title']
-    ordering_fields = ['title']
-
-
 class VideoViewSet(ModelViewSetBase):
     queryset = Video.objects.all()
     serializer_class = video.VideoSerializer
@@ -73,24 +55,6 @@ class VideoViewSet(ModelViewSetBase):
 class VideoLangViewSet(ModelViewSetBase):
     queryset = VideoLang.objects.all()
     serializer_class = video.VideoLangSerializer
-    filterset_fields = ['title', 'extra']
-    search_fields = ['title']
-    ordering_fields = ['title']
-
-
-class ArticleViewSet(ModelViewSetBase):
-    queryset = Article.objects.all()
-    serializer_class = article.ArticleSerializer
-    serializer_class_get = article.ArticleSerializerGet
-    serializer_class_post = article.ArticleSerializerPost
-    filterset_fields = ['title', 'event']
-    search_fields = ['title', 'event__title', 'event__langs__title', 'event__langs__description', 'langs__title']
-    ordering_fields = ['title']
-
-
-class ArticleLangViewSet(ModelViewSetBase):
-    queryset = ArticleLang.objects.all()
-    serializer_class = article.ArticleLangSerializer
     filterset_fields = ['title', 'extra']
     search_fields = ['title']
     ordering_fields = ['title']

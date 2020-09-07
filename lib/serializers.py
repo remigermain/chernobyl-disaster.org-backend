@@ -1,10 +1,7 @@
 from rest_framework import serializers
-from rest_framework.serializers import ListSerializer
 from drf_writable_nested.serializers import WritableNestedModelSerializer
 from django.core.exceptions import ValidationError
 from django.utils.text import capfirst
-from rest_framework.fields import empty
-
 
 
 class ModelSerializerBaseNested(WritableNestedModelSerializer):

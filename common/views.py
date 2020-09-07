@@ -46,6 +46,9 @@ class IssueViewSet(ModelViewSet):
 
 
 class ContactViewSet(ModelViewSet):
+    # remove auth , all people can contact me :D
+    permission_classes = []
+
     http_method_names = [r'post']
     queryset = Contact.objects.none()
     serializer_class = contact.ContactSerializer

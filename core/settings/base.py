@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+from django.utils.translation import gettext_lazy as _
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -66,12 +67,12 @@ MIDDLEWARE = [
 
     # cors header
     'corsheaders.middleware.CorsMiddleware',
-
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.locale.LocaleMiddleware'
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -139,13 +140,12 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en'
 LANGUAGES = [
-    ('fr', 'Français'),
-    ('en', 'English'),
+    ('en', _('English')),
+    ('fr', _('Français')),
 ]
-LANGUAGES_DEFAULT = 'en'
-LANGUAGES.sort(key=lambda l: l[1])
+LANGUAGES_DEFAULT = LANGUAGES[0][0]
 
 #
 # rest framework

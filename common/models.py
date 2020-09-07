@@ -75,6 +75,7 @@ class PeopleLang(LanguageAbstract):
 
 
 class Contact(CreatorAbstract):
+    email = models.EmailField(null=True, blank=True)
     message = models.TextField(null=False, blank=False)
 
     def __str__(self):
