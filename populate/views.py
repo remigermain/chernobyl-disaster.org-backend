@@ -12,7 +12,7 @@ def serialize(obj, display_name):
 class PictureView(APIView):
     def get(self, request, format=None):
         return Response({
-            'photographer': [serialize(obj, 'name') for obj in People.objects.all()]
+            'photographers': [serialize(obj, 'name') for obj in People.objects.all()]
         })
 
 
