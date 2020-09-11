@@ -86,3 +86,135 @@ class PeopleTest(BaseTest):
 
         serializer = PeopleSerializer(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
+
+# langs
+
+    @tag('serializer', 'langs')
+    def test_create_serializer_langs(self):
+        data = {
+            'name': 'test',
+            'born': self.date,
+            'death': self.date2,
+            'wikipedia': self.link,
+            'profil': self.picture,
+            'langs': [
+                {
+                    'biography': 'lallaalla',
+                    'language': self.lang
+                }
+            ]
+        }
+        serializer = PeopleSerializer(data=data, context=self.context)
+        self.assertTrue(serializer.is_valid())
+        obj = serializer.save()
+        self.assertEqual(obj.langs.count(), 1)
+        self.assertEqual(obj.langs.first().biography, data['langs'][0]['biography'])
+        self.assertEqual(obj.langs.first().language, data['langs'][0]['language'])
+        return obj
+
+    @tag('serializer', 'langs')
+    def test_create_serializer_langs2(self):
+        data = {
+            'name': 'test',
+            'born': self.date,
+            'death': self.date2,
+            'wikipedia': self.link,
+            'profil': self.picture,
+            'langs': [
+                {
+                    'biography': 'lallaalla',
+                    'language': self.lang
+                },
+                {
+                    'biography': 'lallaalla egergergrte',
+                    'language': self.lang2
+                }
+            ]
+        }
+        serializer = PeopleSerializer(data=data, context=self.context)
+        self.assertTrue(serializer.is_valid())
+        obj = serializer.save()
+        self.assertEqual(obj.langs.count(), 2)
+        self.assertEqual(obj.langs.first().biography, data['langs'][0]['biography'])
+        self.assertEqual(obj.langs.first().language, data['langs'][0]['language'])
+        self.assertEqual(obj.langs.last().biography, data['langs'][1]['biography'])
+        self.assertEqual(obj.langs.last().language, data['langs'][1]['language'])
+
+    @tag('serializer', 'langs')
+    def test_create_serializer_same_langs(self):
+        data = {
+            'name': 'test',
+            'born': self.date,
+            'death': self.date2,
+            'wikipedia': self.link,
+            'profil': self.picture,
+            'langs': [
+                {
+                    'biography': 'lallaalla',
+                    'language': self.lang
+                },
+                {
+                    'biography': 'lallaalla egergergrte',
+                    'language': self.lang
+                }
+            ]
+        }
+        serializer = PeopleSerializer(data=data, context=self.context)
+        self.assertFalse(serializer.is_valid())
+
+    @tag('serializer', 'langs')
+    def test_create_serializer_update_langs(self):
+        obj = self.test_create_serializer_langs()
+
+        data = {
+            'langs': [
+                {
+                    'biography': 'lallaalla',
+                    'language': self.lang2
+                }
+            ]
+        }
+
+        serializer = PeopleSerializer(instance=obj, data=data, context=self.context, partial=True)
+        self.assertTrue(serializer.is_valid())
+
+    @tag('serializer', 'langs')
+    def test_create_serializer_update_same_langs(self):
+        obj = self.test_create_serializer_langs()
+
+        data = {
+            'langs': [
+                {
+                    'id': obj.langs.first().id,
+                    'biography': 'lallaalla',
+                    'language': self.lang2
+                },
+                {
+                    'biography': 'lallaalla',
+                    'language': self.lang
+                }
+            ]
+        }
+        serializer = PeopleSerializer(instance=obj, data=data, context=self.context, partial=True)
+        self.assertTrue(serializer.is_valid())
+
+    @tag('serializer', 'langs')
+    def test_create_serializer_update_same2_langs(self):
+        obj = self.test_create_serializer_langs()
+
+        data = {
+            'langs': [
+                {
+                    'id': obj.langs.first().id,
+                    'biography': 'lallaalla',
+                    'language': self.lang2
+                },
+                {
+                    'biography': 'lallaalla',
+                    'language': self.lang2
+                }
+            ]
+        }
+
+        serializer = PeopleSerializer(instance=obj, data=data, context=self.context, partial=True)
+        self.assertFalse(serializer.is_valid())

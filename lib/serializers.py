@@ -38,7 +38,7 @@ class ModelSerializerBaseNested(WritableNestedModelSerializer):
             if len(list_id_exist) != len(list_id):
                 _raise = True
 
-        unique = list(set([obj['language'] for obj in objects]))
+        unique = list(set([obj.get('language', None) for obj in objects]))
         unique = list(filter(lambda x: x, unique))
         if _raise or len(unique) != len(objects):
             field = self.Meta.model.langs.field.model.language.field

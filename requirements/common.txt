@@ -10,3 +10,4 @@ django-cors-headers==3.4.0
 drf-nested-forms==0.2.1
 drf-writable-nested==0.6.0
 django-imagekit==4.0.2
+django_environ==0.4.5

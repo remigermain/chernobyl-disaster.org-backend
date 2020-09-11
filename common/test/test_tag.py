@@ -46,3 +46,62 @@ class TagTest(BaseTest):
 
         serialiser = TagSerializer(data=data, context=self.context)
         self.assertFalse(serialiser.is_valid())
+
+    @tag('serializer', 'langs')
+    def test_create_serializer_langs(self):
+        data = {
+            'name': "name",
+            'langs': [
+                {
+                    'name': 'test',
+                    'language': self.lang
+                }
+            ]
+        }
+
+        serialiser = TagSerializer(data=data, context=self.context)
+        self.assertTrue(serialiser.is_valid())
+        obj = serialiser.save()
+        self.assertEqual(obj.langs.count(), 1)
+        self.assertEqual(obj.langs.first().name, data['langs'][0]['name'])
+        self.check_creator(obj)
+
+    @tag('serializer', 'langs')
+    def test_create_serializer_empty_langs(self):
+        data = {
+            'name': "name",
+            'langs': [
+                {
+                    'name': 'test'
+                }
+            ]
+        }
+
+        serialiser = TagSerializer(data=data, context=self.context)
+        self.assertFalse(serialiser.is_valid())
+
+    @tag('serializer', 'langs')
+    def test_create_serializer_empty_langs(self):
+        data = {
+            'name': "name",
+            'langs': [
+                {
+                    'name': 'test',
+                    'language': self.lang
+                },
+                {
+                    'name': 'test22',
+                    'language': self.lang2
+                }
+            ]
+        }
+
+        serialiser = TagSerializer(data=data, context=self.context)
+        self.assertTrue(serialiser.is_valid())
+        obj = serialiser.save()
+        self.assertEqual(obj.langs.count(), 2)
+        self.assertEqual(obj.langs.first().name, data['langs'][0]['name'])
+        self.assertEqual(obj.langs.first().language, data['langs'][0]['language'])
+        self.assertEqual(obj.langs.last().name, data['langs'][1]['name'])
+        self.assertEqual(obj.langs.last().language, data['langs'][1]['language'])
+        self.check_creator(obj)
