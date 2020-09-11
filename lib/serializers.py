@@ -76,7 +76,10 @@ class ModelSerializerBaseNested(WritableNestedModelSerializer):
 
 class ModelSerializerBase(ModelSerializerBaseNested):
     def __init__(self, *args, **kwargs):
-        if hasattr(self.Meta, 'fields') and hasattr(self.Meta.model, "langs"):
+        context = kwargs.get('context', None)
+        if context and hasattr(context['request'].query_params, 'contribute') and \
+            hasattr(self.Meta, 'fields') and \
+            hasattr(self.Meta.model, "langs"):
             self.Meta.fields.extend([
                 'available_languages',
                 'not_available_languages'
@@ -95,13 +98,18 @@ class ModelSerializerBase(ModelSerializerBaseNested):
         # get all langs available
         langs = [lang[0] for lang in obj.langs.model.lang_choices]
         # remove languages exsits
-        return set(obj.langs.values_list("language", flat=True).order_by('language')) ^ set(langs)
+        langs_not_exist = list(set([o.language for o in obj.langs.all()]) ^ set(langs))
+        langs_not_exist.sort()
+        return langs_not_exist
 
     def get_available_languages(self, obj):
         # return all language available
         if hasattr(obj, "ann_langs_availabe"):
             return obj.ann_langs_availabe
-        return obj.langs.values_list("language", flat=True).order_by('language')
+        # remove languages exsits
+        langs_exist = [o.language for o in obj.langs.all()]
+        langs_exist.sort()
+        return langs_exist
 
     def get_commit_count(self, obj):
         # obj has annotate contributures count we return it or by queryset

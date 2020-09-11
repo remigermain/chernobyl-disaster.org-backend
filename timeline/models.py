@@ -66,8 +66,8 @@ class Picture(EventExtraAbstract):
 class Video(EventExtraAbstract):
     video = models.URLField(unique=True)
 
-# Extra i18n
 
+# Extra i18n
 class EventExtraLangAbstract(LanguageAbstract):
     title = models.CharField(max_length=50)
 
@@ -101,6 +101,8 @@ class Event(CreatorAbstract):
     tags = models.ManyToManyField('common.Tag', related_name="events", blank=True)
     date = models.DateTimeField(null=False, blank=False, unique=True)
     slug = models.SlugField(max_length=100)
+
+    prefetch_std = ['pictures__langs', 'videos__langs']
 
     def __str__(self):
         return f"{self.title} {self.date}"

@@ -1,7 +1,7 @@
 from lib.serializers import ModelSerializerBase
 from timeline.models import Event, EventLang
-from timeline.serializers.picture import PictureSerializerGet
-from timeline.serializers.video import VideoSerializerGet
+from timeline.serializers.picture import PictureSerializerMinGet
+from timeline.serializers.video import VideoSerializerMinGet
 
 
 class EventLangSerializer(ModelSerializerBase):
@@ -24,8 +24,8 @@ class EventSerializerPost(EventSerializer):
 
 
 class EventSerializerGet(EventSerializerPost):
-    pictures = PictureSerializerGet(many=True, required=False)
-    videos = VideoSerializerGet(many=True, required=False)
+    pictures = PictureSerializerMinGet(many=True, required=False)
+    videos = VideoSerializerMinGet(many=True, required=False)
 
     class Meta(EventSerializerPost.Meta):
         fields = EventSerializerPost.Meta.fields + \

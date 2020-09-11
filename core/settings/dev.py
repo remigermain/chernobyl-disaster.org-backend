@@ -44,3 +44,7 @@ DEBUG_TOOLBAR_PANELS = [
 ]
 SHOW_COLLAPSED = True
 SHOW_TEMPLATE_CONTEXT = False
+
+REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'].append(
+  'rest_framework.renderers.BrowsableAPIRenderer'
+)

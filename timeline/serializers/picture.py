@@ -35,3 +35,8 @@ class PictureSerializerGet(PictureSerializerPost):
 
     class Meta(PictureSerializerPost.Meta):
         pass
+
+
+class PictureSerializerMinGet(PictureSerializerGet):
+    class Meta(PictureSerializerGet.Meta):
+        fields = ['title', 'picture', 'langs']

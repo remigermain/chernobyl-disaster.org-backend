@@ -20,8 +20,10 @@ class QuerySetBase(models.QuerySet):
     def prefetch_std(self):
         query = self
         prefetch_lst, select_lst = [], []
-        base = ['tags', 'langs']
-        prefetch_lst.extend([el for el in base if hasattr(self.model, el)])
+        if hasattr(self.model, "tags"):
+            prefetch_lst.append("tags__langs")
+        if hasattr(self.model, "langs"):
+            prefetch_lst.append("langs")
         if hasattr(self.model, "prefetch_std"):
             prefetch_lst += self.model.prefetch_std
         if hasattr(self.model, "select_std"):

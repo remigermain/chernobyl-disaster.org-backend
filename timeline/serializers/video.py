@@ -24,3 +24,8 @@ class VideoSerializerPost(VideoSerializer):
 class VideoSerializerGet(VideoSerializerPost):
     class Meta(VideoSerializerPost.Meta):
         pass
+
+
+class VideoSerializerMinGet(VideoSerializerGet):
+    class Meta(VideoSerializerGet.Meta):
+        fields = ['title', 'video', 'langs']

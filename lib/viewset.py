@@ -60,14 +60,14 @@ class ModelViewSetBase(viewsets.ModelViewSet):
             if None , you get all
         """
         completed = self.request.query_params.get('completed', None)
-        queryset = super().get_queryset()
+        queryset = super().get_queryset().prefetch_std()
         if completed is not None:
             completed = bool(strtobool(completed))
             if completed:
                 queryset = queryset.completed()
             else:
                 queryset = queryset.uncompleted()
-        return queryset.prefetch_std()
+        return queryset
 
     def get_serializer_class(self, *args):
         """

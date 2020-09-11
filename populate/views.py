@@ -19,7 +19,11 @@ class PictureView(APIView):
 class PeopleView(APIView):
     def get(self, request, format=None):
         lst = [
-            {'id': p.id, 'name': p.name, 'profil': p.to_url('profil')}
+            {
+                'id': p.id,
+                'name': p.name,
+                'profil': p.to_url('profil'),
+            }
             for p in People.objects.all().order_by('name')
         ]
         return Response({'peoples': lst})

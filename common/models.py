@@ -4,6 +4,7 @@ from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
 import re
 
+
 class Issue(LogAbstract):
     """
         model to report probleme on every models
