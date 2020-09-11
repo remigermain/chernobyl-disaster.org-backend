@@ -77,9 +77,11 @@ class ModelSerializerBaseNested(WritableNestedModelSerializer):
 class ModelSerializerBase(ModelSerializerBaseNested):
     def __init__(self, *args, **kwargs):
         context = kwargs.get('context', None)
-        if context and hasattr(context['request'].query_params, 'contribute') and \
-            hasattr(self.Meta, 'fields') and \
-            hasattr(self.Meta.model, "langs"):
+        if context and \
+           hasattr(context['request'], 'query_params') and \
+           hasattr(context['request'].query_params, 'contribute') and \
+           hasattr(self.Meta, 'fields') and \
+           hasattr(self.Meta.model, "langs"):
             self.Meta.fields.extend([
                 'available_languages',
                 'not_available_languages'

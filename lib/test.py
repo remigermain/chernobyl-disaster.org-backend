@@ -1,5 +1,6 @@
 from django.test import TestCase, RequestFactory
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
 from lib.utils import contenttypes_uuid
 from django.conf import settings
 from django.utils import timezone, datetime_safe
@@ -50,6 +51,10 @@ class BaseTest(TestCase):
         self.document2 = SimpleUploadedFile('small2.gif', self.image, content_type='image/gif')
         self.picture = self.document
         self.picture2 = self.document2
+
+    def get_anonymous_user(self):
+        self.context['request'].user = AnonymousUser()
+        return self.context
 
     def delta_time(self, **kwargs):
         return self.time - timezone.timedelta(**kwargs)

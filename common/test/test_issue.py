@@ -5,14 +5,14 @@ from lib.utils import contenttypes_uuid
 from lib.test import BaseTest
 
 
-@tag('model', 'issue')
+@tag('uuid', 'issue')
 class IssueTest(BaseTest):
 
     @tag('serializer')
     def test_create_serializer(self):
         data = {
-            'model': 'user',
-            'pk': self.user.pk,
+            'uuid': 'user',
+            'object_id': self.user.pk,
             'message': 'this is a repport!'
         }
         serializer = IssueSerializer(data=data, context=self.context)
@@ -29,8 +29,8 @@ class IssueTest(BaseTest):
     @tag('serializer')
     def test_create_serializer_unk_model(self):
         data = {
-            'model': 'usereee',
-            'pk': self.user.pk,
+            'uuid': 'usereee',
+            'object_id': self.user.pk,
             'message': 'this is a repport!'
         }
         serializer = IssueSerializer(data=data, context=self.context)
@@ -39,7 +39,7 @@ class IssueTest(BaseTest):
     @tag('serializer')
     def test_create_serializer_not_model(self):
         data = {
-            'pk': self.user.pk,
+            'object_id': self.user.pk,
             'message': 'this is a repport!'
         }
         serializer = IssueSerializer(data=data, context=self.context)
@@ -48,8 +48,8 @@ class IssueTest(BaseTest):
     @tag('serializer')
     def test_create_serializer_wrong_pk(self):
         data = {
-            'model': 'user',
-            'pk': 'erfer',
+            'uuid': 'user',
+            'object_id': 'erfer',
             'message': 'this is a repport!'
         }
         serializer = IssueSerializer(data=data, context=self.context)
@@ -58,8 +58,8 @@ class IssueTest(BaseTest):
     @tag('serializer')
     def test_create_serializer_wrong_pk2(self):
         data = {
-            'model': 'user',
-            'pk': -5,
+            'uuid': 'user',
+            'object_id': -5,
             'message': 'this is a repport!'
         }
         serializer = IssueSerializer(data=data, context=self.context)
@@ -68,7 +68,7 @@ class IssueTest(BaseTest):
     @tag('serializer')
     def test_create_serializer_not_pk(self):
         data = {
-            'model': 'user',
+            'uuid': 'user',
             'message': 'this is a repport!'
         }
         serializer = IssueSerializer(data=data, context=self.context)
@@ -77,8 +77,8 @@ class IssueTest(BaseTest):
     @tag('serializer')
     def test_create_serializer_not_message(self):
         data = {
-            'model': 'user',
-            'pk': self.user.pk
+            'uuid': 'user',
+            'object_id': self.user.pk
         }
         serializer = IssueSerializer(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
