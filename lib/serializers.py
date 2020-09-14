@@ -47,7 +47,7 @@ class ModelSerializerBaseNested(WritableNestedModelSerializer):
                 'field_label': capfirst(field.verbose_name)
             }
             raise ValidationError(
-                message=field.error_messages['unique'],
+                message="101",
                 code='unique',
                 params=params,
             )

@@ -81,7 +81,6 @@ class ModelViewSetBase(viewsets.ModelViewSet):
             {'method': 'PATCH', 'serializer': 'serializer_class_post'},
         ]
         method = self.request.method.upper()
-        print(self.request.data)
         for action in actions:
             if method == action['method'] and hasattr(self, action['serializer']):
                 return getattr(self, action['serializer'])
