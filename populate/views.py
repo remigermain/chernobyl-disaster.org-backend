@@ -69,10 +69,11 @@ class OverView(APIView):
                 'date': str(obj.created),
                 'type': type_obj,
                 'uuid': obj.__class__.__name__.lower() if not uuid else uuid.lower(),
+                'object_id': obj.id if not display else display.id,
                 'display': str(obj) if not display else str(display),
             }
         query = [
-            gen_dtc(c, UPDATE, c.content_type, c.content_type.__class__.__name__)
+            gen_dtc(c, UPDATE, c.content_object, c.content_object.__class__.__name__)
             for c in Commit.objects.filter(~Q(uuid__contains="lang")).select_related('creator')
         ]
 
@@ -87,9 +88,9 @@ class OverView(APIView):
         contributor = [{'user': key, **value} for key, value in users.items()]
 
         contributor.sort(key=lambda x: x[CREATE], reverse=True)
-        data[CREATE] = contributor[:3],
+        data[CREATE] = contributor[:3]
 
         contributor.sort(key=lambda x: x[UPDATE], reverse=True)
-        data[UPDATE] = contributor[:3],
-
+        data[UPDATE] = contributor[:3]
+        print(data[UPDATE])
         return Response(data)
