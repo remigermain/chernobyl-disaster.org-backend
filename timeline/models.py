@@ -105,7 +105,7 @@ class Event(CreatorAbstract):
     prefetch_std = ['pictures__langs', 'videos__langs']
 
     def __str__(self):
-        return f"{self.title} {self.date}"
+        return self.title
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.title)

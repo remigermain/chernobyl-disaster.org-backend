@@ -17,14 +17,17 @@ class QuerySetBase(models.QuerySet):
     def uncompleted(self):
         return self.completed(False)
 
-    def prefetch_std(self):
+    def prefetch_std(self, prefetch=None, select=None):
         query = self
-        prefetch_lst, select_lst = [], []
+        prefetch_lst = list() if not prefetch else prefetch
+        select_lst = list() if not select else select
+
         if hasattr(self.model, "tags"):
             prefetch_lst.append("tags__langs")
         if hasattr(self.model, "langs"):
             prefetch_lst.append("langs")
         if hasattr(self.model, "prefetch_std"):
+            print(self.model.prefetch_std, "iccc")
             prefetch_lst += self.model.prefetch_std
         if hasattr(self.model, "select_std"):
             select_lst += self.model.select_std
