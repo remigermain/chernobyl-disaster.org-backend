@@ -10,7 +10,9 @@ class Command(BaseCommand):
             "PGSQL_USER",
             "PGSQL_PASSWORD",
             "PGSQL_HOST",
-            "PGSQL_PORT"
+            "PGSQL_PORT",
+            "DOMAIN_NAME",
+            "SITE_URL"
         ]
 
         with open(".env", "w") as f:

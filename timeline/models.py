@@ -39,11 +39,9 @@ def uuid_path(instance, filename):
 
 
 def picture_path(instance, filename):
-    return f"pictures/{uuid_path(instance, filename)}/{filename}"
-
-
-def document_path(instance, filename):
-    return f"document/{uuid_path(instance, filename)}/{filename}"
+    # get only filename , not path
+    name = filename.split('/')[-1]
+    return f"pictures/{uuid_path(instance, filename)}/{name}"
 
 
 class Picture(EventExtraAbstract):

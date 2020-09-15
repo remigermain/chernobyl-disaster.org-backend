@@ -22,8 +22,9 @@ DEBUG = env("DEBUG")
 SECRET_KEY = env("SECRET_KEY")
 
 SITE_ID = 1
-DOMAIN_NAME = "chernobyl.org"
 SITE_NAME = "chernobyl"
+DOMAIN_NAME = env("DOMAIN_NAME")
+SITE_URL = env("SITE_URL")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
@@ -199,8 +200,6 @@ if DEBUG:
         '127.0.0.1'
     ]
 
-    SITE_URL = "http://localhost:8000"
-
     CORS_ORIGIN_ALLOW_ALL = True
 
     ALLOWED_HOSTS = ['*']
@@ -234,8 +233,6 @@ if DEBUG:
         }
     }
 else:
-    SITE_URL = "http://localhost:8000"
-
     CORS_ORIGIN_ALLOW_ALL = True
 
     ALLOWED_HOSTS = ['*']
