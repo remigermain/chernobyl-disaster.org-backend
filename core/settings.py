@@ -1,30 +1,17 @@
 from django.utils.translation import gettext_lazy as _
-import environ
+from django.core.management.utils import get_random_secret_key
 import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-env = environ.Env(
-    DEBUG=(bool, False),
-    SECRET_KEY=(str,),
-    PGSQL_DATABASE=(str,),
-    PGSQL_USER=(str,),
-    PGSQL_PASSWORD=(str,),
-    PGSQL_HOST=(str,),
-    PGSQL_POR=(str,)
-)
-environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
+DEBUG = os.environ.get("DEBUG", False)
 
-############
-# DEBUG
-############
-DEBUG = env("DEBUG")
-
-SECRET_KEY = env("SECRET_KEY")
+SECRET_KEY = os.environ.get("SECRET_KEY", get_random_secret_key())
 
 SITE_ID = 1
-SITE_NAME = "chernobyl"
-DOMAIN_NAME = env("DOMAIN_NAME")
-SITE_URL = env("SITE_URL")
+SITE_NAME = os.environ.get("SITE_NAME", "chernobyl")
+
+DOMAIN_NAME = os.environ.get("DOMAIN_NAME")
+SITE_URL = os.environ.get("SITE_URL")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
@@ -176,8 +163,8 @@ LOGOUT_ON_PASSWORD_CHANGE = False
 # email backend
 #
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'localhost'
-EMAIL_PORT = 1025
+EMAIL_HOST = os.environ.get("EMAIL_HOST", 587)
+EMAIL_PORT = os.environ.get("EMAIL_PORT", 587)
 EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = True
@@ -239,11 +226,11 @@ else:
 
     DATABASES = {
         "default": {
-            "ENGINE": env("django.db.backends.postgresql"),
-            "NAME": env("PGSQL_DATABASE"),
-            "USER": env("PGSQL_USER"),
-            "PASSWORD": env("PGSQL_PASSWORD"),
-            "HOST": env("PGSQL_HOST"),
-            "PORT": env("PGSQL_PORT"),
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ.get("SQL_DATABASE"),
+            "USER": os.environ.get("SQL_USER"),
+            "PASSWORD": os.environ.get("SQL_PASSWORD"),
+            "HOST": os.environ.get("SQL_HOST", "localhost"),
+            "PORT": os.environ.get("SQL_PORT"),
         }
     }
