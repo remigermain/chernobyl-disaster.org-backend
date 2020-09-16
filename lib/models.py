@@ -46,7 +46,10 @@ class ChernobylModelAbstract(models.Model):
         return obj.created if obj else self.created
 
     def to_url(self, field):
-        return os.path.join(settings.SITE_URL, getattr(self, field).url)
+        link = getattr(self, field).url
+        if not link[0] == "/":
+            return f"{settings.SITE_URL}/{getattr(self, field).url}"
+        return f"{settings.SITE_URL}{getattr(self, field).url}"
 
     def save(self, *args, **kwargs):
         # override the save for check every time the field

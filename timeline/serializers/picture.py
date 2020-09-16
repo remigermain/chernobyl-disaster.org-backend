@@ -18,8 +18,10 @@ class PictureSerializer(ModelSerializerBase):
 
     def get_picture(self, obj):
         return {
-            'full': obj.to_url('picture'),
-            'thumbnail': obj.to_url('picture_thumbnail'),
+            'original_jpeg': obj.to_url('picture'),
+            'original_webp': obj.to_url('picture_webp'),
+            'thumbnail_webp': obj.to_url('picture_thumbnail_webp'),
+            'thumbnail_jpeg': obj.to_url('picture_thumbnail_jpeg'),
         }
 
 

@@ -46,10 +46,15 @@ def picture_path(instance, filename):
 
 class Picture(EventExtraAbstract):
     picture = models.ImageField(upload_to=picture_path)
-    picture_thumbnail = ImageSpecField(source='picture',
-                                       processors=[ResizeToFill(250, 160)],
-                                       format='WEBP',
-                                       options={'quality': 60})
+    picture_webp = ImageSpecField(source='picture', format='WEBP')
+    picture_thumbnail_webp = ImageSpecField(source='picture',
+                                            processors=[ResizeToFill(250, 160)],
+                                            format='WEBP',
+                                            options={'quality': 60})
+    picture_thumbnail_jpeg = ImageSpecField(source='picture',
+                                            processors=[ResizeToFill(250, 160)],
+                                            format='JPEG',
+                                            options={'quality': 60})
 
     photographer = models.ForeignKey(
         "common.People",

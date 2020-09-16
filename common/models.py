@@ -56,10 +56,15 @@ class People(CreatorAbstract):
     born = models.DateField(null=True, blank=True)
     death = models.DateField(null=True, blank=True)
     profil = models.ImageField(upload_to=profil_path, null=True, blank=True)
-    profil_thumbnail = ImageSpecField(source='profil',
-                                      processors=[ResizeToFill(250, 160)],
-                                      format='WEBP',
-                                      options={'quality': 60})
+    profil_webp = ImageSpecField(source='profil', format='WEBP')
+    profil_thumbnail_webp = ImageSpecField(source='profil',
+                                           processors=[ResizeToFill(250, 160)],
+                                           format='WEBP',
+                                           options={'quality': 60})
+    profil_thumbnail_jpeg = ImageSpecField(source='profil',
+                                           processors=[ResizeToFill(250, 160)],
+                                           format='JPEG',
+                                           options={'quality': 60})
 
     wikipedia = models.URLField(null=True, blank=True)
     tags = models.ManyToManyField(Tag, related_name="peoples", blank=True)
