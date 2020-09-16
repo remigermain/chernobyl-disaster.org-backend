@@ -176,8 +176,6 @@ GRAPH_MODELS = {
     'group_models': True,
 }
 
-print(DEBUG, type(DEBUG))
-
 if DEBUG:
     INSTALLED_APPS += [
         'debug_toolbar'
