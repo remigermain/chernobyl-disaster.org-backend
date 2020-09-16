@@ -3,7 +3,7 @@ from django.core.management.utils import get_random_secret_key
 import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DEBUG = os.environ.get("DEBUG", False)
+DEBUG = bool(os.environ.get("DEBUG", False))
 
 SECRET_KEY = os.environ.get("SECRET_KEY", get_random_secret_key())
 
@@ -176,6 +176,8 @@ GRAPH_MODELS = {
     'group_models': True,
 }
 
+print(DEBUG, type(DEBUG))
+
 if DEBUG:
     INSTALLED_APPS += [
         'debug_toolbar'
@@ -227,10 +229,10 @@ else:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.environ.get("SQL_DATABASE"),
+            "NAME": os.environ.get("SQL_DATABASE", "chernobyl"),
             "USER": os.environ.get("SQL_USER"),
             "PASSWORD": os.environ.get("SQL_PASSWORD"),
             "HOST": os.environ.get("SQL_HOST", "localhost"),
-            "PORT": os.environ.get("SQL_PORT"),
+            "PORT": os.environ.get("SQL_PORT", 587),
         }
     }
