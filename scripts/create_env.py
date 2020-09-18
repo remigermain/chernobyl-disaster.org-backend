@@ -14,8 +14,9 @@ def main():
         "SITE_NAME": "",
         "DOMAIN_NAME": "",
         "SITE_URL": "http://localhost:8000",
+        "FRONTEND_URL": "http://localhost:3000",
 
-        "EMAIL_HOST": "localhost",
+        "EMAIL_HOST": "postfix",
         "EMAIL_PORT": 587,
 
         "SQL_DATABASE": "",
