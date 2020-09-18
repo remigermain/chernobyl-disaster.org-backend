@@ -1,15 +1,22 @@
-from django.urls import reverse
-from django.contrib.auth.models import User
+#!/usr/bin/python3
 import requests
 
 
 def send_mail():
+    print("send email\n")
     data = {
         'username': 'username',
-        'email': 'email@email.email',
+        'email': 'gifjan@tmpemails.com',
         'password1': 'ApasswordAb123',
         'password2': 'ApasswordAb123',
     }
     # check response
-    User.objects.filter(username=data['username']).delete()
-    return requests.post('http://localhost:8000' + reverse('api:rest_register'), data)
+    # get_user_model().objects.filter(username=data['username']).delete()
+    resp = requests.post('http://localhost:8000/auth/registration/', data)
+    print("email sended\n")
+    print(resp.status_code)
+    print(resp.content)
+
+
+requests.get('http://localhost:8000/auth/supp/')
+send_mail()

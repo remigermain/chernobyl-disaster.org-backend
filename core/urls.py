@@ -1,10 +1,12 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from common.urls import drf_routers as common_urls
 from timeline.urls import drf_routers as timeline_urls
 from rest_framework import routers
 from django.contrib.staticfiles.urls import static
 from django.conf import settings
+
+from allauth.account.views import confirm_email
 
 
 router = routers.DefaultRouter()

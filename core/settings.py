@@ -12,6 +12,7 @@ SITE_NAME = os.environ.get("SITE_NAME", "chernobyl")
 
 DOMAIN_NAME = os.environ.get("DOMAIN_NAME")
 SITE_URL = os.environ.get("SITE_URL")
+FRONTEND_URL = os.environ.get("FRONTEND_URL")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
@@ -154,16 +155,15 @@ AUTHENTICATION_BACKENDS = (
 # ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_AUTHENTICATION_METHOD = 'username'
 OLD_PASSWORD_FIELD_ENABLED = True
 LOGOUT_ON_PASSWORD_CHANGE = False
-
 
 #
 # email backend
 #
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = os.environ.get("EMAIL_HOST", 587)
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "localhost")
 EMAIL_PORT = os.environ.get("EMAIL_PORT", 587)
 EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
@@ -175,6 +175,8 @@ GRAPH_MODELS = {
     'all_applications': True,
     'group_models': True,
 }
+
+APPEND_SLASH = False
 
 if DEBUG:
     INSTALLED_APPS += [
@@ -194,7 +196,7 @@ if DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
     EMAIL_USE_TLS = False
 
-    ACCOUNT_EMAIL_VERIFICATION = 'none'
+    # ACCOUNT_EMAIL_VERIFICATION = 'none'
 
     DEBUG_TOOLBAR_PANELS = [
         'debug_toolbar.panels.timer.TimerPanel',

@@ -8,7 +8,8 @@ class IssueTest(BaseTest):
 
     def test_create_serializer(self):
         data = {
-            'message': 'lalalalalal'
+            'message': 'lalalalalal',
+            'email': 'test@test.fr',
         }
         serializer = ContactSerializer(data=data, context=self.context)
         self.assertTrue(serializer.is_valid())
