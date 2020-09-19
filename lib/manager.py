@@ -27,7 +27,6 @@ class QuerySetBase(models.QuerySet):
         if hasattr(self.model, "langs"):
             prefetch_lst.append("langs")
         if hasattr(self.model, "prefetch_std"):
-            print(self.model.prefetch_std, "iccc")
             prefetch_lst += self.model.prefetch_std
         if hasattr(self.model, "select_std"):
             select_lst += self.model.select_std

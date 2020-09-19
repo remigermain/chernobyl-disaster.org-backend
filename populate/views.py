@@ -92,5 +92,4 @@ class OverView(APIView):
 
         contributor.sort(key=lambda x: x[UPDATE], reverse=True)
         data[UPDATE] = contributor[:3]
-        print(data[UPDATE])
         return Response(data)
