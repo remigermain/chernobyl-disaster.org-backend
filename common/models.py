@@ -86,3 +86,19 @@ class Contact(CreatorAbstract):
 
     def __str__(self):
         return f"{self.creator} | {self.created}"
+
+
+class TranslateLang(LanguageAbstract):
+    value = models.TextField(null=False, blank=False)
+    parent_key = models.ForeignKey("common.Translate", on_delete=models.CASCADE, related_name="langs", null=False)
+    select_std = ['parent_key']
+
+    def __str__(self):
+        return f"{self.parent_key}: {self.value}"
+
+
+class Translate(CreatorAbstract):
+    key = models.TextField(null=False, blank=True)
+
+    def __str__(self):
+        return self.key

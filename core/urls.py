@@ -1,12 +1,10 @@
 from django.contrib import admin
-from django.urls import path, include, re_path
-from common.urls import drf_routers as common_urls
-from timeline.urls import drf_routers as timeline_urls
+from django.urls import path, include
+from common import urls as common_urls
+from timeline import urls as timeline_urls
 from rest_framework import routers
 from django.contrib.staticfiles.urls import static
 from django.conf import settings
-
-from allauth.account.views import confirm_email
 
 
 router = routers.DefaultRouter()
@@ -16,7 +14,7 @@ apps = [
     timeline_urls
 ]
 for app in apps:
-    for url in app:
+    for url in app.drf_routers:
         router.register(*url)
 
 urlpatterns = [

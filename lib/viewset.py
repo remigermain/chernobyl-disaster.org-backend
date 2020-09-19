@@ -7,6 +7,7 @@ from lib.permission import ChernobylPermission
 
 
 class ModelViewSetBase(viewsets.ModelViewSet):
+    http_method_names = ['get', 'post', 'patch', 'head', 'options', 'trace']
     parser_classes = (n, NestedMultiPartParser, MultiPartParser, FormParser, JSONParser)
     permission_classes = (ChernobylPermission,)
 
@@ -80,6 +81,7 @@ class ModelViewSetBase(viewsets.ModelViewSet):
             {'method': 'PATCH', 'serializer': 'serializer_class_post'},
         ]
         method = self.request.method.upper()
+        print("iciciddddddd")
         for action in actions:
             if method == action['method'] and hasattr(self, action['serializer']):
                 return getattr(self, action['serializer'])

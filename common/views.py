@@ -1,7 +1,10 @@
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.views import APIView
 from lib.viewset import ModelViewSetBase
-from common.models import Tag, TagLang, People, Issue, Contact, PeopleLang
-from common.serializers import people, tag, issue, contact
+from common.models import Tag, TagLang, People, Issue, Contact, PeopleLang, TranslateLang, Translate
+from common.serializers import people, tag, issue, contact, translate
+from lib.permission import ReadOnlyLamda, UpdateOnly
+from rest_framework.response import Response
 
 
 class TagViewSet(ModelViewSetBase):
@@ -36,7 +39,7 @@ class PeopleLangViewSet(ModelViewSetBase):
     search_fields = ['biography']
 
 
-class IssueViewSet(ModelViewSet):
+class IssueViewSet(ModelViewSetBase):
     queryset = Issue.objects.none()
     serializer_class = issue.IssueSerializer
 
@@ -52,3 +55,14 @@ class ContactViewSet(ModelViewSet):
     http_method_names = [r'post']
     queryset = Contact.objects.none()
     serializer_class = contact.ContactSerializer
+
+
+class TranslateViewSet(ModelViewSetBase):
+    queryset = Translate.objects.all()
+    serializer_class = translate.TranslateSerializer
+    permission_class = (UpdateOnly,)
+
+
+class TranslateLangViewSet(ModelViewSetBase):
+    queryset = TranslateLang.objects.all()
+    serializer_class = translate.TranslateLangSerializer

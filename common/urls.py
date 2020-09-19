@@ -1,5 +1,5 @@
 from .views import TagViewSet, PeopleViewSet, ContactViewSet, \
-    IssueViewSet
+    IssueViewSet, TranslateViewSet, TranslateLangViewSet
 
 drf_routers = (
     ('tag', TagViewSet),
@@ -8,4 +8,6 @@ drf_routers = (
     # ('people/lang', PeopleLangViewSet),
     ('contact', ContactViewSet),
     ('issue', IssueViewSet),
+    ('translate', TranslateViewSet),
+    ('translatelang', TranslateLangViewSet),
 )

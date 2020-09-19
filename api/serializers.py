@@ -14,7 +14,6 @@ class UserDetailsSerializer(serializers.ModelSerializer):
 
     def get_scope(self, obj):
         return {
-            'staff': obj.is_staff,
+            'staff': obj.is_staff or obj.is_superuser,
             'admin': obj.is_superuser,
-            'deleted': obj.is_superuser or obj.is_staff
         }
