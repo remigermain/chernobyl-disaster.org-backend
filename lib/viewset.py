@@ -1,15 +1,14 @@
 from rest_framework import viewsets
-
 from drf_nested_forms.parsers import NestedMultiPartParser
 from lib.parser.parser import NestedMultiPartParser as n
 from rest_framework.parsers import JSONParser, FormParser, MultiPartParser
 from distutils.util import strtobool
+from lib.permission import ChernobylPermission
 
 
 class ModelViewSetBase(viewsets.ModelViewSet):
-    # remove delete and put method
-    http_method_names = ['get', 'post', 'patch', 'head', 'options', 'trace']
     parser_classes = (n, NestedMultiPartParser, MultiPartParser, FormParser, JSONParser)
+    permission_classes = (ChernobylPermission,)
 
     def __init__(self, *args, **kwargs):
         if not hasattr(self, 'filterset_fields'):

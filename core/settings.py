@@ -127,9 +127,6 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
     ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly'
-    ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
@@ -178,6 +175,12 @@ GRAPH_MODELS = {
 
 APPEND_SLASH = False
 
+
+REST_AUTH_SERIALIZERS = {
+    "USER_DETAILS_SERIALIZER": "api.serializers.UserDetailsSerializer",
+}
+
+
 if DEBUG:
     INSTALLED_APPS += [
         'debug_toolbar'
@@ -196,7 +199,7 @@ if DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
     EMAIL_USE_TLS = False
 
-    # ACCOUNT_EMAIL_VERIFICATION = 'none'
+    ACCOUNT_EMAIL_VERIFICATION = 'none'
 
     DEBUG_TOOLBAR_PANELS = [
         'debug_toolbar.panels.timer.TimerPanel',
