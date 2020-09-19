@@ -13,14 +13,10 @@ class ChernobylPermission(permissions.BasePermission):
         return view.action not in ["update", "destroy"]
 
     def has_permission(self, request, view):
-        a = self._global_permission(request, view)
-        print(a)
-        return a
+        return self._global_permission(request, view)
 
     def has_object_permission(self, request, view, obj):
-        a = self._global_permission(request, view)
-        print(a)
-        return a
+        return self.has_permission(request, view)
 
 
 class ReadOnlyLamda(permissions.BasePermission):

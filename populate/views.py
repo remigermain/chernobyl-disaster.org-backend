@@ -140,7 +140,6 @@ def translate_json(request):
         return Response(status=HTTP_400_BAD_REQUEST, data={'detail': "file not found"})
 
     language = None
-    print(request.data)
     if 'language' in request.data:
         if request.data['language'] not in [code[0] for code in TranslateLang.lang_choices]:
             return Response(status=HTTP_400_BAD_REQUEST, data={'detail': "language not found"})
@@ -185,7 +184,6 @@ def translate_json(request):
         Translate.objects.bulk_create(bulk)
         data['created'] = len(diff)
 
-    print(language)
     if language:
         trans_exist = TranslateLang.objects.filter(language=language).prefetch_std().values_list('parent_key__key', flat=True)
         trans = list(Translate.objects.all())
