@@ -8,10 +8,10 @@ translate = [
 ]
 
 urlpatterns = [
-    path('store', views.PopulateView.as_view()),
-    path('picture', views.PictureView.as_view()),
-    path('people', views.PeopleView.as_view()),
-    path('overview', views.OverView.as_view()),
-    path('contributors', views.ContributorView.as_view()),
+    path('store', views.populate),
+    path('picture', views.picture),
+    path('people', views.people),
+    path('overview', views.overview),
+    path('contributors', views.contributor),
     path('translate/', include(translate))
 ]

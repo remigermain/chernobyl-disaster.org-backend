@@ -3,100 +3,149 @@ from rest_framework.response import Response
 from django.conf import settings
 from timeline.models import Event, Picture, Video
 from common.models import Tag, People, Commit, Translate, TranslateLang
-from django.db.models import Q
+from django.db.models import Q, Count, F
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser
-from rest_framework.status import HTTP_201_CREATED, HTTP_200_OK, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from lib.permission import ReadOnlyLamda
+from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 
 def serialize(obj, display_name):
     return {'value': obj.id, 'display_name': getattr(obj, display_name)}
 
 
-class PictureView(APIView):
-    def get(self, request, format=None):
-        return Response({
-            'photographers': [serialize(obj, 'name') for obj in People.objects.all()]
-        })
+@api_view(['GET'])
+def picture(request):
+    return Response({
+        'photographers': [serialize(obj, 'name') for obj in People.objects.all()]
+    })
 
 
-class PeopleView(APIView):
-    def get(self, request, format=None):
-        lst = [
+@api_view(['GET'])
+def people(request):
+    lst = [
+        {
+            'id': p.id,
+            'name': p.name,
+            'profil': p.to_url('profil'),
+        }
+        for p in People.objects.all().order_by('name')
+    ]
+    return Response({'peoples': lst})
+
+
+@api_view(['GET'])
+def populate(request):
+    langs = [{'value': lang[0], 'display_name': lang[1]} for lang in settings.LANGUAGES]
+
+    tags = [serialize(tag, 'name') for tag in Tag.objects.all()]
+    events = [serialize(event, 'title') for event in Event.objects.all()]
+
+    return Response({
+        'langs': langs,
+        'tags': tags,
+        'events': events
+    })
+
+@api_view(['GET'])
+def contributor(request):
+    return Response({
+        'results': Commit.objects.values_list('creator__username', flat=True).distinct()
+    })
+
+
+@api_view(['GET'])
+def overview(request):
+    week = timezone.now() - timezone.timedelta(days=7)
+    query = get_user_model().objects.annotate(
+        week=(
+            Count("commit_creator", filter=Q(commit_creator__created__gte=week)) +
+            Count("event_creator", filter=Q(event_creator__created__gte=week)) +
+            Count("eventlang_creator", filter=Q(eventlang_creator__created__gte=week)) +
+            Count("people_creator", filter=Q(people_creator__created__gte=week)) +
+            Count("peoplelang_creator", filter=Q(peoplelang_creator__created__gte=week)) +
+            Count("picture_creator", filter=Q(picture_creator__created__gte=week)) +
+            Count("picturelang_creator", filter=Q(picturelang_creator__created__gte=week)) +
+            Count("tag_creator", filter=Q(tag_creator__created__gte=week)) +
+            Count("taglang_creator", filter=Q(taglang_creator__created__gte=week)) +
+            Count("translate_creator", filter=Q(translate_creator__created__gte=week)) +
+            Count("translatelang_creator", filter=Q(translatelang_creator__created__gte=week)) +
+            Count("video_creator", filter=Q(video_creator__created__gte=week)) +
+            Count("videolang_creator", filter=Q(videolang_creator__created__gte=week))
+        ),
+        total=(
+            Count("commit_creator") +
+            Count("event_creator") +
+            Count("eventlang_creator") +
+            Count("people_creator") +
+            Count("peoplelang_creator") +
+            Count("picture_creator") +
+            Count("picturelang_creator") +
+            Count("tag_creator") +
+            Count("taglang_creator") +
+            Count("translate_creator") +
+            Count("translatelang_creator") +
+            Count("video_creator") +
+            Count("videolang_creator")
+        )
+    ).values("username", "week", "total")[:3]
+
+    default = ["creator__username", "created", "id", "display"]
+    # add model field
+
+    def generate(model, display):
+        def update(obj, uuid):
+            obj.update({"uuid": uuid})
+            obj["creator"] = obj.pop("creator__username")
+            obj["date"] = obj.pop("created")
+            return obj
+        uuid = model.__name__.lower()
+        query = model.objects.all()\
+                             .order_by("-created")\
+                             .annotate(display=F(display))\
+                             .select_related('creator').values(*default)
+        return [update(obj, uuid) for obj in query[:50]]
+
+    history = [
+        *generate(Event, "title"),
+        *generate(Picture, "title"),
+        *generate(Video, "title"),
+        *generate(Tag, "name"),
+        *generate(People, "name"),
+        *generate(Translate, "key"),
+        *[
             {
-                'id': p.id,
-                'name': p.name,
-                'profil': p.to_url('profil'),
+                'id': obj.object_id,
+                'creator': obj.username,
+                'date': obj.created,
+                'display': str(obj.content_object),
+                'uuid': obj.content_object.__class__.__name__.lower(),
             }
-            for p in People.objects.all().order_by('name')
+            for obj in Commit.objects
+                             .filter(~Q(uuid__contains="lang"))
+                             .order_by("-created")
+                             .annotate(username=F("creator__username"))
+                             .select_related('creator')[:50]
         ]
-        return Response({'peoples': lst})
+    ]
+    history.sort(key=lambda x: x['date'], reverse=True)
 
-
-class PopulateView(APIView):
-
-    def get(self, request, format=None):
-
-        langs = [{'value': lang[0], 'display_name': lang[1]} for lang in settings.LANGUAGES]
-
-        tags = [serialize(tag, 'name') for tag in Tag.objects.all()]
-        events = [serialize(event, 'title') for event in Event.objects.all()]
-
-        return Response({
-            'langs': langs,
-            'tags': tags,
-            'events': events
-        })
-
-
-class ContributorView(APIView):
-    def get(self, request, format=None):
-        contributors = Commit.objects.values_list('creator__username', flat=True).distinct()
-        return Response({'results': contributors})
-
-
-class OverView(APIView):
-    def get(self, request, format=None):
-        UPDATE = "update"
-        CREATE = "create"
-
-        users = {}
-
-        def gen_dtc(obj, type_obj, display=None, uuid=None):
-            creator = str(obj.creator)
-            if creator not in users:
-                users[creator] = {UPDATE: 0, CREATE: 0}
-            users[creator][type_obj] += 1
-            return {
-                'creator': str(obj.creator),
-                'date': str(obj.created),
-                'type': type_obj,
-                'uuid': obj.__class__.__name__.lower() if not uuid else uuid.lower(),
-                'object_id': obj.id if not display else display.id,
-                'display': str(obj) if not display else str(display),
-            }
-        query = [
-            gen_dtc(c, UPDATE, c.content_object, c.content_object.__class__.__name__)
-            for c in Commit.objects.filter(~Q(uuid__contains="lang")).select_related('creator')
-        ]
-
-        query.extend([gen_dtc(c, CREATE) for c in Tag.objects.all().select_related('creator')])
-        query.extend([gen_dtc(c, CREATE) for c in People.objects.all().select_related('creator')])
-        query.extend([gen_dtc(c, CREATE) for c in Event.objects.all().select_related('creator')])
-        query.extend([gen_dtc(c, CREATE) for c in Picture.objects.all().select_related('creator')])
-        query.extend([gen_dtc(c, CREATE) for c in Video.objects.all().select_related('creator')])
-        query.sort(key=lambda x: x['date'], reverse=True)
-        data = {'results': query}
-
-        contributor = [{'user': key, **value} for key, value in users.items()]
-
-        contributor.sort(key=lambda x: x[CREATE], reverse=True)
-        data[CREATE] = contributor[:3]
-
-        contributor.sort(key=lambda x: x[UPDATE], reverse=True)
-        data[UPDATE] = contributor[:3]
-        return Response(data)
+    query = {
+        'week': {
+            'first': {'username': 'rgermain', 'count': 55},
+            'second': {'username': 'rgermain', 'count': 55},
+            'third': {'username': 'rgermain', 'count': 55},
+        },
+        'total': {
+            'first': {'username': 'rgermain', 'count': 55},
+            'second': {'username': 'rgermain', 'count': 55},
+            'third': {'username': 'rgermain', 'count': 55},
+        },
+        'results': history[:50]
+    }
+    return Response(query)
 
 
 @api_view(['GET'])
@@ -145,7 +194,8 @@ def translate_json(request):
             return Response(status=HTTP_400_BAD_REQUEST, data={'detail': "language not found"})
         language = request.data['language']
 
-    deleted = request.data['deleted'] == 'on' if 'deleted' in request.data else False
+    deleted = 'on' in request.data['deleted'] if 'deleted' in request.data else False
+    merged = 'on' in request.data['merge'] if 'merge' in request.data else False
     content = json.loads(request.data['file'].read())
 
     def gen_path(path, key):
@@ -169,7 +219,8 @@ def translate_json(request):
     data = {
         'created': 0,
         'createdLang': 0,
-        'removed': 0
+        'removed': 0,
+        'update': 0
     }
 
     list_path = [el['path'] for el in lst]
@@ -185,9 +236,26 @@ def translate_json(request):
         data['created'] = len(diff)
 
     if language:
-        trans_exist = TranslateLang.objects.filter(language=language).prefetch_std().values_list('parent_key__key', flat=True)
+        trans_exist = TranslateLang.objects.filter(language=language)\
+                                           .prefetch_std()\
+                                           .values_list('parent_key__key', flat=True)
         trans = list(Translate.objects.all())
-        diff = [el for el in lst if el['path'] not in trans_exist]
+        diff, exist = [], []
+        for el in lst:
+            if el['path'] in trans_exist:
+                exist.append(el)
+            else:
+                diff.append(el)
+
+        if merged:
+            bulk_update = []
+            for ex in TranslateLang.objects.filter(language=language).prefetch_std():
+                el = list(filter(lambda o: ex.parent_key.key == o['path'], lst))
+                if el:
+                    ex.value = el[0]['value']
+                    bulk_update.append(ex)
+            data['update'] = len(bulk_update)
+            TranslateLang.objects.bulk_update(bulk_update, ["value"])
 
         def find_parent(key):
             return list(filter(lambda o: o.key == key, trans))[0]

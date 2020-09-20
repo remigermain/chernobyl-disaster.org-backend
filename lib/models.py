@@ -29,6 +29,10 @@ class ChernobylModelAbstract(models.Model):
     def issue_count(self):
         return self.get_issue().count()
 
+    @property
+    def model(self):
+        return self.__class__.__name__.lower()
+
     def get_commit(self):
         """
             return all commits from this models
