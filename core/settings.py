@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'common',
     'api',
     'timeline',
+    'populate',
 
     # extra package
     'django_cleanup.apps.CleanupConfig',
