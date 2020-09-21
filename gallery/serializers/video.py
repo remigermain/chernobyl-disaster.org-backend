@@ -1,5 +1,5 @@
 from lib.serializers import ModelSerializerBase
-from timeline.models import Video, VideoLang
+from gallery.models import Video, VideoLang
 
 
 class VideoLangSerializer(ModelSerializerBase):

@@ -1,5 +1,5 @@
 from django.urls import path, include, re_path
-from api.views import deleteAcount, PasswordReset, VerifyEmail
+from authentication.views import deleteAcount, PasswordReset, VerifyEmail
 
 
 urlpatterns = [

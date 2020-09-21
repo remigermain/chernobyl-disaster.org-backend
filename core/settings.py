@@ -40,8 +40,9 @@ INSTALLED_APPS = [
 
     # chenobyl
     'common',
-    'api',
+    'authentication',
     'timeline',
+    'gallery',
     'populate',
 
     # extra package
@@ -178,7 +179,7 @@ APPEND_SLASH = False
 
 
 REST_AUTH_SERIALIZERS = {
-    "USER_DETAILS_SERIALIZER": "api.serializers.UserDetailsSerializer",
+    "USER_DETAILS_SERIALIZER": "authentication.serializers.UserDetailsSerializer",
 }
 
 

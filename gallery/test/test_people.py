@@ -1,5 +1,5 @@
 from django.test import tag
-from common.serializers.people import PeopleSerializer
+from gallery.serializers.people import PeopleSerializer
 from lib.test import BaseTest
 
 

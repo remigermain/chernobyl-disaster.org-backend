@@ -42,44 +42,6 @@ class TagLang(LanguageAbstract):
         return f"{self.name} {self.language}"
 
 
-def profil_path(instance, filename):
-    name = re.sub(r"[^a-zA-Z0-9]+", "", instance.name)
-    extentions = filename.split('.')[-1]
-    return f"people/{instance.id}/{name}.{extentions}"
-
-
-class People(CreatorAbstract):
-    """
-        models for personality of chernobyl
-    """
-    name = models.CharField(max_length=80, unique=True)
-    born = models.DateField(null=True, blank=True)
-    death = models.DateField(null=True, blank=True)
-    profil = models.ImageField(upload_to=profil_path, null=True, blank=True)
-    profil_webp = ImageSpecField(source='profil', format='WEBP')
-    profil_thumbnail_webp = ImageSpecField(source='profil',
-                                           processors=[ResizeToFill(250, 160)],
-                                           format='WEBP',
-                                           options={'quality': 60})
-    profil_thumbnail_jpeg = ImageSpecField(source='profil',
-                                           processors=[ResizeToFill(250, 160)],
-                                           format='JPEG',
-                                           options={'quality': 60})
-
-    wikipedia = models.URLField(null=True, blank=True)
-    tags = models.ManyToManyField(Tag, related_name="peoples", blank=True)
-
-    def __str__(self):
-        return self.name
-
-
-class PeopleLang(LanguageAbstract):
-    people = models.ForeignKey(People, on_delete=models.CASCADE, related_name="langs")
-    biography = models.TextField()
-
-    select_std = ['people']
-
-
 class Contact(CreatorAbstract):
     email = models.EmailField(null=False, blank=False)
     message = models.TextField(null=False, blank=False)
@@ -102,3 +64,11 @@ class TranslateLang(LanguageAbstract):
 
     def __str__(self):
         return f"{self.parent_key}: {self.value}"
+
+
+
+def profil_path(instance, filename):
+    import re
+    name = re.sub(r"[^a-zA-Z0-9]+", "", instance.name)
+    extentions = filename.split('.')[-1]
+    return f"people/{instance.id}/{name}.{extentions}"

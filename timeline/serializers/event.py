@@ -1,7 +1,7 @@
 from lib.serializers import ModelSerializerBase
 from timeline.models import Event, EventLang
-from timeline.serializers.picture import PictureSerializerMinGet
-from timeline.serializers.video import VideoSerializerMinGet
+from gallery.serializers.picture import PictureSerializerMinGet
+from gallery.serializers.video import VideoSerializerMinGet
 
 
 class EventLangSerializer(ModelSerializerBase):

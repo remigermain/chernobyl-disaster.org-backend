@@ -1,10 +1,9 @@
-from .views import TagViewSet, PeopleViewSet, ContactViewSet, \
+from .views import TagViewSet, ContactViewSet, \
     IssueViewSet, TranslateViewSet, TranslateLangViewSet
 
 drf_routers = (
     ('tag', TagViewSet),
     # ('tag/lang', TagLangViewSet),
-    ('people', PeopleViewSet),
     # ('people/lang', PeopleLangViewSet),
     ('contact', ContactViewSet),
     ('issue', IssueViewSet),

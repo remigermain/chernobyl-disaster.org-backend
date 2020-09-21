@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Tag, TagLang, People, Issue, Commit, PeopleLang
+from common.models import Tag, TagLang, Issue, Commit, Translate, TranslateLang
 from lib.admin import AdminBase, AdminInlineBase
 
 
@@ -28,17 +28,14 @@ class TagAdmin(AdminBase):
     ]
 
 
-class PeopleLangInline(AdminInlineBase):
-    model = PeopleLang
+class TranslateLangInline(AdminInlineBase):
+    model = TranslateLang
 
 
-@admin.register(People)
-class PeopleAdmin(AdminBase):
-    list_display = ('name', 'born', 'death', 'pictures')
-    search_fields = ('name', 'born', 'death')
+@admin.register(Translate)
+class TranslateAdmin(AdminBase):
+    list_display = ('key',)
+    search_fields = ('key',)
     inlines = [
-        PeopleLangInline
+        TranslateLangInline
     ]
-
-    def pictures(self, obj):
-        return obj.pictures.count() if obj else 0

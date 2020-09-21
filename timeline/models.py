@@ -1,98 +1,7 @@
 from django.db import models
 from lib.models import CreatorAbstract, LanguageAbstract
-from imagekit.models import ImageSpecField
-from imagekit.processors import ResizeToFill
 from django.template.defaultfilters import slugify
 
-
-class EventExtraAbstract(CreatorAbstract):
-    title = models.CharField(max_length=50)
-    tags = models.ManyToManyField("common.Tag", related_name="%(class)s", blank=True)
-    date = models.DateTimeField(blank=True, null=True)
-    event = models.ForeignKey(
-        "timeline.Event",
-        on_delete=models.SET_NULL,
-        blank=True,
-        null=True,
-        related_name="%(class)ss"
-    )
-
-    select_std = ['event']
-
-    class Meta:
-        abstract = True
-
-    def __str__(self):
-        if self.event:
-            return f"{self.event} {self.__class__.__name__} {self.title}"
-        return f"{self.__class__.__name__} {self.title}"
-
-
-def uuid_path(instance, filename):
-    """
-        function to generate path file name
-        ex: for Picture models as imagefiled named "my_pictures.png"
-        the path is:
-            50/Picture/10/my_pictures.png
-    """
-    return instance.pk if instance.pk else instance.__class__.objects.count() + 1
-
-
-def picture_path(instance, filename):
-    # get only filename , not path
-    name = filename.split('/')[-1]
-    return f"pictures/{uuid_path(instance, filename)}/{name}"
-
-
-class Picture(EventExtraAbstract):
-    picture = models.ImageField(upload_to=picture_path)
-    picture_webp = ImageSpecField(source='picture', format='WEBP')
-    picture_thumbnail_webp = ImageSpecField(source='picture',
-                                            processors=[ResizeToFill(250, 160)],
-                                            format='WEBP',
-                                            options={'quality': 60})
-    picture_thumbnail_jpeg = ImageSpecField(source='picture',
-                                            processors=[ResizeToFill(250, 160)],
-                                            format='JPEG',
-                                            options={'quality': 60})
-
-    photographer = models.ForeignKey(
-        "common.People",
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="pictures"
-    )
-    select_std = EventExtraAbstract.select_std + ['photographer']
-
-
-class Video(EventExtraAbstract):
-    video = models.URLField(unique=True)
-
-
-# Extra i18n
-class EventExtraLangAbstract(LanguageAbstract):
-    title = models.CharField(max_length=50)
-
-    get_parent_lang = 'extra'
-    select_std = ['extra']
-
-    class Meta:
-        abstract = True
-
-    def __str__(self):
-        return f"{self.extra} {self.language}"
-
-
-class PictureLang(EventExtraLangAbstract):
-    extra = models.ForeignKey(Picture, on_delete=models.CASCADE, related_name="langs")
-
-
-class VideoLang(EventExtraLangAbstract):
-    extra = models.ForeignKey(Video, on_delete=models.CASCADE, related_name="langs")
-
-
-# Event Models
 
 class Event(CreatorAbstract):
     """
@@ -128,3 +37,31 @@ class EventLang(LanguageAbstract):
 
     def __str__(self):
         return f"{self.event} {self.language}"
+
+
+class EventExtraAbstract(CreatorAbstract):
+    title = models.CharField(max_length=50)
+    tags = models.ManyToManyField("common.Tag", related_name="%(class)s", blank=True)
+    date = models.DateTimeField(blank=True, null=True)
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="%(class)ss"
+    )
+
+    select_std = ['event']
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        if self.event:
+            return f"{self.event} {self.__class__.__name__} {self.title}"
+        return f"{self.__class__.__name__} {self.title}"
+
+def picture_path(instance, filename):
+    # get only filename , not path
+    name = filename.split('/')[-1]
+    return f"pictures/{uuid_path(instance, filename)}/{name}"

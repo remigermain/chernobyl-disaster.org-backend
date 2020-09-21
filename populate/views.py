@@ -1,8 +1,8 @@
-from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.conf import settings
-from timeline.models import Event, Picture, Video
-from common.models import Tag, People, Commit, Translate, TranslateLang
+from timeline.models import Event
+from gallery.models import Picture, Video, People
+from common.models import Tag, Commit, Translate, TranslateLang
 from django.db.models import Q, Count, F
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser

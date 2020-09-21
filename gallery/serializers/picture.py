@@ -1,5 +1,5 @@
 from lib.serializers import ModelSerializerBase
-from timeline.models import Picture, PictureLang
+from gallery.models import Picture, PictureLang
 from rest_framework.serializers import SerializerMethodField
 
 

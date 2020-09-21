@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from common import urls as common_urls
 from timeline import urls as timeline_urls
+from gallery import urls as gallery_urls
 from rest_framework import routers
 from django.contrib.staticfiles.urls import static
 from django.conf import settings
@@ -11,7 +12,8 @@ router = routers.DefaultRouter()
 # load the url of all app
 apps = [
     common_urls,
-    timeline_urls
+    timeline_urls,
+    gallery_urls
 ]
 for app in apps:
     for url in app.drf_routers:
@@ -23,7 +25,7 @@ urlpatterns = [
     path('populate/', include('populate.urls'), name="populate"),
 
     # account / auth
-    path('auth/', include('api.urls')),
+    path('auth/', include('authentication.urls')),
 
     # admin
     path('admin/', admin.site.urls),
