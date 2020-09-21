@@ -209,7 +209,7 @@ def translate_json(request):
 
     if language:
         trans_exist = TranslateLang.objects.filter(language=language)\
-                                           .prefetch_std()\
+                                           .select_related('parent_key')\
                                            .values_list('parent_key__key', flat=True)
         trans = list(Translate.objects.all())
         diff, exist = [], []
@@ -221,7 +221,7 @@ def translate_json(request):
 
         if merged:
             bulk_update = []
-            for ex in TranslateLang.objects.filter(language=language).prefetch_std():
+            for ex in TranslateLang.objects.filter(language=language).select_related('parent_key'):
                 el = list(filter(lambda o: ex.parent_key.key == o['path'], lst))
                 if el:
                     ex.value = el[0]['value']
@@ -234,7 +234,6 @@ def translate_json(request):
 
         bulk = [
             TranslateLang(
-                creator=request.user,
                 value=obj['value'],
                 language=language,
                 parent_key=find_parent(obj['path'])

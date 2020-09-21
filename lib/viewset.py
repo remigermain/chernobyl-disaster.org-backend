@@ -60,7 +60,7 @@ class ModelViewSetBase(viewsets.ModelViewSet):
             if None , you get all
         """
         completed = self.request.query_params.get('completed', None)
-        queryset = super().get_queryset().prefetch_std()
+        queryset = super().get_queryset()
         if completed is not None:
             completed = bool(strtobool(completed))
             if completed:

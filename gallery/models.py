@@ -41,7 +41,6 @@ class Picture(EventExtraAbstract):
         on_delete=models.SET_NULL,
         related_name="pictures"
     )
-    select_std = EventExtraAbstract.select_std + ['photographer']
 
 
 class Video(EventExtraAbstract):
@@ -51,9 +50,6 @@ class Video(EventExtraAbstract):
 # Extra i18n
 class EventExtraLangAbstract(LanguageAbstract):
     title = models.CharField(max_length=50)
-
-    get_parent_lang = 'extra'
-    select_std = ['extra']
 
     class Meta:
         abstract = True
@@ -105,5 +101,3 @@ class People(ChernobylModelAbstract):
 class PeopleLang(LanguageAbstract):
     people = models.ForeignKey(People, on_delete=models.CASCADE, related_name="langs")
     biography = models.TextField()
-
-    select_std = ['people']

@@ -18,8 +18,6 @@ class TagLang(LanguageAbstract):
     """
     name = models.CharField(max_length=50)
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE, related_name="langs")
-    get_parent_lang = 'tag'
-    select_std = ['tag']
 
     def __str__(self):
         return f"{self.name} {self.language}"
@@ -35,7 +33,6 @@ class Translate(ChernobylModelAbstract):
 class TranslateLang(LanguageAbstract):
     value = models.TextField(null=False, blank=False)
     parent_key = models.ForeignKey(Translate, on_delete=models.CASCADE, related_name="langs", null=False)
-    select_std = ['parent_key']
 
     def __str__(self):
         return f"{self.parent_key}: {self.value}"

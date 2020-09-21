@@ -12,18 +12,17 @@ class TagViewSet(ModelViewSetBase):
     filterset_fields = ['name']
     search_fields = ['name']
 
-
-class TagLangViewSet(ModelViewSetBase):
-    queryset = TagLang.objects.all()
-    serializer_class = tag.TagSerializer
-    filterset_fields = ['name']
-    search_fields = ['name']
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related("langs")
 
 
 class TranslateViewSet(ModelViewSetBase):
     queryset = Translate.objects.all()
     serializer_class = translate.TranslateSerializer
     permission_class = (UpdateOnly,)
+
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related("langs")
 
 
 class TranslateLangViewSet(ModelViewSetBase):

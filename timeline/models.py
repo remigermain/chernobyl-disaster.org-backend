@@ -14,8 +14,6 @@ class Event(ChernobylModelAbstract):
     date = models.DateTimeField(null=False, blank=False, unique=True)
     slug = models.SlugField(max_length=100)
 
-    prefetch_std = ['pictures__langs', 'videos__langs']
-
     def __str__(self):
         return self.title
 
@@ -32,9 +30,6 @@ class EventLang(LanguageAbstract):
     description = models.TextField()
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="langs")
 
-    get_parent_lang = 'event'
-    select_std = ['event']
-
     def __str__(self):
         return f"{self.event} {self.language}"
 
@@ -50,8 +45,6 @@ class EventExtraAbstract(ChernobylModelAbstract):
         null=True,
         related_name="%(class)ss"
     )
-
-    select_std = ['event']
 
     class Meta:
         abstract = True

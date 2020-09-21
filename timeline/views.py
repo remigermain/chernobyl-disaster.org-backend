@@ -1,5 +1,5 @@
 from lib.viewset import ModelViewSetBase
-from timeline.models import Event, EventLang
+from timeline.models import Event
 from timeline.serializers import event
 
 
@@ -12,10 +12,11 @@ class EventViewSet(ModelViewSetBase):
     search_fields = ['title', 'date', 'langs__title', 'langs__description']
     ordering_fields = ['title', 'date']
 
+    def get_queryset(self):
+        return super().get_queryset()\
+                      .prefetch_related("langs",
+                                        "pictures__langs",
+                                        "videos__langs",
+                                        "tags__langs"
+                                        )
 
-class EventLangViewSet(ModelViewSetBase):
-    queryset = EventLang.objects.all()
-    serializer_class = event.EventLangSerializer
-    filterset_fields = ['title', 'event']
-    search_fields = ['title', 'description']
-    ordering_fields = ['title']

@@ -4,9 +4,6 @@ from django.core.exceptions import ValidationError
 from django.utils.text import capfirst
 from utils.models import Commit
 from django.forms.models import model_to_dict
-from django.utils.timezone import datetime
-
-from django.db.models.fields.related import ManyToManyRel, ManyToManyField, ManyToOneRel
 
 
 class ModelSerializerBaseNested(WritableNestedModelSerializer):
@@ -78,7 +75,7 @@ class ModelSerializerBaseNested(WritableNestedModelSerializer):
                             diff.extend(child)
                 if len(lst) != len(value):
                     diff.append(field)
-            elif relation.many_to_one:
+            elif relation.many_to_one and attr:
                 if self.compare_field(attr, model_to_dict(value)):
                     diff.append(field)
             elif attr != value:
@@ -131,9 +128,6 @@ class ModelSerializerBase(ModelSerializerBaseNested):
     not_available_languages = serializers.SerializerMethodField()
 
     def get_not_available_languages(self, obj):
-        # return all language available
-        if hasattr(obj, "ann_langs_not_availabe"):
-            return obj.ann_langs_not_availabe
         # get all langs available
         langs = [lang[0] for lang in obj.langs.model.lang_choices]
         # remove languages exsits
@@ -142,9 +136,6 @@ class ModelSerializerBase(ModelSerializerBaseNested):
         return langs_not_exist
 
     def get_available_languages(self, obj):
-        # return all language available
-        if hasattr(obj, "ann_langs_availabe"):
-            return obj.ann_langs_availabe
         # remove languages exsits
         langs_exist = [o.language for o in obj.langs.all()]
         langs_exist.sort()
@@ -152,8 +143,8 @@ class ModelSerializerBase(ModelSerializerBaseNested):
 
     def get_commit_count(self, obj):
         # obj has annotate contributures count we return it or by queryset
-        return getattr(obj, 'ann_commit_count', obj.commit_count)
+        return obj.commit_count
 
     def updated(self, obj):
         # obj has annotate contributures count we return it or by queryset
-        return getattr(obj, 'ann_updated', obj.updated)
+        return obj.updated
