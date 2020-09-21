@@ -1,5 +1,5 @@
 from lib.serializers import ModelSerializerBase
-from common.models import Issue
+from utils.models import Issue
 from django.core.exceptions import ValidationError
 
 

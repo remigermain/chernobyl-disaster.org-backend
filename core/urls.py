@@ -3,6 +3,7 @@ from django.urls import path, include
 from common import urls as common_urls
 from timeline import urls as timeline_urls
 from gallery import urls as gallery_urls
+from utils import urls as utils_urls
 from rest_framework import routers
 from django.contrib.staticfiles.urls import static
 from django.conf import settings
@@ -13,7 +14,8 @@ router = routers.DefaultRouter()
 apps = [
     common_urls,
     timeline_urls,
-    gallery_urls
+    gallery_urls,
+    utils_urls
 ]
 for app in apps:
     for url in app.drf_routers:

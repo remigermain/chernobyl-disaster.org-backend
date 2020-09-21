@@ -1,18 +1,6 @@
 from django.contrib import admin
-from common.models import Tag, TagLang, Issue, Commit, Translate, TranslateLang
+from common.models import Tag, TagLang, Translate, TranslateLang
 from lib.admin import AdminBase, AdminInlineBase
-
-
-@admin.register(Issue)
-class IssueAdmin(admin.ModelAdmin):
-    list_display = ('id', 'creator', 'content_type', 'content_object', 'created')
-    exclude = ('uuid',)
-
-
-@admin.register(Commit)
-class CommitAdmin(admin.ModelAdmin):
-    list_display = ('id', 'creator', 'content_type', 'content_object', 'created')
-    exclude = ('uuid',)
 
 
 class TagLangInline(AdminInlineBase):

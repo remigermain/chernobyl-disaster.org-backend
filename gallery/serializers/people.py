@@ -27,7 +27,7 @@ class PeopleSerializerPost(PeopleSerializer):
         try:
             tag = Tag.objects.get(name=validated_data['name'])
         except Tag.DoesNotExist:
-            tag = Tag.objects.create(name=validated_data['name'], creator=self.context['request'].user)
+            tag = Tag.objects.create(name=validated_data['name'])
         instance = super().create(validated_data)
         instance.tags.add(tag)
         return instance
@@ -37,7 +37,7 @@ class PeopleSerializerPost(PeopleSerializer):
         try:
             tag = Tag.objects.get(name=instance.name)
         except Tag.DoesNotExist:
-            tag = Tag.objects.create(name=validated_data['name'], creator=self.context['request'].user)
+            tag = Tag.objects.create(name=validated_data['name'])
         obj = super().update(instance, validated_data)
         if tag.name != validated_data['name']:
             tag.name = validated_data['name']

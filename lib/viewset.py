@@ -19,7 +19,7 @@ class ModelViewSetBase(viewsets.ModelViewSet):
         if not hasattr(self, 'ordering_fields'):
             self.ordering_fields = []
         # we allway ad tags if models is not tags
-        fields = ['id', 'created']
+        fields = ['id']
 
         from common.models import Tag, TagLang
         if self.get_model not in [Tag, TagLang] and hasattr(self.get_model, 'tags'):

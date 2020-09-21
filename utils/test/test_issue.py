@@ -1,7 +1,7 @@
 from django.test import tag
-from common.serializers.issue import IssueSerializer
-from common.models import Issue
-from lib.utils import contenttypes_uuid
+from utils.serializers.issue import IssueSerializer
+from utils.models import Issue
+from utils.function import contenttypes_uuid
 from lib.test import BaseTest
 
 
@@ -20,7 +20,7 @@ class IssueTest(BaseTest):
         serializer.save()
 
         # check is create
-        issue = Issue.objects.filter(uuid=contenttypes_uuid(Issue, self.user))
+        issue = Issue.objects.filter(uuid=contenttypes_uuid(self.user))
         self.assertEqual(issue.count(), 1)
         issue = issue.first()
         self.assertEqual(issue.content_object, self.user)

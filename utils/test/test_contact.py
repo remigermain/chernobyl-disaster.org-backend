@@ -1,10 +1,10 @@
 from django.test import tag
-from common.serializers.contact import ContactSerializer
+from utils.serializers.contact import ContactSerializer
 from lib.test import BaseTest
 
 
 @tag('model', 'contact')
-class IssueTest(BaseTest):
+class ContactTest(BaseTest):
 
     def test_create_serializer(self):
         data = {

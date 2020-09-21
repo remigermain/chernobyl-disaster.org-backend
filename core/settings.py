@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'timeline',
     'gallery',
     'populate',
+    'utils',
 
     # extra package
     'django_cleanup.apps.CleanupConfig',

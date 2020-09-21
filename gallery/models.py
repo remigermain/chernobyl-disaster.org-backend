@@ -1,5 +1,5 @@
 from django.db import models
-from lib.models import CreatorAbstract, LanguageAbstract
+from lib.models import ChernobylModelAbstract, LanguageAbstract
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
 from timeline.models import EventExtraAbstract
@@ -77,7 +77,7 @@ def profil_path(instance, filename):
     return f"people/{instance.id}/{name}.{extentions}"
 
 
-class People(CreatorAbstract):
+class People(ChernobylModelAbstract):
     """
         models for personality of chernobyl
     """

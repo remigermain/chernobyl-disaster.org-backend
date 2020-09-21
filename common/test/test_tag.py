@@ -81,7 +81,7 @@ class TagTest(BaseTest):
         self.assertFalse(serialiser.is_valid())
 
     @tag('serializer', 'langs')
-    def test_create_serializer_empty_langs(self):
+    def test_create_serializer_empty_langs2(self):
         data = {
             'name': "name",
             'langs': [

@@ -1,9 +1,9 @@
 from django.db import models
-from lib.models import CreatorAbstract, LanguageAbstract
+from lib.models import ChernobylModelAbstract, LanguageAbstract
 from django.template.defaultfilters import slugify
 
 
-class Event(CreatorAbstract):
+class Event(ChernobylModelAbstract):
     """
         event models is a date event on chernobyl
         the title is for indication , tags for easy find here, and the date ...
@@ -39,7 +39,7 @@ class EventLang(LanguageAbstract):
         return f"{self.event} {self.language}"
 
 
-class EventExtraAbstract(CreatorAbstract):
+class EventExtraAbstract(ChernobylModelAbstract):
     title = models.CharField(max_length=50)
     tags = models.ManyToManyField("common.Tag", related_name="%(class)s", blank=True)
     date = models.DateTimeField(blank=True, null=True)
@@ -60,8 +60,3 @@ class EventExtraAbstract(CreatorAbstract):
         if self.event:
             return f"{self.event} {self.__class__.__name__} {self.title}"
         return f"{self.__class__.__name__} {self.title}"
-
-def picture_path(instance, filename):
-    # get only filename , not path
-    name = filename.split('/')[-1]
-    return f"pictures/{uuid_path(instance, filename)}/{name}"

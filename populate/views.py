@@ -2,7 +2,8 @@ from rest_framework.response import Response
 from django.conf import settings
 from timeline.models import Event
 from gallery.models import Picture, Video, People
-from common.models import Tag, Commit, Translate, TranslateLang
+from common.models import Tag, Translate, TranslateLang
+from utils.models import Commit
 from django.db.models import Q, Count, F
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser
@@ -60,114 +61,61 @@ def contributor(request):
 def overview(request):
     week = timezone.now() - timezone.timedelta(days=7)
 
-    query_week = [
-        *get_user_model().objects.annotate(
-            week=(
-                Count("commit_creator", filter=Q(commit_creator__created__gte=week)) +
-                Count("event_creator", filter=Q(event_creator__created__gte=week)) +
-                Count("eventlang_creator", filter=Q(eventlang_creator__created__gte=week)) +
-                Count("people_creator", filter=Q(people_creator__created__gte=week)) +
-                Count("peoplelang_creator", filter=Q(peoplelang_creator__created__gte=week)) +
-                Count("picture_creator", filter=Q(picture_creator__created__gte=week)) +
-                Count("picturelang_creator", filter=Q(picturelang_creator__created__gte=week)) +
-                Count("tag_creator", filter=Q(tag_creator__created__gte=week)) +
-                Count("taglang_creator", filter=Q(taglang_creator__created__gte=week)) +
-                Count("video_creator", filter=Q(video_creator__created__gte=week)) +
-                Count("videolang_creator", filter=Q(videolang_creator__created__gte=week))
-            ),
-        ).values("username", "week"),
-        *get_user_model().objects.annotate(
-            week=Count("translatelang_creator", filter=Q(translatelang_creator__created__gte=week))
-        ).values("username", "week"),
-    ]
+    query = Commit.objects.all().select_related('creator')
+    dtc = {}
+    for commit in query:
+        key = commit.creator.username
+        if key not in dtc:
+            dtc[key] = {
+                'total': 1,
+                'week': 1 if commit.date and commit.date >= week else 0
+            }
+        else:
+            dtc[key]['total'] += 1
+            if commit.date and commit.date >= week:
+                dtc[key]['week'] += 1
 
-    query_total = [
-        *get_user_model().objects.annotate(
-            total=(
-                Count("commit_creator") +
-                Count("event_creator") +
-                Count("eventlang_creator") +
-                Count("people_creator") +
-                Count("peoplelang_creator") +
-                Count("picture_creator") +
-                Count("picturelang_creator") +
-                Count("taglang_creator") +
-                Count("tag_creator") +
-                Count("video_creator") +
-                Count("videolang_creator")
-            )
-        ).values("username", "total"),
-        *get_user_model().objects.annotate(total=Count("translatelang_creator")).values("username", "total"),
-    ]
+    def to_ranking(objs, key):
+        dtc = {
+            'first': {
+                'username': objs[0]['username'],
+                'count': objs[0][key]
+            },
+        }
 
-    def merge(query, annotate):
-        dtc = {}
-        for w in query:
-            print(w)
-            if w['username'] not in dtc:
-                dtc[w['username']] = w[annotate]
-            else:
-                dtc[w['username']] += w[annotate]
-        lst = [{'username': key, annotate: value} for key, value in dtc.items()]
-        lst.sort(key=lambda x: x[annotate], reverse=True)
-        lst = lst[:3]
+        if len(objs) > 1:
+            dtc['second'] = {}
+            dtc['second']['username'] = objs[1]['username']
+            dtc['second']['count'] = objs[1][key]
+        if len(objs) > 2:
+            dtc['third'] = {}
+            dtc['third']['username'] = objs[2]['username']
+            dtc['third']['count'] = objs[2][key]
 
-        final = {}
-        if len(lst) > 0:
-            final['first'] = {'username': lst[0]['username'], 'count': lst[0][annotate]}
-        if len(lst) > 1:
-            final['second'] = {'username': lst[1]['username'], 'count': lst[1][annotate]}
-        if len(lst) > 2:
-            final['third'] = {'username': lst[2]['username'], 'count': lst[2][annotate]}
-        return final
+        return dtc
 
-    lst_week = merge(query_week, "week")
-    lst_total = merge(query_total, "total")
-
-    default = ["creator__username", "created", "id", "display"]
-    # add model field
-
-    def generate(model, display):
-        def update(obj, uuid):
-            obj.update({"uuid": uuid})
-            obj["creator"] = obj.pop("creator__username")
-            obj["date"] = obj.pop("created")
-            return obj
-        uuid = model.__name__.lower()
-        query = model.objects.all()\
-                             .order_by("-created")\
-                             .annotate(display=F(display))\
-                             .select_related('creator').values(*default)
-        return [update(obj, uuid) for obj in query[:50]]
+    lst = [{'username': key, **val} for key, val in dtc.items()]
+    lst.sort(key=lambda x: x['total'], reverse=True)
+    lst_total = to_ranking(lst[:3], 'total')
+    lst.sort(key=lambda x: x['week'], reverse=True)
+    lst_week = to_ranking(lst[:3], 'week')
 
     history = [
-        *generate(Event, "title"),
-        *generate(Picture, "title"),
-        *generate(Video, "title"),
-        *generate(Tag, "name"),
-        *generate(People, "name"),
-        *generate(Translate, "key"),
-        *[
-            {
-                'id': obj.object_id,
-                'creator': obj.username,
-                'date': obj.created,
-                'display': str(obj.content_object),
-                'uuid': obj.content_object.__class__.__name__.lower(),
-            }
-            for obj in Commit.objects
-                             .filter(~Q(uuid__contains="lang"))
-                             .order_by("-created")
-                             .annotate(username=F("creator__username"))
-                             .select_related('creator')[:50]
-        ]
+        {
+            'id': commit.object_id,
+            'creator': commit.creator.username,
+            'date': commit.date,
+            'display': str(commit.content_object),
+            'uuid': commit.content_object.__class__.__name__.lower(),
+            'created': commit.created,
+        }
+        for commit in query.order_by('-date')[:50]
     ]
-    history.sort(key=lambda x: x['date'], reverse=True)
 
     query = {
         'week': lst_week,
         'total': lst_total,
-        'results': history[:50]
+        'results': history
     }
     return Response(query)
 
@@ -255,7 +203,7 @@ def translate_json(request):
     diff = list(set(exist) ^ set(list_path))
 
     if len(diff) > 0:
-        bulk = [Translate(creator=request.user, key=key) for key in list_path]
+        bulk = [Translate(key=key) for key in list_path]
         Translate.objects.bulk_create(bulk)
         data['created'] = len(diff)
 

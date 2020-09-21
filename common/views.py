@@ -1,8 +1,7 @@
-from rest_framework.viewsets import ModelViewSet
 from lib.viewset import ModelViewSetBase
-from common.models import Tag, TagLang, Translate, TranslateLang, Contact, Issue
+from common.models import Tag, TagLang, Translate, TranslateLang
 from lib.permission import UpdateOnly
-from common.serializers import tag, contact, issue, translate
+from common.serializers import tag, translate
 
 
 class TagViewSet(ModelViewSetBase):
@@ -19,24 +18,6 @@ class TagLangViewSet(ModelViewSetBase):
     serializer_class = tag.TagSerializer
     filterset_fields = ['name']
     search_fields = ['name']
-
-
-class IssueViewSet(ModelViewSetBase):
-    queryset = Issue.objects.none()
-    serializer_class = issue.IssueSerializer
-
-    def get_queryset(self):
-        # you can only delete/update/get yourqueryset
-        return super().get_queryset().filter(creator=self.request.user)
-
-
-class ContactViewSet(ModelViewSet):
-    # remove auth , all people can contact me :D
-    permission_classes = []
-
-    http_method_names = [r'post']
-    queryset = Contact.objects.none()
-    serializer_class = contact.ContactSerializer
 
 
 class TranslateViewSet(ModelViewSetBase):

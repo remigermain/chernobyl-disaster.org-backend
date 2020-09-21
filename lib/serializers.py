@@ -2,6 +2,11 @@ from rest_framework import serializers
 from drf_writable_nested.serializers import WritableNestedModelSerializer
 from django.core.exceptions import ValidationError
 from django.utils.text import capfirst
+from utils.models import Commit
+from django.forms.models import model_to_dict
+from django.utils.timezone import datetime
+
+from django.db.models.fields.related import ManyToManyRel, ManyToManyField, ManyToOneRel
 
 
 class ModelSerializerBaseNested(WritableNestedModelSerializer):
@@ -53,24 +58,56 @@ class ModelSerializerBaseNested(WritableNestedModelSerializer):
             )
         return data
 
-    def add_validated_data(self, validated_data):
-        validated_data['creator'] = self.context['request'].user
-        return validated_data
+    def compare_field(self, instance, validated_data):
+        """
+            find where field are changed
+        """
+        diff = []
+        for field, value in validated_data.items():
+            relation = instance._meta.get_field(field)
+            attr = getattr(instance, field)
+            if relation.many_to_many:
+                lst = list(attr.all())
+                for element in lst:
+                    el = list(filter(lambda x: x.id == element.id, value))
+                    if not el:
+                        diff.append(field)
+                    else:
+                        child = self.compare_field(element, model_to_dict(el[0]))
+                        if child:
+                            diff.extend(child)
+                if len(lst) != len(value):
+                    diff.append(field)
+            elif relation.many_to_one:
+                if self.compare_field(attr, model_to_dict(value)):
+                    diff.append(field)
+            elif attr != value:
+                diff.append(field)
+        return diff
+
+    def commit_create(self, request, obj):
+        Commit.objects.create(creator=request.user, content_object=obj, created=True)
+
+    def commit_update(self, request, obj, diff_fields):
+        if diff_fields:
+            updated_field = "|".join(diff_fields)
+            Commit.objects.create(creator=request.user, content_object=obj, updated_field=updated_field)
 
     def create(self, validated_data):
-        validated_data = self.add_validated_data(validated_data)
-        return super().create(validated_data)
+        obj = super().create(validated_data)
+        self.commit_create(self.context['request'], obj)
+        return obj
 
     def update(self, instance, validated_data):
+        diff_fields = self.compare_field(instance, validated_data)
         obj = super().update(instance, validated_data)
 
         # clean multi select tags
         if hasattr(self.Meta.model, 'tags') and 'tags' not in validated_data:
             obj.tags.clear()
 
-        from common.models import Commit
         # we create a commit with contributor
-        Commit.objects.create(creator=self.context['request'].user, content_object=obj)
+        self.commit_update(self.context['request'], obj, diff_fields)
         return obj
 
 

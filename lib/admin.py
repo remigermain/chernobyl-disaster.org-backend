@@ -12,9 +12,9 @@ class AdminBase(admin.ModelAdmin):
 
     def __init__(self, model, admin_site):
 
-        __list_display = ('created', 'updated', 'issue_count', 'commit_count')
-        __list_filter = ('created',)
-        __search_fields = ('created',)
+        __list_display = ('issue_count', 'commit_count')
+        __list_filter = ()
+        __search_fields = ()
 
         # check if models have i18n field
         if hasattr(model, 'langs'):

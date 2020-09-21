@@ -11,7 +11,6 @@ class PictureTest(BaseTest):
         self.event = Event.objects.create(
             title='good',
             date=self.time,
-            creator=self.user
         )
 
     @tag('serializer')

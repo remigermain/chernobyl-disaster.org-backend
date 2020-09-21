@@ -1,25 +1,8 @@
 from django.db import models
-from lib.models import CreatorAbstract, LanguageAbstract, LogAbstract
-from imagekit.models import ImageSpecField
-from imagekit.processors import ResizeToFill
-import re
+from lib.models import ChernobylModelAbstract, LanguageAbstract
 
 
-class Issue(LogAbstract):
-    """
-        model to report probleme on every models
-    """
-    message = models.TextField()
-
-
-class Commit(LogAbstract):
-    """
-        model to commit all modification on every models
-    """
-    pass
-
-
-class Tag(CreatorAbstract):
+class Tag(ChernobylModelAbstract):
     """
         tags content for easy to find element by tag
     """
@@ -42,15 +25,7 @@ class TagLang(LanguageAbstract):
         return f"{self.name} {self.language}"
 
 
-class Contact(CreatorAbstract):
-    email = models.EmailField(null=False, blank=False)
-    message = models.TextField(null=False, blank=False)
-
-    def __str__(self):
-        return f"{self.creator} | {self.created}"
-
-
-class Translate(CreatorAbstract):
+class Translate(ChernobylModelAbstract):
     key = models.TextField(null=False, blank=True)
 
     def __str__(self):
@@ -64,11 +39,3 @@ class TranslateLang(LanguageAbstract):
 
     def __str__(self):
         return f"{self.parent_key}: {self.value}"
-
-
-
-def profil_path(instance, filename):
-    import re
-    name = re.sub(r"[^a-zA-Z0-9]+", "", instance.name)
-    extentions = filename.split('.')[-1]
-    return f"people/{instance.id}/{name}.{extentions}"
