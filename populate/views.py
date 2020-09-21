@@ -59,38 +59,70 @@ def contributor(request):
 @api_view(['GET'])
 def overview(request):
     week = timezone.now() - timezone.timedelta(days=7)
-    query = get_user_model().objects.annotate(
-        week=(
-            Count("commit_creator", filter=Q(commit_creator__created__gte=week)) +
-            Count("event_creator", filter=Q(event_creator__created__gte=week)) +
-            Count("eventlang_creator", filter=Q(eventlang_creator__created__gte=week)) +
-            Count("people_creator", filter=Q(people_creator__created__gte=week)) +
-            Count("peoplelang_creator", filter=Q(peoplelang_creator__created__gte=week)) +
-            Count("picture_creator", filter=Q(picture_creator__created__gte=week)) +
-            Count("picturelang_creator", filter=Q(picturelang_creator__created__gte=week)) +
-            Count("tag_creator", filter=Q(tag_creator__created__gte=week)) +
-            Count("taglang_creator", filter=Q(taglang_creator__created__gte=week)) +
-            Count("translate_creator", filter=Q(translate_creator__created__gte=week)) +
-            Count("translatelang_creator", filter=Q(translatelang_creator__created__gte=week)) +
-            Count("video_creator", filter=Q(video_creator__created__gte=week)) +
-            Count("videolang_creator", filter=Q(videolang_creator__created__gte=week))
-        ),
-        total=(
-            Count("commit_creator") +
-            Count("event_creator") +
-            Count("eventlang_creator") +
-            Count("people_creator") +
-            Count("peoplelang_creator") +
-            Count("picture_creator") +
-            Count("picturelang_creator") +
-            Count("tag_creator") +
-            Count("taglang_creator") +
-            Count("translate_creator") +
-            Count("translatelang_creator") +
-            Count("video_creator") +
-            Count("videolang_creator")
-        )
-    ).values("username", "week", "total")[:3]
+
+    query_week = [
+        *get_user_model().objects.annotate(
+            week=(
+                Count("commit_creator", filter=Q(commit_creator__created__gte=week)) +
+                Count("event_creator", filter=Q(event_creator__created__gte=week)) +
+                Count("eventlang_creator", filter=Q(eventlang_creator__created__gte=week)) +
+                Count("people_creator", filter=Q(people_creator__created__gte=week)) +
+                Count("peoplelang_creator", filter=Q(peoplelang_creator__created__gte=week)) +
+                Count("picture_creator", filter=Q(picture_creator__created__gte=week)) +
+                Count("picturelang_creator", filter=Q(picturelang_creator__created__gte=week)) +
+                Count("tag_creator", filter=Q(tag_creator__created__gte=week)) +
+                Count("taglang_creator", filter=Q(taglang_creator__created__gte=week)) +
+                Count("video_creator", filter=Q(video_creator__created__gte=week)) +
+                Count("videolang_creator", filter=Q(videolang_creator__created__gte=week))
+            ),
+        ).values("username", "week"),
+        *get_user_model().objects.annotate(
+            week=Count("translatelang_creator", filter=Q(translatelang_creator__created__gte=week))
+        ).values("username", "week"),
+    ]
+
+    query_total = [
+        *get_user_model().objects.annotate(
+            total=(
+                Count("commit_creator") +
+                Count("event_creator") +
+                Count("eventlang_creator") +
+                Count("people_creator") +
+                Count("peoplelang_creator") +
+                Count("picture_creator") +
+                Count("picturelang_creator") +
+                Count("taglang_creator") +
+                Count("tag_creator") +
+                Count("video_creator") +
+                Count("videolang_creator")
+            )
+        ).values("username", "total"),
+        *get_user_model().objects.annotate(total=Count("translatelang_creator")).values("username", "total"),
+    ]
+
+    def merge(query, annotate):
+        dtc = {}
+        for w in query:
+            print(w)
+            if w['username'] not in dtc:
+                dtc[w['username']] = w[annotate]
+            else:
+                dtc[w['username']] += w[annotate]
+        lst = [{'username': key, annotate: value} for key, value in dtc.items()]
+        lst.sort(key=lambda x: x[annotate], reverse=True)
+        lst = lst[:3]
+
+        final = {}
+        if len(lst) > 0:
+            final['first'] = {'username': lst[0]['username'], 'count': lst[0][annotate]}
+        if len(lst) > 1:
+            final['second'] = {'username': lst[1]['username'], 'count': lst[1][annotate]}
+        if len(lst) > 2:
+            final['third'] = {'username': lst[2]['username'], 'count': lst[2][annotate]}
+        return final
+
+    lst_week = merge(query_week, "week")
+    lst_total = merge(query_total, "total")
 
     default = ["creator__username", "created", "id", "display"]
     # add model field
@@ -133,16 +165,8 @@ def overview(request):
     history.sort(key=lambda x: x['date'], reverse=True)
 
     query = {
-        'week': {
-            'first': {'username': 'rgermain', 'count': 55},
-            'second': {'username': 'rgermain', 'count': 55},
-            'third': {'username': 'rgermain', 'count': 55},
-        },
-        'total': {
-            'first': {'username': 'rgermain', 'count': 55},
-            'second': {'username': 'rgermain', 'count': 55},
-            'third': {'username': 'rgermain', 'count': 55},
-        },
+        'week': lst_week,
+        'total': lst_total,
         'results': history[:50]
     }
     return Response(query)
