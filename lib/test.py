@@ -70,13 +70,12 @@ class BaseTest(TestCase):
         # self.assertIsNotNone(obj.created)
         pass
 
-    def check_commit(self, obj, user=None):
-        user = user or self.user
-        commit = Commit.objects.filter(uuid=contenttypes_uuid(obj))
+    def check_commit(self, obj, created=True):
+        commit = Commit.objects.filter(uuid=contenttypes_uuid(obj), created=created)
         self.assertEqual(commit.count(), 1)
         commit = commit.first()
-        self.assertEqual(commit.creator, user)
-        self.assertIsNotNone(commit.created)
+        self.assertEqual(commit.creator, self.user)
+        self.assertEqual(commit.created, created)
 
     def check_update_language(self, obj, old_language, new_language):
         self.assertNotEqual(obj.language, old_language)

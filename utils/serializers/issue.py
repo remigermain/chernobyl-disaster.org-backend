@@ -11,6 +11,12 @@ class IssueSerializer(ModelSerializerBase):
     def get_contenttype(self, model, pk):
         return model.objects.get(pk=pk)
 
+    def commit_create(self, *args):
+        pass
+
+    def commit_update(self, *args):
+        pass
+
     def get_model(self, obj):
         return obj.contenttype.__class__ if obj.contenttype else None
 
