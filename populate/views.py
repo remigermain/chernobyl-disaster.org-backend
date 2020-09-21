@@ -100,16 +100,23 @@ def overview(request):
     lst.sort(key=lambda x: x['week'], reverse=True)
     lst_week = to_ranking(lst[:3], 'week')
 
+    def conv_uuid(obj):
+        if isinstance(obj, TranslateLang):
+            return Translate.__name__.lower()
+        return obj.__class__.__name__.lower()
+
     history = [
         {
             'id': commit.object_id,
             'creator': commit.creator.username,
             'date': commit.date,
             'display': str(commit.content_object),
-            'uuid': commit.content_object.__class__.__name__.lower(),
+            'uuid': conv_uuid(commit.content_object),
             'created': commit.created,
         }
-        for commit in query.order_by('-date')[:50]
+        for commit in query.filter(~Q(uuid__contains="|translateLang|"))
+                           .prefetch_related("content_object")
+                           .order_by('-date')[:50]
     ]
 
     query = {

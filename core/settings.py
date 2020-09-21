@@ -200,9 +200,8 @@ if DEBUG:
     ALLOWED_HOSTS = ['*']
 
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-    EMAIL_USE_TLS = False
-
     ACCOUNT_EMAIL_VERIFICATION = 'none'
+    EMAIL_USE_TLS = False
 
     DEBUG_TOOLBAR_PANELS = [
         'debug_toolbar.panels.timer.TimerPanel',

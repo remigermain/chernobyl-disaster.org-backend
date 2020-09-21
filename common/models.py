@@ -35,4 +35,4 @@ class TranslateLang(LanguageAbstract):
     parent_key = models.ForeignKey(Translate, on_delete=models.CASCADE, related_name="langs", null=False)
 
     def __str__(self):
-        return f"{str(self.parent_key)}: {self.value}"
+        return f"{self.get_language_display()}: {str(self.parent_key)}"
