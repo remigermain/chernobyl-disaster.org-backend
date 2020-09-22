@@ -34,5 +34,8 @@ class TranslateLang(LanguageAbstract):
     value = models.TextField(null=False, blank=False)
     parent_key = models.ForeignKey(Translate, on_delete=models.CASCADE, related_name="langs", null=False)
 
+    class Meta:
+        unique_together = ['parent_key', 'language']
+
     def __str__(self):
         return f"{self.get_language_display()}: {str(self.parent_key)}"

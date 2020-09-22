@@ -70,7 +70,7 @@ class LanguageAbstract(ChernobylModelAbstract):
     lang_choices = settings.LANGUAGES
     lang_default = settings.LANGUAGES_DEFAULT
 
-    language = models.CharField(choices=lang_choices, default=lang_default, max_length=4)
+    language = models.CharField(choices=lang_choices, max_length=4)
 
     class Meta:
         abstract = True

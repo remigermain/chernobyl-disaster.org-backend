@@ -81,7 +81,7 @@ class ModelSerializerBaseNested(WritableNestedModelSerializer):
 
     def commit_update(self, request, obj, diff):
         if diff:
-            "|".join(diff)
+            diff = "|".join(diff)
             Commit.objects.create(creator=request.user, content_object=obj, updated_field=diff)
 
     def create(self, validated_data):
