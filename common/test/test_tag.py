@@ -1,107 +1,239 @@
 from django.test import tag
 from lib.test import BaseTest
 from common.serializers.tag import TagSerializer
+from common.models import TagLang
+from django.urls import reverse
 
 
-@tag('model', 'tag')
+@tag('tag')
 class TagTest(BaseTest):
+
+    @tag('auth')
+    def test_auth(self):
+        response = self.client.post(reverse("tag-list"))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.post(reverse("tag-detail", args=[5]))
+        self.assertEqual(response.status_code, 403)
+
+    @tag('serializer', 'create')
     def test_create_serializer(self):
         data = {
-            'name': 'test'
+            'name': "name name",
         }
-        serialiser = TagSerializer(data=data, context=self.context)
-        self.assertTrue(serialiser.is_valid())
-        obj = serialiser.save()
-        self.assertIsNotNone(obj.id)
-        self.assertEqual(obj.name, data['name'])
-        self.check_creator(obj)
-        return obj
+        serializer = TagSerializer(data=data, context=self.context)
+        self.assertTrue(serializer.is_valid())
+        instance = serializer.save()
+        self.check_commit_created(instance)
+        return instance
 
-    def test_create_serializer_update(self):
-        obj = self.test_create_serializer()
-        old_name = obj.name
+    @tag('serializer', 'create')
+    def test_create_serializer_lang(self):
         data = {
-            'name': 'update-name'
-        }
-
-        serialiser = TagSerializer(instance=obj, data=data, context=self.context)
-        self.assertTrue(serialiser.is_valid())
-        updated = serialiser.save()
-        self.assertEqual(updated.id, obj.id)
-        self.assertNotEqual(updated.name, old_name)
-        self.assertEqual(updated.name, data['name'])
-        self.check_commit(updated)
-
-    def test_create_serializer_empty(self):
-        data = {}
-
-        serialiser = TagSerializer(data=data, context=self.context)
-        self.assertFalse(serialiser.is_valid())
-
-    def test_create_serializer_same_name(self):
-        obj = self.test_create_serializer()
-        data = {
-            'name': obj.name
-        }
-
-        serialiser = TagSerializer(data=data, context=self.context)
-        self.assertFalse(serialiser.is_valid())
-
-    @tag('serializer', 'langs')
-    def test_create_serializer_langs(self):
-        data = {
-            'name': "name",
+            'name': "name name",
             'langs': [
                 {
-                    'name': 'test',
+                    'name': 'lala',
                     'language': self.lang
                 }
             ]
         }
+        serializer = TagSerializer(data=data, context=self.context)
+        self.assertTrue(serializer.is_valid())
+        instance = serializer.save()
+        self.check_commit_created(instance)
+        self.check_commit_created(TagLang.objects.first())
+        return instance
 
-        serialiser = TagSerializer(data=data, context=self.context)
-        self.assertTrue(serialiser.is_valid())
-        obj = serialiser.save()
-        self.assertEqual(obj.langs.count(), 1)
-        self.assertEqual(obj.langs.first().name, data['langs'][0]['name'])
-        self.check_creator(obj)
-
-    @tag('serializer', 'langs')
-    def test_create_serializer_empty_langs(self):
+    @tag('serializer', 'create')
+    def test_create_serializer_lang2(self):
         data = {
-            'name': "name",
+            'name': "name name",
             'langs': [
                 {
-                    'name': 'test'
-                }
-            ]
-        }
-
-        serialiser = TagSerializer(data=data, context=self.context)
-        self.assertFalse(serialiser.is_valid())
-
-    @tag('serializer', 'langs')
-    def test_create_serializer_empty_langs2(self):
-        data = {
-            'name': "name",
-            'langs': [
-                {
-                    'name': 'test',
+                    'name': 'lala',
                     'language': self.lang
                 },
                 {
-                    'name': 'test22',
+                    'name': 'lala',
                     'language': self.lang2
                 }
             ]
         }
+        serializer = TagSerializer(data=data, context=self.context)
+        self.assertTrue(serializer.is_valid())
+        instance = serializer.save()
+        self.check_commit_created(instance)
+        self.assertEqual(TagLang.objects.count(), 2)
+        return instance
 
-        serialiser = TagSerializer(data=data, context=self.context)
-        self.assertTrue(serialiser.is_valid())
-        obj = serialiser.save()
-        self.assertEqual(obj.langs.count(), 2)
-        self.assertEqual(obj.langs.first().name, data['langs'][0]['name'])
-        self.assertEqual(obj.langs.first().language, data['langs'][0]['language'])
-        self.assertEqual(obj.langs.last().name, data['langs'][1]['name'])
-        self.assertEqual(obj.langs.last().language, data['langs'][1]['language'])
-        self.check_creator(obj)
+    @tag('serializer', 'update')
+    def test_update_serializer_lang2(self):
+        instance = self.test_create_serializer_lang2()
+        data = {
+            'name': "name name name",
+        }
+        serializer = TagSerializer(instance=instance, data=data, context=self.context)
+        self.assertTrue(serializer.is_valid())
+        instance = serializer.save()
+        self.check_commit_update(instance, ["name"])
+        return instance
+
+    @tag('serializer', 'update')
+    def test_update_serializer_change_lang(self):
+        instance = self.test_create_serializer_lang2()
+        obj1 = instance.langs.first()
+        obj2 = instance.langs.last()
+        data = {
+            'name': instance.name,
+            'langs': [
+                {
+                    'id': obj2.id,
+                    'name': 'lalal',
+                    'language': obj1.language,
+                },
+                {
+                    'id': obj1.id,
+                    'name': 'lalal',
+                    'language': obj2.language,
+                },
+            ],
+        }
+        serializer = TagSerializer(instance=instance, data=data, context=self.context)
+        self.assertTrue(serializer.is_valid())
+        instance = serializer.save()
+        self.check_commit_update(instance, ["langs"])
+        return instance
+
+    ###############################
+    #      error
+    ###############################
+
+    @tag('serializer', 'update')
+    def test_update_serializer_empty_name(self):
+        instance = self.test_create_serializer_lang2()
+        data = {
+            'name': "",
+        }
+        serializer = TagSerializer(instance=instance, data=data, context=self.context)
+        self.assertFalse(serializer.is_valid())
+
+    @tag('serializer', 'update')
+    def test_update_serializer_wrong_lang2(self):
+        instance = self.test_create_serializer_lang2()
+        data = {
+            'name': "",
+            'langs': [
+                {
+                    'name': 'lala',
+                    'language': self.lang
+                },
+                {
+                    'name': 'lala',
+                    'language': self.lang2
+                }
+            ]
+        }
+        serializer = TagSerializer(instance=instance, data=data, context=self.context)
+        self.assertFalse(serializer.is_valid())
+
+    @tag('serializer', 'create')
+    def test_create_serializer_wrong_lang(self):
+        data = {
+            'name': "name name",
+            'langs': [
+                {
+                    'name': 'lala',
+                    'language': "wrong"
+                },
+            ]
+        }
+        serializer = TagSerializer(data=data, context=self.context)
+        self.assertFalse(serializer.is_valid())
+
+    @tag('serializer', 'create')
+    def test_create_serializer_wrong_name(self):
+        data = {
+            'name': "",
+            'langs': [
+                {
+                    'name': 'lala',
+                    'language': self.lang
+                },
+            ]
+        }
+        serializer = TagSerializer(data=data, context=self.context)
+        self.assertFalse(serializer.is_valid())
+
+    @tag('serializer', 'create')
+    def test_create_serializer_wrong_lang_name(self):
+        data = {
+            'name': "name",
+            'langs': [
+                {
+                    'name': '',
+                    'language': self.lang
+                },
+            ]
+        }
+        serializer = TagSerializer(data=data, context=self.context)
+        self.assertFalse(serializer.is_valid())
+
+    @tag('serializer', 'create')
+    def test_client_serializer_wrong_lang_name(self):
+        data = {
+            'name': "name",
+            'langs': [
+                {
+                    'name': '',
+                    'language': self.lang
+                },
+            ]
+        }
+        response = self.factory.post(reverse("tag-list"), data=data)
+        self.assertEqual(response.status_code, 400)
+
+    @tag('serializer', 'create')
+    def test_client_serializer_wrong_name(self):
+        data = {
+            'name': "",
+            'langs': [
+                {
+                    'name': 'name',
+                    'language': self.lang
+                },
+            ]
+        }
+        response = self.factory.post(reverse("tag-list"), data=data)
+        self.assertEqual(response.status_code, 400)
+
+    @tag('serializer', 'create')
+    def test_client_serializer_wrong_lang(self):
+        data = {
+            'name': "",
+            'langs': [
+                {
+                    'name': 'name',
+                    'language': "wrong"
+                },
+            ]
+        }
+        response = self.factory.post(reverse("tag-list"), data=data)
+        self.assertEqual(response.status_code, 400)
+
+    @tag('serializer', 'create')
+    def test_client_serializer_wrong_same_lang(self):
+        data = {
+            'name': "name",
+            'langs': [
+                {
+                    'name': 'name',
+                    'language': self.lang
+                },
+                {
+                    'name': 'name',
+                    'language': self.lang
+                },
+            ]
+        }
+        response = self.factory.post(reverse("tag-list"), data=data)
+        self.assertEqual(response.status_code, 400)

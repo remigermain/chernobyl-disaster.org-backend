@@ -56,7 +56,13 @@ class BaseTest(TestCase):
         
         self.factory = APIClient()
         self.factory.force_authenticate(user=self.user)
-
+    
+    def get_user(self):
+        return get_user_model().objects.get(
+            username=self.username,
+            email=self.email,
+            password=self.password,
+        )
 
     def get_anonymous_user(self):
         self.context['request'].user = AnonymousUser()

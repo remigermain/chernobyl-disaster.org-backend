@@ -8,5 +8,5 @@ urlpatterns = [
     re_path(r'^registration/verify-email/(?P<key>[-:\w]+)/$', VerifyEmail.as_view(), name='account_confirm_email'),
     path('registration/verify-email/', VerifyEmail.as_view(), name='account_email_verification_sent'),
     path('password/reset/confirm/<uidb64>/<token>/', PasswordReset.as_view(), name='password_reset_confirm'),
-    path('delete/', deleteAcount),
+    path('delete/', deleteAcount, name='account_delete'),
 ]
