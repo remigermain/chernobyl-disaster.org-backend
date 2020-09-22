@@ -34,7 +34,7 @@ class ReadOnlyLamda(permissions.BasePermission):
         return self._global_permission(request, view)
 
     def has_object_permission(self, request, view, obj):
-        return self._global_permission(request, view)
+        return self.has_permission(request, view)
 
 
 class UpdateOnly(permissions.BasePermission):
@@ -52,5 +52,4 @@ class UpdateOnly(permissions.BasePermission):
         return self._global_permission(request, view)
 
     def has_object_permission(self, request, view, obj):
-        return self._global_permission(request, view)
-
+        return self.has_permission(request, view)

@@ -24,7 +24,7 @@ class TagLang(LanguageAbstract):
 
 
 class Translate(ChernobylModelAbstract):
-    key = models.TextField(null=False, blank=True)
+    key = models.TextField(null=False, blank=True, unique=True)
 
     def __str__(self):
         return self.key

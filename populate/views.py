@@ -114,7 +114,7 @@ def overview(request):
             'uuid': conv_uuid(commit.content_object),
             'created': commit.created,
         }
-        for commit in query.filter(~Q(uuid__contains="|translateLang|"))
+        for commit in query.all()
                            .prefetch_related("content_object")
                            .order_by('-date')[:50]
     ]
