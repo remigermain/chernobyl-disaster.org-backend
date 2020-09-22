@@ -3,7 +3,6 @@ from drf_writable_nested.serializers import WritableNestedModelSerializer
 from django.core.exceptions import ValidationError
 from django.utils.text import capfirst
 from utils.models import Commit
-from django.forms.models import model_to_dict
 
 
 class ModelSerializerBaseNested(WritableNestedModelSerializer):
@@ -55,40 +54,35 @@ class ModelSerializerBaseNested(WritableNestedModelSerializer):
             )
         return data
 
-    def compare_field(self, instance, validated_data):
+    def __diff_field(self, old, new):
         """
             find where field are changed
         """
         diff = []
-        for field, value in validated_data.items():
-            relation = instance._meta.get_field(field)
-            attr = getattr(instance, field)
-            if relation.many_to_many:
-                lst = list(attr.all())
-                for element in lst:
-                    el = list(filter(lambda x: x.id == element.id, value))
-                    if not el:
+        for field, value in old.items():
+            # print(field, value)
+            if field not in new:
+                diff.append(field)
+            elif isinstance(field, list):
+                for old_value, new_value in zip(value, new[field]):
+                    if isinstance(old_value, dict):
                         diff.append(field)
-                    else:
-                        child = self.compare_field(element, model_to_dict(el[0]))
-                        if child:
-                            diff.extend(child)
-                if len(lst) != len(value):
-                    diff.append(field)
-            elif relation.many_to_one and attr:
-                if self.compare_field(attr, model_to_dict(value)):
-                    diff.append(field)
-            elif attr != value:
+                        diff.extend(self.__diff_field(old_value, new_value))
+                    elif old_value != new_value:
+                        diff.append(field)
+            elif isinstance(field, dict):
+                diff.extend(self.__diff_field(old[field], new[field]))
+            elif value != new[field]:
                 diff.append(field)
         return diff
 
     def commit_create(self, request, obj):
         Commit.objects.create(creator=request.user, content_object=obj, created=True)
 
-    def commit_update(self, request, obj, diff_fields):
-        if diff_fields:
-            updated_field = "|".join(diff_fields)
-            Commit.objects.create(creator=request.user, content_object=obj, updated_field=updated_field)
+    def commit_update(self, request, obj, diff):
+        if diff:
+            "|".join(diff)
+            Commit.objects.create(creator=request.user, content_object=obj, updated_field=diff)
 
     def create(self, validated_data):
         obj = super().create(validated_data)
@@ -96,15 +90,21 @@ class ModelSerializerBaseNested(WritableNestedModelSerializer):
         return obj
 
     def update(self, instance, validated_data):
-        diff_fields = self.compare_field(instance, validated_data)
+        # serialize old instance
+        t1 = self.__class__(instance=instance).data
+
         obj = super().update(instance, validated_data)
+
+        # serialize new instance
+        t2 = self.__class__(instance=obj).data
 
         # clean multi select tags
         if hasattr(self.Meta.model, 'tags') and 'tags' not in validated_data:
             obj.tags.clear()
 
+        diff = self.__diff_field(t1, t2)
         # we create a commit with contributor
-        self.commit_update(self.context['request'], obj, diff_fields)
+        self.commit_update(self.context['request'], obj, diff)
         return obj
 
 
