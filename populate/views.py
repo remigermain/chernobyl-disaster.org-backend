@@ -10,6 +10,7 @@ from rest_framework.permissions import IsAdminUser
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_204_NO_CONTENT
 from lib.permission import ReadOnlyLamda
 from django.utils import timezone
+from utils.function import contenttypes_uuid
 
 
 def serialize(obj, display_name):
@@ -164,9 +165,15 @@ def translate_overview(request):
 def translate_delete(request, lang):
     if lang not in [code[0] for code in TranslateLang.lang_choices]:
         return Response(status=HTTP_400_BAD_REQUEST, data={'detail': "language not found"})
-    data = {
-        "detail": TranslateLang.objects.filter(language=lang).delete()
-    }
+
+    # generate uuids
+    uuids = [contenttypes_uuid(t) for t in TranslateLang.objects.filter(language=lang)]
+    deleted = TranslateLang.objects.filter(language=lang).delete()
+
+    # delete commit
+    Commit.objects.filter(uuid__in=uuids).delete()
+
+    data = {"detail": deleted}
     return Response(data, status=HTTP_204_NO_CONTENT)
 
 
