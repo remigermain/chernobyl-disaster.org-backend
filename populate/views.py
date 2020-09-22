@@ -1,15 +1,14 @@
 from rest_framework.response import Response
 from django.conf import settings
 from timeline.models import Event
-from gallery.models import Picture, Video, People
+from gallery.models import People
 from common.models import Tag, Translate, TranslateLang
 from utils.models import Commit
-from django.db.models import Q, Count, F
+from django.db.models import Q
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser
-from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_204_NO_CONTENT
 from lib.permission import ReadOnlyLamda
-from django.contrib.auth import get_user_model
 from django.utils import timezone
 
 
@@ -49,6 +48,7 @@ def populate(request):
         'tags': tags,
         'events': events
     })
+
 
 @api_view(['GET'])
 def contributor(request):
@@ -105,14 +105,25 @@ def overview(request):
             return Translate.__name__.lower()
         return obj.__class__.__name__.lower()
 
+    def conv_id(obj):
+        if isinstance(obj.content_object, TranslateLang):
+            return obj.content_object.language
+        return obj.content_object.id
+
+    def conv_query(obj):
+        if isinstance(obj.content_object, TranslateLang):
+            return {'query': {'id': obj.content_object.parent_key.id}, 'detail': obj.content_object.id}
+        return {}
+
     history = [
         {
-            'id': commit.object_id,
+            'id': conv_id(commit),
             'creator': commit.creator.username,
             'date': commit.date,
             'display': str(commit.content_object),
             'uuid': conv_uuid(commit.content_object),
             'created': commit.created,
+            **conv_query(commit)
         }
         for commit in query.all()
                            .prefetch_related("content_object")
@@ -156,7 +167,7 @@ def translate_delete(request, lang):
     data = {
         "detail": TranslateLang.objects.filter(language=lang).delete()
     }
-    return Response(data)
+    return Response(data, status=HTTP_204_NO_CONTENT)
 
 
 @api_view(['POST'])

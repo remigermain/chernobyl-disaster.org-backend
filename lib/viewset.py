@@ -7,7 +7,6 @@ from lib.permission import ChernobylPermission
 
 
 class ModelViewSetBase(viewsets.ModelViewSet):
-    http_method_names = ['get', 'post', 'patch', 'head', 'options', 'trace']
     parser_classes = (n, NestedMultiPartParser, MultiPartParser, FormParser, JSONParser)
     permission_classes = (ChernobylPermission,)
 

@@ -148,3 +148,11 @@ class ModelSerializerBase(ModelSerializerBaseNested):
     def updated(self, obj):
         # obj has annotate contributures count we return it or by queryset
         return obj.updated
+
+    def perform_destroy(self, instance):
+        from utils.models import Commit
+        from utils.function import contenttypes_uuid
+        uuid = contenttypes_uuid(instance)
+        ret = super().perform_destroy(instance)
+        Commit.objects.filter(uuid=uuid).delete()
+        return ret
