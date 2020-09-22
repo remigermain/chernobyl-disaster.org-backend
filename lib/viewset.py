@@ -1,16 +1,16 @@
 from rest_framework import viewsets
-from drf_nested_forms.parsers import NestedMultiPartParser
-from lib.parser.parser import NestedMultiPartParser as n
+from lib.parser.parser import NestedParser
 from rest_framework.parsers import JSONParser, FormParser, MultiPartParser
 from distutils.util import strtobool
 from lib.permission import ChernobylPermission
 
 
 class ModelViewSetBase(viewsets.ModelViewSet):
-    parser_classes = (n, NestedMultiPartParser, MultiPartParser, FormParser, JSONParser)
+    parser_classes = (NestedParser, MultiPartParser, FormParser, JSONParser)
     permission_classes = (ChernobylPermission,)
 
     def __init__(self, *args, **kwargs):
+        # TODO
         if not hasattr(self, 'filterset_fields'):
             self.filterset_fields = []
         if not hasattr(self, 'search_fields'):

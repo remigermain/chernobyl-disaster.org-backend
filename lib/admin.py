@@ -12,6 +12,7 @@ class AdminBase(admin.ModelAdmin):
 
     def __init__(self, model, admin_site):
 
+        # TODO
         __list_display = ('issue_count', 'commit_count')
         __list_filter = ()
         __search_fields = ()

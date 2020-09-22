@@ -14,37 +14,6 @@ class ChernobylModelAbstract(models.Model):
     class Meta:
         abstract = True
 
-    def get_issue(self):
-        """
-            return all issues on this models
-        """
-        from common.models import Issue
-        return Issue.objects.filter(uuid=contenttypes_uuid(self))
-
-    @property
-    def issue_count(self):
-        return self.get_issue().count()
-
-    @property
-    def model(self):
-        return self.__class__.__name__.lower()
-
-    def get_commit(self):
-        """
-            return all commits from this models
-        """
-        from common.models import Commit
-        return Commit.objects.filter(uuid=contenttypes_uuid(self))
-
-    @property
-    def commit_count(self):
-        return self.get_commit().count()
-
-    @property
-    def updated(self):
-        obj = self.get_commit().order_by('-created').first()
-        return obj.created if obj else self.created
-
     def to_url(self, field):
         link = getattr(self, field)
         if not link:
@@ -60,6 +29,13 @@ class ChernobylModelAbstract(models.Model):
             self.full_clean()
         super(ChernobylModelAbstract, self).save(*args, **kwargs)
         return self
+
+    def delete(self, *args, **kwargs):
+        from utils.models import Commit
+        uuid = contenttypes_uuid(self)
+        ret = super().delete(*args, **kwargs)
+        Commit.objects.filter(uuid=uuid).delete()
+        return ret
 
 
 class LanguageAbstract(ChernobylModelAbstract):

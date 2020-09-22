@@ -1,7 +1,13 @@
 #!/usr/bin/python3
-from django.core.management.utils import get_random_secret_key
 import argparse
 import re
+import secrets
+
+
+def get_random_secret_key():
+    allowed_char = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
+    return ''.join(secrets.choice(allowed_char) for i in range(50))
+
 
 REGEX = r"[\t ]+"
 reg_space = re.compile(REGEX)

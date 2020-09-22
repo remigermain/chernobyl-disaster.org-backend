@@ -56,17 +56,15 @@ class ModelSerializerBaseNested(WritableNestedModelSerializer):
 
     def __diff_field(self, old, new):
         """
-            find where field are changed
+            find field are changed before update
         """
         diff = []
         for field, value in old.items():
-            # print(field, value)
             if field not in new:
                 diff.append(field)
             elif isinstance(field, list):
                 for old_value, new_value in zip(value, new[field]):
                     if isinstance(old_value, dict):
-                        diff.append(field)
                         diff.extend(self.__diff_field(old_value, new_value))
                     elif old_value != new_value:
                         diff.append(field)
@@ -80,9 +78,7 @@ class ModelSerializerBaseNested(WritableNestedModelSerializer):
         Commit.objects.create(creator=request.user, content_object=obj, created=True)
 
     def commit_update(self, request, obj, diff):
-        if diff:
-            diff = "|".join(diff)
-            Commit.objects.create(creator=request.user, content_object=obj, updated_field=diff)
+        Commit.objects.create(creator=request.user, content_object=obj, updated_fields=diff)
 
     def create(self, validated_data):
         obj = super().create(validated_data)
@@ -94,23 +90,25 @@ class ModelSerializerBaseNested(WritableNestedModelSerializer):
         t1 = self.__class__(instance=instance).data
 
         obj = super().update(instance, validated_data)
-
-        # serialize new instance
-        t2 = self.__class__(instance=obj).data
-
         # clean multi select tags
         if hasattr(self.Meta.model, 'tags') and 'tags' not in validated_data:
             obj.tags.clear()
 
+        # serialize new instance
+        t2 = self.__class__(instance=obj).data
+
+        # generate diff from old and new instance
         diff = self.__diff_field(t1, t2)
         # we create a commit with contributor
-        self.commit_update(self.context['request'], obj, diff)
+        if diff:
+            self.commit_update(self.context['request'], obj, diff)
         return obj
 
 
 class ModelSerializerBase(ModelSerializerBaseNested):
     def __init__(self, *args, **kwargs):
         context = kwargs.get('context', None)
+        # TODO
         if context and \
            hasattr(context['request'], 'query_params') and \
            hasattr(context['request'].query_params, 'contribute') and \
@@ -149,10 +147,3 @@ class ModelSerializerBase(ModelSerializerBaseNested):
         # obj has annotate contributures count we return it or by queryset
         return obj.updated
 
-    def perform_destroy(self, instance):
-        from utils.models import Commit
-        from utils.function import contenttypes_uuid
-        uuid = contenttypes_uuid(instance)
-        ret = super().perform_destroy(instance)
-        Commit.objects.filter(uuid=uuid).delete()
-        return ret

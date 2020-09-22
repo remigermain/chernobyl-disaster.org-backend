@@ -53,7 +53,7 @@ class Migration(migrations.Migration):
                 ('created', models.BooleanField(default=False)),
                 ('object_id', models.PositiveIntegerField()),
                 ('uuid', models.CharField(max_length=200)),
-                ('updated_field', models.TextField(blank=True, null=True)),
+                ('updated_fields', models.TextField(blank=True, null=True)),
                 ('content_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='contenttypes.contenttype')),
                 ('creator', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='commit_creator', to=settings.AUTH_USER_MODEL)),
             ],

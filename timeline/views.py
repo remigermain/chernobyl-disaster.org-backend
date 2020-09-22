@@ -13,10 +13,5 @@ class EventViewSet(ModelViewSetBase):
     ordering_fields = ['title', 'date']
 
     def get_queryset(self):
-        return super().get_queryset()\
-                      .prefetch_related("langs",
-                                        "pictures__langs",
-                                        "videos__langs",
-                                        "tags__langs"
-                                        )
-
+        fields = ["langs", "pictures__langs", "videos__langs", "tags__langs"]
+        return super().get_queryset().prefetch_related(*fields)

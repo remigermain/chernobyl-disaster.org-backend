@@ -101,7 +101,7 @@ class BaseTest(TestCase):
         self.assertEqual(query.count(), 1)
         commit = query.first()
         self.assertEqual(commit.creator, creator)
-        self.assertIsNone(commit.updated_field)
+        self.assertIsNone(commit.updated_fields)
         self.assertTrue(commit.created)
 
     def check_commit_update(self, instance, diff, creator=None):
@@ -112,4 +112,4 @@ class BaseTest(TestCase):
         self.assertEqual(query.count(), 1)
         commit = query.first()
         self.assertEqual(commit.creator, creator)
-        self.assertEqual(commit.updated_field.split("|"), diff)
+        self.assertEqual(commit.updated_fields.split("|"), diff)
