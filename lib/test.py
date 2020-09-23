@@ -36,7 +36,8 @@ class BaseTest(TestCase):
         self.context = {'request': self.request}
 
         self.lang = settings.LANGUAGES_DEFAULT
-        self.lang2 = [lang for lang in self.langs if lang is not self.lang][0]
+        self.__available_langs = [lang[0] for lang in settings.LANGUAGES]
+        self.lang2 = [lang for lang in self.__available_langs if lang is not self.lang][0]
         self.time = timezone.now()
         self.time2 = timezone.now() - timezone.timedelta(days=9)
 
@@ -94,4 +95,4 @@ class BaseTest(TestCase):
         self.assertEqual(query.count(), 1)
         commit = query.first()
         self.assertEqual(commit.creator, creator)
-        self.assertEqual(commit.updated_fields.split("|"), diff)
+        self.assertSetEqual(set(commit.updated_fields.split("|")), set(diff))

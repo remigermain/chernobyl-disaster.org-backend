@@ -9,19 +9,16 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 
 
 @tag('picture')
-class VideoTest(BaseTest):
+class PictureTest(BaseTest):
 
     def setUp(self):
         super().setUp()
-        self.picture = SimpleUploadedFile(
-            'small.png',
-            (
-                b'\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x00\x00\x00\x21\xf9\x04'
-                b'\x01\x0a\x00\x01\x00\x2c\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02'
-                b'\x02\x4c\x01\x00\x3b'
-            ),
-            content_type='image/png'
+        image = (
+            b'\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x00\x00\x00\x21\xf9\x04'
+            b'\x01\x0a\x00\x01\x00\x2c\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02'
+            b'\x02\x4c\x01\x00\x3b'
         )
+        self.picture = SimpleUploadedFile("image.jpeg", image, content_type="multipart")
         self.event = Event.objects.create(title="title", date=timezone.now())
 
     def test_auth(self):
@@ -47,6 +44,18 @@ class VideoTest(BaseTest):
         data = {
             'title': 'title',
             'picture': self.picture
+        }
+        serializer = PictureSerializerPost(data=data, context=self.context, partial=True)
+        self.assertTrue(serializer.is_valid())
+        instance = serializer.save()
+        self.check_commit_created(instance)
+        return instance
+
+    def test_create_serializer_event(self):
+        data = {
+            'title': 'title',
+            'picture': self.picture,
+            'event': self.event.id
         }
         serializer = PictureSerializerPost(data=data, context=self.context, partial=True)
         self.assertTrue(serializer.is_valid())
@@ -90,6 +99,7 @@ class VideoTest(BaseTest):
         instance = serializer.save()
         self.check_commit_created(instance)
         self.assertEqual(instance.langs.count(), 2)
+        self.assertIsNotNone(instance.picture)
         return instance
 
     def test_create_client(self):
@@ -99,8 +109,18 @@ class VideoTest(BaseTest):
         }
         response = self.client.post(reverse('picture-list'), data=data)
         self.assertEqual(response.status_code, 403)
-        response = self.factory.post(reverse('picture-list'), data=data, format='multipart')
-        print(response.content)
+        response = self.factory.post(reverse('picture-list'), data=data)
+        self.assertEqual(response.status_code, 201)
+
+    def test_create_client_event(self):
+        data = {
+            'title': 'title',
+            'video': 'https://peertube.com/emmferpfe',
+            'event': self.event.id
+        }
+        response = self.client.post(reverse('video-list'), data=data)
+        self.assertEqual(response.status_code, 403)
+        response = self.factory.post(reverse('video-list'), data=data)
         self.assertEqual(response.status_code, 201)
 
     def test_create_client_langs(self):
@@ -130,17 +150,17 @@ class VideoTest(BaseTest):
         response = self.factory.post(reverse('picture-list'), data=data)
         self.assertEqual(response.status_code, 201)
         self.assertEqual(PictureLang.objects.count(), 2)
-    
-    # def test_create_serializer(self):
-    #     instance = self.test_create_serializer()
-    #     data = {
-    #         'title': 'title title',
-    #     }
-    #     serializer = PictureSerializerPost(instance=instance, data=data, context=self.context, partial=True)
-    #     print(serializer.is_valid(), serializer.errors)
-    #     self.assertTrue(serializer.is_valid())
-    #     instance = serializer.save()
-    #     self.check_commit_update(instance, diff=['title'])
+
+    def test_update_serializer(self):
+        instance = self.test_create_serializer()
+        data = {
+            'title': 'title title',
+        }
+        serializer = PictureSerializerPost(instance=instance, data=data, context=self.context, partial=True)
+        print(serializer.is_valid(), serializer.errors)
+        self.assertTrue(serializer.is_valid())
+        instance = serializer.save()
+        self.check_commit_update(instance, diff=['title'])
 
     def test_update_client(self):
         instance = self.test_create_serializer()
@@ -274,6 +294,26 @@ class VideoTest(BaseTest):
         }
         response = self.factory.post(reverse('picture-list'), data=data)
         self.assertEqual(response.status_code, 400)
+
+    def test_create_serializer_wrong_event(self):
+        data = {
+            'title': 'title',
+            'picture': self.picture,
+            'event': self.event.id + 2
+        }
+        serializer = PictureSerializerPost(data=data, context=self.context, partial=True)
+        self.assertFalse(serializer.is_valid())
+
+    def test_create_serializer_empty_event(self):
+        data = {
+            'title': 'title',
+            'picture': self.picture,
+            'event': ""
+        }
+        serializer = PictureSerializerPost(data=data, context=self.context, partial=True)
+        self.assertTrue(serializer.is_valid())
+        instance = serializer.save()
+        self.assertIsNone(instance.event)
 
     def test_update_serializer(self):
         instance = self.test_create_serializer()

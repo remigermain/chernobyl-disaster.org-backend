@@ -44,6 +44,18 @@ class VideoTest(BaseTest):
         self.check_commit_created(instance)
         return instance
 
+    def test_create_serializer_event(self):
+        data = {
+            'title': 'title',
+            'video': 'https://peertube.com/emmferpfe',
+            'event': self.event.id
+        }
+        serializer = VideoSerializerPost(data=data, context=self.context, partial=True)
+        self.assertTrue(serializer.is_valid())
+        instance = serializer.save()
+        self.check_commit_created(instance)
+        return instance
+
     def test_create_serializer_langs(self):
         data = {
             'title': 'title',
@@ -92,6 +104,17 @@ class VideoTest(BaseTest):
         response = self.factory.post(reverse('video-list'), data=data)
         self.assertEqual(response.status_code, 201)
 
+    def test_create_client_event(self):
+        data = {
+            'title': 'title',
+            'video': 'https://peertube.com/emmferpfe',
+            'event': self.event.id
+        }
+        response = self.client.post(reverse('video-list'), data=data)
+        self.assertEqual(response.status_code, 403)
+        response = self.factory.post(reverse('video-list'), data=data)
+        self.assertEqual(response.status_code, 201)
+
     def test_create_client_langs(self):
         data = {
             'title': 'title',
@@ -120,16 +143,15 @@ class VideoTest(BaseTest):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(VideoLang.objects.count(), 2)
     
-    # def test_create_serializer(self):
-    #     instance = self.test_create_serializer()
-    #     data = {
-    #         'title': 'title title',
-    #     }
-    #     serializer = VideoSerializerPost(instance=instance, data=data, context=self.context, partial=True)
-    #     print(serializer.is_valid(), serializer.errors)
-    #     self.assertTrue(serializer.is_valid())
-    #     instance = serializer.save()
-    #     self.check_commit_update(instance, diff=['title'])
+    def test_update_serializer(self):
+        instance = self.test_create_serializer()
+        data = {
+            'title': 'title title',
+        }
+        serializer = VideoSerializerPost(instance=instance, data=data, context=self.context, partial=True)
+        self.assertTrue(serializer.is_valid())
+        instance = serializer.save()
+        self.check_commit_update(instance, diff=['title'])
 
     def test_update_client(self):
         instance = self.test_create_serializer()
@@ -263,6 +285,26 @@ class VideoTest(BaseTest):
         }
         response = self.factory.post(reverse('video-list'), data=data)
         self.assertEqual(response.status_code, 400)
+
+    def test_create_serializer_wrong_event(self):
+        data = {
+            'title': 'title',
+            'video': 'https://peertube.com/emmferpfe',
+            'event': self.event.id + 2
+        }
+        serializer = VideoSerializerPost(data=data, context=self.context, partial=True)
+        self.assertFalse(serializer.is_valid())
+
+    def test_create_serializer_empty_event(self):
+        data = {
+            'title': 'title',
+            'video': 'https://peertube.com/emmferpfe',
+            'event': ""
+        }
+        serializer = VideoSerializerPost(data=data, context=self.context, partial=True)
+        self.assertTrue(serializer.is_valid())
+        instance = serializer.save()
+        self.assertIsNone(instance.event)
 
     def test_update_serializer(self):
         instance = self.test_create_serializer()

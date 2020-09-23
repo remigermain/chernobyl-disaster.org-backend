@@ -91,7 +91,7 @@ class People(ChernobylModelAbstract):
                                            format='JPEG',
                                            options={'quality': 60})
 
-    wikipedia = models.URLField(null=True, blank=True)
+    wikipedia = models.URLField(null=True)
     tags = models.ManyToManyField(Tag, related_name="peoples", blank=True)
 
     def __str__(self):

@@ -38,8 +38,10 @@ class PeopleSerializerPost(PeopleSerializer):
             tag = Tag.objects.get(name=instance.name)
         except Tag.DoesNotExist:
             tag = Tag.objects.create(name=validated_data['name'])
+
         obj = super().update(instance, validated_data)
-        if tag.name != validated_data['name']:
+
+        if 'name' in validated_data and tag.name != validated_data['name']:
             tag.name = validated_data['name']
             tag.save()
         obj.tags.add(tag)
