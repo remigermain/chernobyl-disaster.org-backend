@@ -10,9 +10,14 @@ class TagTest(BaseTest):
 
     @tag('auth')
     def test_auth(self):
+        instance = self.test_create_serializer()
+        response = self.client.get(reverse("tag-list"))
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(reverse("tag-detail", args=[instance.id]))
+        self.assertEqual(response.status_code, 200)
         response = self.client.post(reverse("tag-list"))
         self.assertEqual(response.status_code, 403)
-        response = self.client.post(reverse("tag-detail", args=[5]))
+        response = self.client.post(reverse("tag-detail", args=[instance.id]))
         self.assertEqual(response.status_code, 403)
 
     @tag('serializer', 'create')

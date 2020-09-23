@@ -15,9 +15,17 @@ class TranslateTest(BaseTest):
 
     @tag('auth')
     def test_auth(self):
+        response = self.client.get(reverse("translatelang-list"))
+        self.assertEqual(response.status_code, 403)
         response = self.client.post(reverse("translatelang-list"))
         self.assertEqual(response.status_code, 403)
         response = self.client.post(reverse("translatelang-detail", args=[5]))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get(reverse("translate-list"))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.post(reverse("translate-list"))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.post(reverse("translate-detail", args=[5]))
         self.assertEqual(response.status_code, 403)
 
     @tag('serializer', 'create')

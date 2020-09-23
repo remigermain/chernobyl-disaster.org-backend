@@ -18,7 +18,7 @@ class BaseTest(TestCase):
     def setUp(self):
         self.username = 'username'
         self.email = 'email@email.email'
-        self.password = 'password'
+        self.password = 'ER5dd[]433-444e'
         self.user = get_user_model().objects.create(
             username=self.username,
             email=self.email,

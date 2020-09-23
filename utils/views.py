@@ -1,12 +1,12 @@
 from rest_framework import mixins, viewsets
 from utils.models import Contact, Issue
 from utils.serializers import contact, issue
-from lib.permission import CreateOnly
+from rest_framework.permissions import IsAuthenticated
 
 
 class IssueViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     queryset = Issue.objects.none()
-    permission_classes = (CreateOnly,)
+    permission_classes = (IsAuthenticated,)
     serializer_class = issue.IssueSerializer
 
 

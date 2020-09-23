@@ -59,7 +59,7 @@ class Commit(LogAbstract):
     def save(self, *args, **kwargs):
         if isinstance(self.updated_fields, list):
             self.updated_fields = "|".join(self.updated_fields)
-        super().save(*args, **kwargs)
+        return super().save(*args, **kwargs)
 
 
 class Contact(CreatorAbstract):

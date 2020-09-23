@@ -9,6 +9,11 @@ import json
 @tag('contact')
 class ContactTest(BaseTest):
 
+    @tag('auth')
+    def test_auth(self):
+        response = self.client.get(reverse('contact-list'))
+        self.assertEqual(response.status_code, 405)
+
     def test_create_serializer(self):
         data = {
             'message': 'lalalalalal',

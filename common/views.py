@@ -1,6 +1,7 @@
 from lib.viewset import ModelViewSetBase
 from common.models import Tag, Translate, TranslateLang
 from lib.permission import ReadOnlyLamda
+from rest_framework.permissions import IsAuthenticated
 from common.serializers import tag, translate
 
 
@@ -19,7 +20,7 @@ class TagViewSet(ModelViewSetBase):
 class TranslateViewSet(ModelViewSetBase):
     queryset = Translate.objects.all()
     serializer_class = translate.TranslateSerializer
-    permission_class = (ReadOnlyLamda,)
+    permission_classes = (ReadOnlyLamda,)
 
     def get_queryset(self):
         return super().get_queryset().prefetch_related("langs")
@@ -28,3 +29,4 @@ class TranslateViewSet(ModelViewSetBase):
 class TranslateLangViewSet(ModelViewSetBase):
     queryset = TranslateLang.objects.all()
     serializer_class = translate.TranslateLangSerializer
+    permission_classes = (IsAuthenticated,)

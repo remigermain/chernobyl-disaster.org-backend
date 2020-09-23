@@ -16,6 +16,11 @@ class IssueTest(BaseTest):
         self.event = Event.objects.create(title="event_name", date=timezone.now())
         self.uuid = self.event.__class__.__name__.lower()
 
+    @tag('auth')
+    def test_auth(self):
+        response = self.client.get(reverse('issue-list'))
+        self.assertEqual(response.status_code, 403)
+
     def test_create_serializer(self):
         data = {
             'message': 'lalalalalal',
@@ -132,11 +137,6 @@ class IssueTest(BaseTest):
         }
         response = self.factory.post(reverse("issue-list"), data=data)
         self.assertEqual(response.status_code, 400)
-
-    @tag('client', 'get')
-    def test_create_client_get(self):
-        response = self.factory.get(reverse("issue-list"))
-        self.assertEqual(response.status_code, 403)
 
     @tag('client', 'get')
     def test_create_client_no_connect(self):
