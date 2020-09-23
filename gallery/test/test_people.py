@@ -101,8 +101,6 @@ class PeopleTest(BaseTest):
             'name': 'name',
             'profil': self.picture
         }
-        response = self.client.post(reverse('people-list'), data=data)
-        self.assertEqual(response.status_code, 403)
         response = self.factory.post(reverse('people-list'), data=data)
         self.assertEqual(response.status_code, 201)
 
@@ -112,8 +110,6 @@ class PeopleTest(BaseTest):
             'langs[0][biography]': 'lala',
             'langs[0][language]': self.lang,
         }
-        response = self.client.post(reverse('people-list'), data=data)
-        self.assertEqual(response.status_code, 403)
         response = self.factory.post(reverse('people-list'), data=data)
         self.assertEqual(response.status_code, 201)
         self.assertEqual(PeopleLang.objects.count(), 1)
@@ -126,8 +122,6 @@ class PeopleTest(BaseTest):
             'langs[1][biography]': 'lala',
             'langs[1][language]': self.lang2,
         }
-        response = self.client.post(reverse('people-list'), data=data)
-        self.assertEqual(response.status_code, 403)
         response = self.factory.post(reverse('people-list'), data=data)
         self.assertEqual(response.status_code, 201)
         self.assertEqual(PeopleLang.objects.count(), 2)
@@ -137,8 +131,6 @@ class PeopleTest(BaseTest):
         data = {
             'name': 'title title',
         }
-        response = self.client.patch(reverse('people-detail', args=[instance.id]), data=data)
-        self.assertEqual(response.status_code, 403)
         response = self.factory.patch(reverse('people-detail', args=[instance.id]), data=data)
         self.assertEqual(response.status_code, 200)
 
@@ -151,8 +143,6 @@ class PeopleTest(BaseTest):
             'langs[1][biography]': 'lala',
             'langs[1][language]': self.lang2,
         }
-        response = self.client.patch(reverse('people-detail', args=[instance.id]), data=data)
-        self.assertEqual(response.status_code, 403)
         response = self.factory.patch(reverse('people-detail', args=[instance.id]), data=data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(People.objects.count(), 1)
@@ -170,16 +160,13 @@ class PeopleTest(BaseTest):
             'langs[1][biography]': 'lala',
             'langs[1][language]': langs[0].language,
         }
-        response = self.client.patch(reverse('people-detail', args=[instance.id]), data=data)
-        self.assertEqual(response.status_code, 403)
         response = self.factory.patch(reverse('people-detail', args=[instance.id]), data=data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(People.objects.count(), 1)
         self.assertEqual(PeopleLang.objects.count(), 2)
 
     def test_create_client_no_biography(self):
-        data = {
-        }
+        data = {}
         response = self.factory.post(reverse('people-list'), data=data)
         self.assertEqual(response.status_code, 400)
 
@@ -379,3 +366,33 @@ class PeopleTest(BaseTest):
         }
         serializer = PeopleSerializerPost(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
+
+    def test_delete_commit(self):
+        from utils.function import contenttypes_uuid
+        from utils.models import Commit
+
+        instance = self.test_create_serializer()
+
+        uuid = contenttypes_uuid(instance)
+        self.assertNotEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+        response = self.factory_admin.delete(reverse("people-detail", args=[instance.id]))
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+
+    def test_delete_commit_parent(self):
+        from utils.function import contenttypes_uuid
+        from utils.models import Commit
+
+        instance = self.test_create_serializer_langs2()
+        langs = instance.langs.all()
+
+        # delete child
+        uuid = contenttypes_uuid(langs[0])
+        self.assertNotEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+        langs[0].delete()
+        self.assertEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+
+        uuid = contenttypes_uuid(langs[0])
+        self.assertNotEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+        langs.delete()
+        self.assertEqual(Commit.objects.filter(uuid=uuid).count(), 0)

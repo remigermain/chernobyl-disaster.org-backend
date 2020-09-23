@@ -57,7 +57,7 @@ class TagTest(BaseTest):
         return instance
 
     @tag('serializer', 'create')
-    def test_create_serializer_lang2(self):
+    def test_create_serializer_langs2(self):
         data = {
             'name': "name name",
             'langs': [
@@ -80,7 +80,7 @@ class TagTest(BaseTest):
 
     @tag('serializer', 'update')
     def test_update_serializer_lang2(self):
-        instance = self.test_create_serializer_lang2()
+        instance = self.test_create_serializer_langs2()
         data = {
             'name': "name name name",
         }
@@ -92,7 +92,7 @@ class TagTest(BaseTest):
 
     @tag('serializer', 'update')
     def test_update_serializer_change_lang(self):
-        instance = self.test_create_serializer_lang2()
+        instance = self.test_create_serializer_langs2()
         obj1 = instance.langs.first()
         obj2 = instance.langs.last()
         data = {
@@ -122,7 +122,7 @@ class TagTest(BaseTest):
 
     @tag('serializer', 'update')
     def test_update_serializer_empty_name(self):
-        instance = self.test_create_serializer_lang2()
+        instance = self.test_create_serializer_langs2()
         data = {
             'name': "",
         }
@@ -131,7 +131,7 @@ class TagTest(BaseTest):
 
     @tag('serializer', 'update')
     def test_update_serializer_wrong_lang2(self):
-        instance = self.test_create_serializer_lang2()
+        instance = self.test_create_serializer_langs2()
         data = {
             'name': "",
             'langs': [
@@ -257,3 +257,33 @@ class TagTest(BaseTest):
 
         response = self.factory_admin.delete(reverse("tag-detail", args=[instance.id]))
         self.assertEqual(response.status_code, 204)
+
+    def test_delete_commit(self):
+        from utils.function import contenttypes_uuid
+        from utils.models import Commit
+
+        instance = self.test_create_serializer()
+
+        uuid = contenttypes_uuid(instance)
+        self.assertNotEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+        response = self.factory_admin.delete(reverse("tag-detail", args=[instance.id]))
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+
+    def test_delete_commit_parent(self):
+        from utils.function import contenttypes_uuid
+        from utils.models import Commit
+
+        instance = self.test_create_serializer_langs2()
+        langs = instance.langs.all()
+
+        # delete child
+        uuid = contenttypes_uuid(langs[0])
+        self.assertNotEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+        langs[0].delete()
+        self.assertEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+
+        uuid = contenttypes_uuid(langs[0])
+        self.assertNotEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+        langs.delete()
+        self.assertEqual(Commit.objects.filter(uuid=uuid).count(), 0)

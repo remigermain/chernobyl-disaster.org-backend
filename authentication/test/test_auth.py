@@ -135,15 +135,14 @@ class AuthTest(BaseTest):
         response = self.factory.post(reverse("rest_password_change"), data=data)
         self.assertEqual(response.status_code, 400)
 
-    # def test_reset_password_old_password(self):
-    #     # self.test_login()
-    #     data = {
-    #         "old_password": self.password,
-    #         "new_password1": "5f5fwefFWFE[[",
-    #         "new_password2": "5f5fwefFWFE[["
-    #     }
-    #     response = self.factory.post(reverse("rest_password_change"), data=data)
-    #     self.assertEqual(response.status_code, 200)
+    def test_reset_password_old_password(self):
+        data = {
+            "old_password": self.password,
+            "new_password1": "5f5fwefFWFE[[",
+            "new_password2": "5f5fwefFWFE[["
+        }
+        response = self.factory.post(reverse("rest_password_change"), data=data)
+        self.assertEqual(response.status_code, 200)
 
     def test_auccount_delete(self):
         self.test_register_valid()

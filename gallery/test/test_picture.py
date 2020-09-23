@@ -18,8 +18,9 @@ class PictureTest(BaseTest):
             b'\x01\x0a\x00\x01\x00\x2c\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02'
             b'\x02\x4c\x01\x00\x3b'
         )
-        self.picture = SimpleUploadedFile("image.jpeg", image, content_type="multipart")
+        self.picture = SimpleUploadedFile("image.gif", image, content_type="image/gif")
         self.event = Event.objects.create(title="title", date=timezone.now())
+
 
     def test_auth(self):
         instance = self.test_create_serializer()
@@ -109,6 +110,12 @@ class PictureTest(BaseTest):
         }
         response = self.client.post(reverse('picture-list'), data=data)
         self.assertEqual(response.status_code, 403)
+
+    def test_create_client2(self):
+        data = {
+            'title': 'title',
+            'picture': self.picture
+        }
         response = self.factory.post(reverse('picture-list'), data=data)
         self.assertEqual(response.status_code, 201)
 
@@ -118,8 +125,6 @@ class PictureTest(BaseTest):
             'video': 'https://peertube.com/emmferpfe',
             'event': self.event.id
         }
-        response = self.client.post(reverse('video-list'), data=data)
-        self.assertEqual(response.status_code, 403)
         response = self.factory.post(reverse('video-list'), data=data)
         self.assertEqual(response.status_code, 201)
 
@@ -130,8 +135,6 @@ class PictureTest(BaseTest):
             'langs[0][title]': 'lala',
             'langs[0][language]': self.lang,
         }
-        response = self.client.post(reverse('picture-list'), data=data)
-        self.assertEqual(response.status_code, 403)
         response = self.factory.post(reverse('picture-list'), data=data)
         self.assertEqual(response.status_code, 201)
         self.assertEqual(PictureLang.objects.count(), 1)
@@ -145,8 +148,6 @@ class PictureTest(BaseTest):
             'langs[1][title]': 'lala',
             'langs[1][language]': self.lang2,
         }
-        response = self.client.post(reverse('picture-list'), data=data)
-        self.assertEqual(response.status_code, 403)
         response = self.factory.post(reverse('picture-list'), data=data)
         self.assertEqual(response.status_code, 201)
         self.assertEqual(PictureLang.objects.count(), 2)
@@ -157,7 +158,6 @@ class PictureTest(BaseTest):
             'title': 'title title',
         }
         serializer = PictureSerializerPost(instance=instance, data=data, context=self.context, partial=True)
-        print(serializer.is_valid(), serializer.errors)
         self.assertTrue(serializer.is_valid())
         instance = serializer.save()
         self.check_commit_update(instance, diff=['title'])
@@ -455,3 +455,33 @@ class PictureTest(BaseTest):
         }
         serializer = PictureSerializerPost(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
+
+    def test_delete_commit(self):
+        from utils.function import contenttypes_uuid
+        from utils.models import Commit
+
+        instance = self.test_create_serializer()
+
+        uuid = contenttypes_uuid(instance)
+        self.assertNotEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+        response = self.factory_admin.delete(reverse("picture-detail", args=[instance.id]))
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+
+    def test_delete_commit_parent(self):
+        from utils.function import contenttypes_uuid
+        from utils.models import Commit
+
+        instance = self.test_create_serializer_langs2()
+        langs = instance.langs.all()
+
+        # delete child
+        uuid = contenttypes_uuid(langs[0])
+        self.assertNotEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+        langs[0].delete()
+        self.assertEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+
+        uuid = contenttypes_uuid(langs[0])
+        self.assertNotEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+        langs.delete()
+        self.assertEqual(Commit.objects.filter(uuid=uuid).count(), 0)

@@ -71,6 +71,7 @@ class EventTest(BaseTest):
         serializer = EventSerializer(data=data, context=self.context)
         self.assertTrue(serializer.is_valid())
         obj = serializer.save()
+        self.assertEqual(obj.langs.count(), 2)
         self.check_commit_created(obj)
         return obj
 
@@ -367,3 +368,33 @@ class EventTest(BaseTest):
         self.assertEqual(response.status_code, 404)
         response = self.factory_admin.delete(reverse('event-detail', args=[instance.id]))
         self.assertEqual(response.status_code, 204)
+
+    def test_delete_commit(self):
+        from utils.function import contenttypes_uuid
+        from utils.models import Commit
+
+        instance = self.test_create_serializer()
+
+        uuid = contenttypes_uuid(instance)
+        self.assertNotEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+        response = self.factory_admin.delete(reverse("event-detail", args=[instance.id]))
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+
+    def test_delete_commit_parent(self):
+        from utils.function import contenttypes_uuid
+        from utils.models import Commit
+
+        instance = self.test_create_serializer_langs2()
+        langs = instance.langs.all()
+
+        # delete child
+        uuid = contenttypes_uuid(langs[0])
+        self.assertNotEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+        langs[0].delete()
+        self.assertEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+
+        uuid = contenttypes_uuid(langs[0])
+        self.assertNotEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+        langs.delete()
+        self.assertEqual(Commit.objects.filter(uuid=uuid).count(), 0)

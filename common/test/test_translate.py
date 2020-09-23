@@ -45,6 +45,22 @@ class TranslateTest(BaseTest):
         self.assertTrue(serializer.is_valid())
         instance = serializer.save()
         self.check_commit_created(instance)
+        self.assertEqual(self.__translate.langs.count(), 1)
+        return instance
+
+    @tag('serializer', 'create')
+    def test_create_serializer_2(self):
+        self.test_create_serializer()
+        data = {
+            'parent_key': self.__translate.id,
+            'value': "value value",
+            'language': self.lang2
+        }
+        serializer = TranslateLangSerializer(data=data, context=self.context)
+        self.assertTrue(serializer.is_valid())
+        instance = serializer.save()
+        self.check_commit_created(instance)
+        self.assertEqual(self.__translate.langs.count(), 2)
         return instance
 
     @tag('serializer', 'create')
@@ -269,3 +285,32 @@ class TranslateTest(BaseTest):
         self.assertEqual(response.status_code, 403)
         response = self.factory_admin.delete(reverse("translate-detail", args=[self.__translate.id]))
         self.assertEqual(response.status_code, 204)
+
+    def test_delete_commit(self):
+        from utils.function import contenttypes_uuid
+        from utils.models import Commit
+
+        instance = self.test_create_serializer()
+        uuid = contenttypes_uuid(instance)
+        self.assertNotEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+        response = self.factory_admin.delete(reverse("translatelang-detail", args=[instance.id]))
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+
+    def test_delete_commit_parent(self):
+        from utils.function import contenttypes_uuid
+        from utils.models import Commit
+
+        self.test_create_serializer_2()
+        langs = self.__translate.langs.all()
+
+        # delete child
+        uuid = contenttypes_uuid(langs[0])
+        self.assertNotEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+        langs[0].delete()
+        self.assertEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+
+        uuid = contenttypes_uuid(langs[0])
+        self.assertNotEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+        langs.delete()
+        self.assertEqual(Commit.objects.filter(uuid=uuid).count(), 0)

@@ -31,13 +31,6 @@ class ChernobylModelAbstract(models.Model):
         super(ChernobylModelAbstract, self).save(*args, **kwargs)
         return self
 
-    def delete(self, *args, **kwargs):
-        from utils.models import Commit
-        uuid = contenttypes_uuid(self)
-        ret = super().delete(*args, **kwargs)
-        Commit.objects.filter(uuid=uuid).delete()
-        return ret
-
 
 class LanguageAbstract(ChernobylModelAbstract):
     """
