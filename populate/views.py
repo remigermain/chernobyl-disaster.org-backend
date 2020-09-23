@@ -6,9 +6,8 @@ from common.models import Tag, Translate, TranslateLang
 from utils.models import Commit
 from django.db.models import Q
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_204_NO_CONTENT
-from lib.permission import ReadOnlyLamda
 from django.utils import timezone
 from utils.function import contenttypes_uuid
 
@@ -18,6 +17,7 @@ def serialize(obj, display_name):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def picture(request):
     return Response({
         'photographers': [serialize(obj, 'name') for obj in People.objects.all()]
@@ -25,6 +25,7 @@ def picture(request):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def people(request):
     lst = [
         {
@@ -38,6 +39,7 @@ def people(request):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def populate(request):
     langs = [{'value': lang[0], 'display_name': lang[1]} for lang in settings.LANGUAGES]
 
@@ -52,6 +54,7 @@ def populate(request):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def contributor(request):
     return Response({
         'results': Commit.objects.values_list('creator__username', flat=True).distinct()
@@ -59,6 +62,7 @@ def contributor(request):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def overview(request):
     week = timezone.now() - timezone.timedelta(days=7)
 
@@ -77,22 +81,14 @@ def overview(request):
                 dtc[key]['week'] += 1
 
     def to_ranking(objs, key):
-        dtc = {
-            'first': {
-                'username': objs[0]['username'],
-                'count': objs[0][key]
-            },
-        }
-
-        if len(objs) > 1:
-            dtc['second'] = {}
-            dtc['second']['username'] = objs[1]['username']
-            dtc['second']['count'] = objs[1][key]
-        if len(objs) > 2:
-            dtc['third'] = {}
-            dtc['third']['username'] = objs[2]['username']
-            dtc['third']['count'] = objs[2][key]
-
+        name = ["first", "second", "third"]
+        dtc = {}
+        for i in range(3):
+            if len(objs) > i:
+                dtc[name[i]] = {
+                    'username': objs[i]['username'],
+                    'count': objs[i][key]
+                }
         return dtc
 
     lst = [{'username': key, **val} for key, val in dtc.items()]
@@ -140,7 +136,7 @@ def overview(request):
 
 
 @api_view(['GET'])
-@permission_classes([ReadOnlyLamda])
+@permission_classes([IsAuthenticated])
 def translate_overview(request):
     data = {}
     for t in TranslateLang.lang_choices:
@@ -182,18 +178,21 @@ def translate_delete(request, lang):
 def translate_json(request):
     import json
 
-    if 'file' not in request.data:
-        return Response(status=HTTP_400_BAD_REQUEST, data={'detail': "file not found"})
-
     language = None
     if 'language' in request.data:
         if request.data['language'] not in [code[0] for code in TranslateLang.lang_choices]:
             return Response(status=HTTP_400_BAD_REQUEST, data={'detail': "language not found"})
         language = request.data['language']
 
+    try:
+        content = json.loads(request.data['file'].read())
+    except KeyError:
+        return Response(status=HTTP_400_BAD_REQUEST, data={'detail': "file not found"})
+    except Exception as error:
+        return Response(status=HTTP_400_BAD_REQUEST, data={'detail': str(error)})
+
     deleted = 'on' in request.data['deleted'] if 'deleted' in request.data else False
     merged = 'on' in request.data['merge'] if 'merge' in request.data else False
-    content = json.loads(request.data['file'].read())
 
     def gen_path(path, key):
         return f"{path}.{key}" if path else key

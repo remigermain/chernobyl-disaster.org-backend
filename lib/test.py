@@ -25,6 +25,15 @@ class BaseTest(TestCase):
             password=self.password,
             is_active=True
             )
+        
+        self.user_admin = get_user_model().objects.create(
+            username=f"admin{self.username}",
+            email=f"admin{self.email}",
+            password=self.password,
+            is_active=True,
+            is_superuser=True,
+            is_staff=True
+            )
         self.request = RequestFactory
         self.request.user = self.user
         self.context = {
@@ -56,6 +65,8 @@ class BaseTest(TestCase):
 
         self.factory = APIClient()
         self.factory.force_authenticate(user=self.user)
+        self.factory_admin = APIClient()
+        self.factory_admin.force_authenticate(user=self.user_admin)
 
     def get_user(self):
         return get_user_model().objects.get(
