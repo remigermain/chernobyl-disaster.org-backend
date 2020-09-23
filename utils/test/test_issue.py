@@ -11,10 +11,11 @@ import json
 @tag('issue')
 class IssueTest(BaseTest):
 
-    def setUp(self):
-        super().setUp()
-        self.event = Event.objects.create(title="event_name", date=timezone.now())
-        self.uuid = self.event.__class__.__name__.lower()
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.event = Event.objects.create(title="event_name", date=timezone.now())
+        cls.uuid = cls.event.__class__.__name__.lower()
 
     @tag('auth')
     def test_auth(self):

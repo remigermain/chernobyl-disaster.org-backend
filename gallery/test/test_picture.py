@@ -11,6 +11,11 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 @tag('picture')
 class PictureTest(BaseTest):
 
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.event = Event.objects.create(title="title", date=timezone.now())
+
     def setUp(self):
         super().setUp()
         image = (
@@ -19,8 +24,6 @@ class PictureTest(BaseTest):
             b'\x02\x4c\x01\x00\x3b'
         )
         self.picture = SimpleUploadedFile("image.gif", image, content_type="image/gif")
-        self.event = Event.objects.create(title="title", date=timezone.now())
-
 
     def test_auth(self):
         instance = self.test_create_serializer()
@@ -314,16 +317,6 @@ class PictureTest(BaseTest):
         self.assertTrue(serializer.is_valid())
         instance = serializer.save()
         self.assertIsNone(instance.event)
-
-    def test_update_serializer(self):
-        instance = self.test_create_serializer()
-        data = {
-            'title': 'title title',
-        }
-        serializer = PictureSerializerPost(instance=instance, data=data, context=self.context, partial=True)
-        self.assertTrue(serializer.is_valid())
-        obj = serializer.save()
-        self.check_commit_update(obj, diff=['title'])
 
     def test_update_serializer_langs(self):
         instance = self.test_create_serializer()

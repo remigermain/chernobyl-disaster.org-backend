@@ -148,8 +148,7 @@ class AuthTest(BaseTest):
         self.test_register_valid()
         response = self.factory.post(reverse("account_delete"))
         self.assertEqual(response.status_code, 200)
-        user = self.get_user()
-        self.assertFalse(user.is_active)
+        self.assertFalse(self.user.is_active)
 
     def test_get_user(self):
         response = self.factory.get(reverse("rest_user_details"))

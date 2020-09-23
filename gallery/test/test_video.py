@@ -10,9 +10,10 @@ from timeline.models import Event
 @tag('video')
 class VideoTest(BaseTest):
 
-    def setUp(self):
-        super().setUp()
-        self.event = Event.objects.create(title="title", date=timezone.now())
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.event = Event.objects.create(title="title", date=timezone.now())
 
     def test_auth(self):
         instance = self.test_create_serializer()
@@ -142,7 +143,7 @@ class VideoTest(BaseTest):
         response = self.factory.post(reverse('video-list'), data=data)
         self.assertEqual(response.status_code, 201)
         self.assertEqual(VideoLang.objects.count(), 2)
-    
+
     def test_update_serializer(self):
         instance = self.test_create_serializer()
         data = {
@@ -305,16 +306,6 @@ class VideoTest(BaseTest):
         self.assertTrue(serializer.is_valid())
         instance = serializer.save()
         self.assertIsNone(instance.event)
-
-    def test_update_serializer(self):
-        instance = self.test_create_serializer()
-        data = {
-            'title': 'title title',
-        }
-        serializer = VideoSerializerPost(instance=instance, data=data, context=self.context, partial=True)
-        self.assertTrue(serializer.is_valid())
-        obj = serializer.save()
-        self.check_commit_update(obj, diff=['title'])
 
     def test_update_serializer_langs(self):
         instance = self.test_create_serializer()

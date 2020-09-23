@@ -9,9 +9,10 @@ import json
 @tag('translate')
 class TranslateTest(BaseTest):
 
-    def setUp(self):
-        super().setUp()
-        self.__translate = Translate.objects.create(key="test.key")
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.__translate = Translate.objects.create(key="test.key")
 
     @tag('auth')
     def test_auth(self):

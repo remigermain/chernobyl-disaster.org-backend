@@ -10,51 +10,46 @@ from rest_framework.test import APIClient
 
 class BaseTest(TestCase):
 
-    def setUp(self):
-        self.username = 'username'
-        self.email = 'email@email.email'
-        self.password = 'ER5dd[]433-444e'
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.username = 'username'
+        cls.email = 'email@email.email'
+        cls.password = 'ER5dd[]433-444e'
 
-        self.user = get_user_model().objects.create(
-            username=self.username,
-            email=self.email,
-            password=self.password,
+        cls.user = get_user_model().objects.create(
+            username=cls.username,
+            email=cls.email,
             is_active=True
         )
+        cls.user.set_password(cls.password)
 
-        self.user_admin = get_user_model().objects.create(
-            username=f"admin{self.username}",
-            email=f"admin{self.email}",
-            password=self.password,
+        cls.user_admin = get_user_model().objects.create(
+            username=f"admin{cls.username}",
+            email=f"admin{cls.email}",
             is_active=True,
             is_superuser=True,
             is_staff=True
         )
+        cls.user_admin.set_password(cls.password)
 
-        self.request = RequestFactory
-        self.request.user = self.user
-        self.context = {'request': self.request}
+        cls.request = RequestFactory
+        cls.request.user = cls.user
+        cls.context = {'request': cls.request}
 
-        self.lang = settings.LANGUAGES_DEFAULT
-        self.__available_langs = [lang[0] for lang in settings.LANGUAGES]
-        self.lang2 = [lang for lang in self.__available_langs if lang is not self.lang][0]
-        self.time = timezone.now()
-        self.time2 = timezone.now() - timezone.timedelta(days=9)
+        cls.lang = settings.LANGUAGES_DEFAULT
+        cls.__available_langs = [lang[0] for lang in settings.LANGUAGES]
+        cls.lang2 = [lang for lang in cls.__available_langs if lang is not cls.lang][0]
+        cls.time = timezone.now()
+        cls.time2 = timezone.now() - timezone.timedelta(days=9)
 
-        self.date = datetime_safe.new_date(self.time)
-        self.date2 = datetime_safe.new_date(self.time2)
+        cls.date = datetime_safe.new_date(cls.time)
+        cls.date2 = datetime_safe.new_date(cls.time2)
 
-        self.factory = APIClient()
-        self.factory.force_authenticate(user=self.user)
-        self.factory_admin = APIClient()
-        self.factory_admin.force_authenticate(user=self.user_admin)
-
-    def get_user(self):
-        return get_user_model().objects.get(
-            username=self.username,
-            email=self.email,
-            password=self.password,
-        )
+        cls.factory = APIClient()
+        cls.factory.force_authenticate(user=cls.user)
+        cls.factory_admin = APIClient()
+        cls.factory_admin.force_authenticate(user=cls.user_admin)
 
     def get_anonymous_user(self):
         self.context['request'].user = AnonymousUser()
