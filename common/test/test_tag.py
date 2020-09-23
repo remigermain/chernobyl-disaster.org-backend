@@ -20,6 +20,11 @@ class TagTest(BaseTest):
         response = self.client.post(reverse("tag-detail", args=[instance.id]))
         self.assertEqual(response.status_code, 403)
 
+        response = self.factory.get(reverse("tag-list"))
+        self.assertEqual(response.status_code, 200)
+        response = self.factory.get(reverse("tag-detail", args=[instance.id]))
+        self.assertEqual(response.status_code, 200)
+
     @tag('serializer', 'create')
     def test_create_serializer(self):
         data = {

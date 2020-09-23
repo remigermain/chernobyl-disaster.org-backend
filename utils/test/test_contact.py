@@ -14,6 +14,9 @@ class ContactTest(BaseTest):
         response = self.client.get(reverse('contact-list'))
         self.assertEqual(response.status_code, 405)
 
+        response = self.factory.get(reverse('contact-list'))
+        self.assertEqual(response.status_code, 405)
+
     def test_create_serializer(self):
         data = {
             'message': 'lalalalalal',

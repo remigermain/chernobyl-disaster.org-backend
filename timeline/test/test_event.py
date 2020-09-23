@@ -12,10 +12,10 @@ class EventTest(BaseTest):
         instance = self.test_create_serializer()
         response = self.client.get(reverse('event-list'))
         self.assertEqual(response.status_code, 200)
-        response = self.client.post(reverse('event-list'))
-        self.assertEqual(response.status_code, 403)
         response = self.client.get(reverse('event-detail', args=[instance.id]))
         self.assertEqual(response.status_code, 200)
+        response = self.client.post(reverse('event-list'))
+        self.assertEqual(response.status_code, 403)
         response = self.client.patch(reverse('event-detail', args=[instance.id]))
         self.assertEqual(response.status_code, 403)
 

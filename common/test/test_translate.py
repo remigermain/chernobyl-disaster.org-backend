@@ -15,18 +15,24 @@ class TranslateTest(BaseTest):
 
     @tag('auth')
     def test_auth(self):
+        instance = self.test_create_serializer()
         response = self.client.get(reverse("translatelang-list"))
         self.assertEqual(response.status_code, 403)
         response = self.client.post(reverse("translatelang-list"))
         self.assertEqual(response.status_code, 403)
-        response = self.client.post(reverse("translatelang-detail", args=[5]))
+        response = self.client.post(reverse("translatelang-detail", args=[instance.id]))
         self.assertEqual(response.status_code, 403)
         response = self.client.get(reverse("translate-list"))
         self.assertEqual(response.status_code, 403)
         response = self.client.post(reverse("translate-list"))
         self.assertEqual(response.status_code, 403)
-        response = self.client.post(reverse("translate-detail", args=[5]))
+        response = self.client.post(reverse("translate-detail", args=[instance.id]))
         self.assertEqual(response.status_code, 403)
+
+        response = self.factory.get(reverse("translatelang-list"))
+        self.assertEqual(response.status_code, 200)
+        response = self.factory.get(reverse("translate-detail", args=[instance.id]))
+        self.assertEqual(response.status_code, 200)
 
     @tag('serializer', 'create')
     def test_create_serializer(self):

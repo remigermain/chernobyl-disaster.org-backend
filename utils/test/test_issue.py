@@ -20,6 +20,8 @@ class IssueTest(BaseTest):
     def test_auth(self):
         response = self.client.get(reverse('issue-list'))
         self.assertEqual(response.status_code, 403)
+        response = self.factory.get(reverse('issue-list'))
+        self.assertEqual(response.status_code, 405)
 
     def test_create_serializer(self):
         data = {
