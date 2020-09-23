@@ -10,6 +10,7 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_204_NO_CONTENT
 from django.utils import timezone
 from utils.function import contenttypes_uuid
+from django.contrib.auth import get_user_model
 
 
 def serialize(obj, display_name):
@@ -57,7 +58,7 @@ def populate(request):
 @permission_classes([IsAuthenticated])
 def contributor(request):
     return Response({
-        'results': Commit.objects.values_list('creator__username', flat=True).distinct()
+        'results': get_user_model().objects.filter(commit_creator__gte=1).distinct().values_list('username', flat=True)
     })
 
 
@@ -98,9 +99,7 @@ def overview(request):
     lst_week = to_ranking(lst[:3], 'week')
 
     def conv_uuid(obj):
-        if isinstance(obj, TranslateLang):
-            return Translate.__name__.lower()
-        return obj.__class__.__name__.lower()
+        return obj.__class__.__name__.lower().replace("lang", "")
 
     def conv_id(obj):
         if isinstance(obj.content_object, TranslateLang):
