@@ -1,95 +1,406 @@
 from django.test import tag
-from timeline.models import Event
-from gallery.serializers.video import VideoSerializer
 from lib.test import BaseTest
+from gallery.serializers.video import VideoSerializerPost
+from gallery.models import VideoLang, Video
+from django.urls import reverse
+from django.utils import timezone
+from timeline.models import Event
 
 
-@tag('model', 'video')
+@tag('video')
 class VideoTest(BaseTest):
+
     def setUp(self):
         super().setUp()
-        self.event = Event.objects.create(
-            title='good',
-            date=self.time,
-        )
+        self.event = Event.objects.create(title="title", date=timezone.now())
 
-    @tag('serializer')
+    def test_auth(self):
+        instance = self.test_create_serializer()
+
+        response = self.client.get(reverse("video-list"))
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(reverse("video-detail", args=[instance.id]))
+        self.assertEqual(response.status_code, 200)
+
+    def test_delete(self):
+        instance = self.test_create_serializer()
+        response = self.client.delete(reverse("video-detail", args=[instance.id]))
+        self.assertEqual(response.status_code, 403)
+        response = self.factory.delete(reverse("video-detail", args=[instance.id]))
+        self.assertEqual(response.status_code, 403)
+        response = self.factory_admin.delete(reverse("video-detail", args=["wrong"]))
+        self.assertEqual(response.status_code, 404)
+        response = self.factory_admin.delete(reverse("video-detail", args=[instance.id]))
+        self.assertEqual(response.status_code, 204)
+
     def test_create_serializer(self):
         data = {
             'title': 'title',
-            'event': self.event.pk,
-            'video': self.link
+            'video': 'https://peertube.com/emmferpfe'
         }
-        serializer = VideoSerializer(data=data, context=self.context)
+        serializer = VideoSerializerPost(data=data, context=self.context, partial=True)
         self.assertTrue(serializer.is_valid())
-        obj = serializer.save()
-        self.assertIsNotNone(obj.id)
-        self.assertEqual(obj.title, data['title'])
-        self.assertEqual(obj.video, data['video'])
-        self.assertEqual(obj.event.pk, data['event'])
-        self.check_creator(obj)
-        return obj
+        instance = serializer.save()
+        self.check_commit_created(instance)
+        return instance
 
-    @tag('serializer')
-    def test_create_serializer_without_event(self):
+    def test_create_serializer_langs(self):
         data = {
             'title': 'title',
-            'video': self.link
+            'video': 'https://peertube.com/emmferpfe',
+            'langs': [{
+                'title': 'lala',
+                'language': self.lang,
+            }]
         }
-        serializer = VideoSerializer(data=data, context=self.context)
+        serializer = VideoSerializerPost(data=data, context=self.context, partial=True)
         self.assertTrue(serializer.is_valid())
-        obj = serializer.save()
-        self.assertIsNotNone(obj.id)
-        self.assertEqual(obj.title, data['title'])
-        self.assertEqual(obj.video, data['video'])
-        self.check_creator(obj)
-        return obj
+        instance = serializer.save()
+        self.check_commit_created(instance)
+        self.assertEqual(instance.langs.count(), 1)
+        return instance
 
-    @tag('serializer')
-    def test_create_serializer_empty(self):
-        data = {}
-
-        serializer = VideoSerializer(data=data, context=self.context)
-        self.assertFalse(serializer.is_valid())
-
-    @tag('serializer')
-    def test_create_serializer_wrong_event(self):
+    def test_create_serializer_langs2(self):
         data = {
             'title': 'title',
-            'event': self.event.pk + 99,
-            'video': self.link
+            'video': 'https://peertube.com/emmferpfe',
+            'langs': [
+                {
+                    'title': 'lala',
+                    'language': self.lang,
+                },
+                {
+                    'title': 'lala',
+                    'language': self.lang2,
+                }
+            ]
         }
-        serializer = VideoSerializer(data=data, context=self.context)
-        self.assertFalse(serializer.is_valid())
+        serializer = VideoSerializerPost(data=data, context=self.context, partial=True)
+        self.assertTrue(serializer.is_valid())
+        instance = serializer.save()
+        self.check_commit_created(instance)
+        self.assertEqual(instance.langs.count(), 2)
+        return instance
 
-    @tag('serializer')
-    def test_create_serializer_same_link(self):
-        obj = self.test_create_serializer()
+    def test_create_client(self):
         data = {
             'title': 'title',
-            'event': obj.event.pk,
-            'video': obj.video
+            'video': 'https://peertube.com/emmferpfe'
         }
-        serializer = VideoSerializer(data=data, context=self.context)
-        self.assertFalse(serializer.is_valid())
+        response = self.client.post(reverse('video-list'), data=data)
+        self.assertEqual(response.status_code, 403)
+        response = self.factory.post(reverse('video-list'), data=data)
+        self.assertEqual(response.status_code, 201)
 
-    @tag('serializer')
-    def test_create_serializer_update(self):
-        obj = self.test_create_serializer()
-        obj_id = obj.id
-        obj_video = obj.video
-        obj_title = obj.title
+    def test_create_client_langs(self):
         data = {
-            'title': 'update-title',
-            'event': obj.event.pk,
-            'video': self.link2
+            'title': 'title',
+            'video': 'https://peertube.com/emmferpfe',
+            'langs[0][title]': 'lala',
+            'langs[0][language]': self.lang,
         }
-        serializer = VideoSerializer(instance=obj, data=data, context=self.context, partial=True)
+        response = self.client.post(reverse('video-list'), data=data)
+        self.assertEqual(response.status_code, 403)
+        response = self.factory.post(reverse('video-list'), data=data)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(VideoLang.objects.count(), 1)
+
+    def test_create_client_langs2(self):
+        data = {
+            'title': 'title',
+            'video': 'https://peertube.com/emmferpfe',
+            'langs[0][title]': 'lala',
+            'langs[0][language]': self.lang,
+            'langs[1][title]': 'lala',
+            'langs[1][language]': self.lang2,
+        }
+        response = self.client.post(reverse('video-list'), data=data)
+        self.assertEqual(response.status_code, 403)
+        response = self.factory.post(reverse('video-list'), data=data)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(VideoLang.objects.count(), 2)
+    
+    # def test_create_serializer(self):
+    #     instance = self.test_create_serializer()
+    #     data = {
+    #         'title': 'title title',
+    #     }
+    #     serializer = VideoSerializerPost(instance=instance, data=data, context=self.context, partial=True)
+    #     print(serializer.is_valid(), serializer.errors)
+    #     self.assertTrue(serializer.is_valid())
+    #     instance = serializer.save()
+    #     self.check_commit_update(instance, diff=['title'])
+
+    def test_update_client(self):
+        instance = self.test_create_serializer()
+        data = {
+            'title': 'title title',
+        }
+        response = self.client.patch(reverse('video-detail', args=[instance.id]), data=data)
+        self.assertEqual(response.status_code, 403)
+        response = self.factory.patch(reverse('video-detail', args=[instance.id]), data=data)
+        self.assertEqual(response.status_code, 200)
+
+    def test_update_client_langs(self):
+        instance = self.test_create_serializer()
+        data = {
+            'title': 'title title',
+            'langs[0][title]': 'lala',
+            'langs[0][language]': self.lang,
+            'langs[1][title]': 'lala',
+            'langs[1][language]': self.lang2,
+        }
+        response = self.client.patch(reverse('video-detail', args=[instance.id]), data=data)
+        self.assertEqual(response.status_code, 403)
+        response = self.factory.patch(reverse('video-detail', args=[instance.id]), data=data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Video.objects.count(), 1)
+        self.assertEqual(VideoLang.objects.count(), 2)
+
+    def test_update_client_langs_change(self):
+        instance = self.test_create_serializer_langs2()
+        langs = instance.langs.all()
+        data = {
+            'title': 'title title',
+            'langs[0][id]': langs[0].id,
+            'langs[0][title]': 'lala',
+            'langs[0][language]': langs[1].language,
+            'langs[1][id]': langs[1].id,
+            'langs[1][title]': 'lala',
+            'langs[1][language]': langs[0].language,
+        }
+        response = self.client.patch(reverse('video-detail', args=[instance.id]), data=data)
+        self.assertEqual(response.status_code, 403)
+        response = self.factory.patch(reverse('video-detail', args=[instance.id]), data=data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Video.objects.count(), 1)
+        self.assertEqual(VideoLang.objects.count(), 2)
+
+    def test_create_client_no_title(self):
+        data = {
+            'video': 'https://peertube.com/emmferpfe'
+        }
+        response = self.factory.post(reverse('video-list'), data=data)
+        self.assertEqual(response.status_code, 400)
+
+    def test_create_client_empty_title(self):
+        data = {
+            'title': '',
+            'video': 'https://peertube.com/emmferpfe'
+        }
+        response = self.factory.post(reverse('video-list'), data=data)
+        self.assertEqual(response.status_code, 400)
+
+    def test_create_client_no_video(self):
+        data = {
+            'title': 'title',
+        }
+        response = self.factory.post(reverse('video-list'), data=data)
+        self.assertEqual(response.status_code, 400)
+
+    def test_create_client_empty_video(self):
+        data = {
+            'title': 'title',
+            'video': ''
+        }
+        response = self.factory.post(reverse('video-list'), data=data)
+        self.assertEqual(response.status_code, 400)
+
+    def test_create_client_wrong_video(self):
+        data = {
+            'title': 'title',
+            'video': 'worng_url'
+        }
+        response = self.factory.post(reverse('video-list'), data=data)
+        self.assertEqual(response.status_code, 400)
+
+    def test_create_client_same_langs(self):
+        data = {
+            'title': 'title',
+            'video': 'https://peertube.com/emmferpfe',
+            'langs[0][title]': 'lala',
+            'langs[0][language]': self.lang,
+            'langs[1][title]': 'lala',
+            'langs[1][language]': self.lang,
+        }
+        response = self.factory.post(reverse('video-list'), data=data)
+        self.assertEqual(response.status_code, 400)
+
+    def test_create_client_wrong_lang(self):
+        data = {
+            'title': 'title',
+            'video': 'https://peertube.com/emmferpfe',
+            'langs[0][title]': 'lala',
+            'langs[0][language]': "self.lang",
+        }
+        response = self.factory.post(reverse('video-list'), data=data)
+        self.assertEqual(response.status_code, 400)
+
+    def test_create_client_no_langs(self):
+        data = {
+            'title': 'title',
+            'video': 'https://peertube.com/emmferpfe',
+            'langs[0][title]': 'lala',
+        }
+        response = self.factory.post(reverse('video-list'), data=data)
+        self.assertEqual(response.status_code, 400)
+
+    def test_create_client_langs_no_title(self):
+        data = {
+            'title': 'title',
+            'video': 'https://peertube.com/emmferpfe',
+            'langs[0][language]': self.lang,
+        }
+        response = self.factory.post(reverse('video-list'), data=data)
+        self.assertEqual(response.status_code, 400)
+
+    def test_create_client_langs_empty_title(self):
+        data = {
+            'title': 'title',
+            'video': 'https://peertube.com/emmferpfe',
+            'langs[0][title]': '',
+            'langs[0][language]': self.lang,
+        }
+        response = self.factory.post(reverse('video-list'), data=data)
+        self.assertEqual(response.status_code, 400)
+
+    def test_update_serializer(self):
+        instance = self.test_create_serializer()
+        data = {
+            'title': 'title title',
+        }
+        serializer = VideoSerializerPost(instance=instance, data=data, context=self.context, partial=True)
         self.assertTrue(serializer.is_valid())
         obj = serializer.save()
-        self.assertEqual(obj.id, obj_id)
-        self.assertNotEqual(obj_video, obj.video)
-        self.assertEqual(obj.video, data['video'])
-        self.assertNotEqual(obj_title, obj.title)
-        self.assertEqual(obj.title, data['title'])
-        self.check_commit(obj)
+        self.check_commit_update(obj, diff=['title'])
+
+    def test_update_serializer_langs(self):
+        instance = self.test_create_serializer()
+        data = {
+            'title': 'title title',
+            'langs': [
+                {
+                    'title': 'title',
+                    'language': self.lang
+                },
+                {
+                    'title': 'title',
+                    'language': self.lang2
+                }
+            ]
+        }
+        serializer = VideoSerializerPost(instance=instance, data=data, context=self.context, partial=True)
+        self.assertTrue(serializer.is_valid())
+        obj = serializer.save()
+        self.check_commit_update(obj, diff=['title', 'langs'])
+        self.assertEqual(obj.langs.count(), 2)
+
+    def test_create_serializer_no_title(self):
+        data = {
+            'video': 'https://peertube.com/emmferpfe'
+        }
+        serializer = VideoSerializerPost(data=data, context=self.context)
+        self.assertFalse(serializer.is_valid())
+
+    def test_create_serializer_empty_title(self):
+        data = {
+            'title': '',
+            'video': 'https://peertube.com/emmferpfe'
+        }
+        serializer = VideoSerializerPost(data=data, context=self.context)
+        self.assertFalse(serializer.is_valid())
+
+    def test_create_serializer_no_video(self):
+        data = {
+            'title': 'title',
+        }
+        serializer = VideoSerializerPost(data=data, context=self.context)
+        self.assertFalse(serializer.is_valid())
+
+    def test_create_serializer_empty_video(self):
+        data = {
+            'title': 'title',
+            'video': ''
+        }
+        serializer = VideoSerializerPost(data=data, context=self.context)
+        self.assertFalse(serializer.is_valid())
+
+    def test_create_serializer_wrong_video(self):
+        data = {
+            'title': 'title',
+            'video': 'worng_url'
+        }
+        serializer = VideoSerializerPost(data=data, context=self.context)
+        self.assertFalse(serializer.is_valid())
+
+    def test_create_serializer_same_langs(self):
+        data = {
+            'title': 'title',
+            'video': 'https://peertube.com/emmferpfe',
+            'langs': [
+                {
+                    'title': 'title',
+                    'language': self.lang
+                },
+                {
+                    'title': 'title2',
+                    'language': self.lang
+                }
+            ]
+        }
+        serializer = VideoSerializerPost(data=data, context=self.context)
+        self.assertFalse(serializer.is_valid())
+
+    def test_create_serializer_wrong_lang(self):
+        data = {
+            'title': 'title',
+            'video': 'https://peertube.com/emmferpfe',
+            'langs': [
+                {
+                    'title': 'lalala',
+                    'language': "wrong"
+                }
+            ]
+        }
+        serializer = VideoSerializerPost(data=data, context=self.context,)
+        self.assertFalse(serializer.is_valid())
+
+    def test_create_serializer_no_langs(self):
+        data = {
+            'title': 'title',
+            'video': 'https://peertube.com/emmferpfe',
+            'langs': [
+                {
+                    'title': 'lalala',
+                }
+            ]
+        }
+        serializer = VideoSerializerPost(data=data, context=self.context)
+        self.assertFalse(serializer.is_valid())
+
+    def test_create_serializer_langs_no_title(self):
+        data = {
+            'title': 'title',
+            'video': 'https://peertube.com/emmferpfe',
+            'langs': [
+                {
+                    'language': self.lang
+                }
+            ]
+        }
+        serializer = VideoSerializerPost(data=data, context=self.context)
+        self.assertFalse(serializer.is_valid())
+
+    def test_create_serializer_langs_empty_title(self):
+        data = {
+            'title': 'title',
+            'video': 'https://peertube.com/emmferpfe',
+            'langs': [
+                {
+                    'title': '',
+                    'language': self.lang
+                }
+            ]
+        }
+        serializer = VideoSerializerPost(data=data, context=self.context)
+        self.assertFalse(serializer.is_valid())

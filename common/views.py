@@ -1,6 +1,6 @@
 from lib.viewset import ModelViewSetBase
 from common.models import Tag, Translate, TranslateLang
-from lib.permission import ReadOnlyLamda
+from lib.permission import ReadOnlyLamda, ChernobylPermission
 from rest_framework.permissions import IsAuthenticated
 from common.serializers import tag, translate
 
@@ -29,4 +29,4 @@ class TranslateViewSet(ModelViewSetBase):
 class TranslateLangViewSet(ModelViewSetBase):
     queryset = TranslateLang.objects.all()
     serializer_class = translate.TranslateLangSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (ChernobylPermission, IsAuthenticated)

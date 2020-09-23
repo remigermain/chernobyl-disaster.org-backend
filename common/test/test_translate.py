@@ -257,3 +257,15 @@ class TranslateTest(BaseTest):
         }
         response = self.factory.post(reverse("translatelang-list"), data=data)
         self.assertEqual(response.status_code, 400)
+
+    def test_delete(self):
+        instance = self.test_create_serializer()
+        response = self.factory.delete(reverse("translatelang-detail", args=[instance.id]))
+        self.assertEqual(response.status_code, 403)
+        response = self.factory_admin.delete(reverse("translatelang-detail", args=[instance.id]))
+        self.assertEqual(response.status_code, 204)
+
+        response = self.factory.delete(reverse("translate-detail", args=[self.__translate.id]))
+        self.assertEqual(response.status_code, 403)
+        response = self.factory_admin.delete(reverse("translate-detail", args=[self.__translate.id]))
+        self.assertEqual(response.status_code, 204)

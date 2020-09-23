@@ -357,3 +357,13 @@ class EventTest(BaseTest):
         }
         response = self.factory.post(reverse("event-list"), data=data)
         self.assertEqual(response.status_code, 201)
+
+    def test_delete(self):
+        instance = self.test_create_serializer()
+
+        response = self.factory.delete(reverse('event-detail', args=[instance.id]))
+        self.assertEqual(response.status_code, 403)
+        response = self.factory_admin.delete(reverse('event-detail', args=["wrong"]))
+        self.assertEqual(response.status_code, 404)
+        response = self.factory_admin.delete(reverse('event-detail', args=[instance.id]))
+        self.assertEqual(response.status_code, 204)

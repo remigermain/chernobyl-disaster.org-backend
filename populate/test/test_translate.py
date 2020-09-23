@@ -27,7 +27,7 @@ class PopulateTranslateTest(BaseTest):
         self.assertEqual(response.status_code, 403)
         response = self.factory_admin.delete(reverse('translate_delete', args=["wrong"]))
         self.assertEqual(response.status_code, 400)
-    
+
         self.test_upload_lang()
         count = Translate.objects.count()
         self.assertNotEqual(count, 0)

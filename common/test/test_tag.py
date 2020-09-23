@@ -19,6 +19,8 @@ class TagTest(BaseTest):
         self.assertEqual(response.status_code, 403)
         response = self.client.post(reverse("tag-detail", args=[instance.id]))
         self.assertEqual(response.status_code, 403)
+        response = self.client.delete(reverse("tag-detail", args=[instance.id]))
+        self.assertEqual(response.status_code, 403)
 
         response = self.factory.get(reverse("tag-list"))
         self.assertEqual(response.status_code, 200)
@@ -247,3 +249,11 @@ class TagTest(BaseTest):
         }
         response = self.factory.post(reverse("tag-list"), data=data)
         self.assertEqual(response.status_code, 400)
+
+    def test_delete(self):
+        instance = self.test_create_serializer()
+        response = self.factory.delete(reverse("tag-detail", args=[instance.id]))
+        self.assertEqual(response.status_code, 403)
+
+        response = self.factory_admin.delete(reverse("tag-detail", args=[instance.id]))
+        self.assertEqual(response.status_code, 204)

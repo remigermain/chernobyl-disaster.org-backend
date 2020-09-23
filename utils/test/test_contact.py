@@ -13,8 +13,12 @@ class ContactTest(BaseTest):
     def test_auth(self):
         response = self.client.get(reverse('contact-list'))
         self.assertEqual(response.status_code, 405)
+        response = self.client.delete(reverse('contact-list'))
+        self.assertEqual(response.status_code, 405)
 
         response = self.factory.get(reverse('contact-list'))
+        self.assertEqual(response.status_code, 405)
+        response = self.factory.delete(reverse('contact-list'))
         self.assertEqual(response.status_code, 405)
 
     def test_create_serializer(self):
