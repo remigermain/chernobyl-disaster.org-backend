@@ -16,7 +16,7 @@ class PeopleTest(BaseTest):
             b'\x01\x0a\x00\x01\x00\x2c\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02'
             b'\x02\x4c\x01\x00\x3b'
         )
-        self.picture = SimpleUploadedFile("image.jpeg", image, content_type="multipart")
+        self.picture = SimpleUploadedFile("image.gif", image, content_type="image/gif")
 
     def test_auth(self):
         instance = self.test_create_serializer()
