@@ -13,6 +13,7 @@ class ChernobylModelAbstract(models.Model):
 
     class Meta:
         abstract = True
+        ordering = ['-id']
 
     def to_url(self, field):
         link = getattr(self, field)
@@ -50,4 +51,4 @@ class LanguageAbstract(ChernobylModelAbstract):
 
     class Meta:
         abstract = True
-        ordering = ['language']
+        ordering = ['language', '-id']

@@ -46,7 +46,7 @@ class EventExtraAbstract(ChernobylModelAbstract):
         related_name="%(class)ss"
     )
 
-    class Meta:
+    class Meta(ChernobylModelAbstract.Meta):
         abstract = True
 
     def __str__(self):

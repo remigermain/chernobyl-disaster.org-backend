@@ -51,7 +51,7 @@ class Video(EventExtraAbstract):
 class EventExtraLangAbstract(LanguageAbstract):
     title = models.CharField(max_length=50)
 
-    class Meta:
+    class Meta(LanguageAbstract.Meta):
         abstract = True
 
     def __str__(self):

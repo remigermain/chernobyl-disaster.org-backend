@@ -35,6 +35,7 @@ class TranslateLang(LanguageAbstract):
     parent_key = models.ForeignKey(Translate, on_delete=models.CASCADE, related_name="langs", null=False)
 
     class Meta:
+        ordering = ['-id']
         unique_together = ['parent_key', 'language']
 
     def __str__(self):

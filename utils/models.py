@@ -18,6 +18,7 @@ class CreatorAbstract(models.Model):
 
     class Meta:
         abstract = True
+        ordering = ['-id']
 
 
 class LogAbstract(CreatorAbstract):
@@ -32,7 +33,7 @@ class LogAbstract(CreatorAbstract):
     content_object = GenericForeignKey('content_type', 'object_id')
     uuid = models.CharField(max_length=200)
 
-    class Meta:
+    class Meta(CreatorAbstract.Meta):
         abstract = True
 
     def __str__(self):
