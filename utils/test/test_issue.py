@@ -1,84 +1,149 @@
 from django.test import tag
-from utils.serializers.issue import IssueSerializer
-from utils.models import Issue
-from utils.function import contenttypes_uuid
 from lib.test import BaseTest
+from utils.serializers.issue import IssueSerializer
+from django.urls import reverse
+from django.utils import timezone
+from timeline.models import Event
+from utils.models import Issue
+import json
 
 
-@tag('uuid', 'issue')
+@tag('issue')
 class IssueTest(BaseTest):
 
-    @tag('serializer')
+    def setUp(self):
+        super().setUp()
+        self.event = Event.objects.create(title="event_name", date=timezone.now())
+        self.uuid = self.event.__class__.__name__.lower()
+
     def test_create_serializer(self):
         data = {
-            'uuid': 'user',
-            'object_id': self.user.pk,
-            'message': 'this is a repport!'
+            'message': 'lalalalalal',
+            'uuid': self.uuid,
+            'object_id': self.event.id,
         }
         serializer = IssueSerializer(data=data, context=self.context)
         self.assertTrue(serializer.is_valid())
-        serializer.save()
+        instance = serializer.save()
+        self.check_not_commit_created(instance)
+        return instance
 
-        # check is create
-        issue = Issue.objects.filter(uuid=contenttypes_uuid(self.user))
-        self.assertEqual(issue.count(), 1)
-        issue = issue.first()
-        self.assertEqual(issue.content_object, self.user)
-        self.assertEqual(issue.creator, self.user)
-
-    @tag('serializer')
-    def test_create_serializer_unk_model(self):
+    def test_create_serializer_no_message(self):
         data = {
-            'uuid': 'usereee',
-            'object_id': self.user.pk,
-            'message': 'this is a repport!'
+            'uuid': self.uuid,
+            'object_id': self.event.id,
         }
         serializer = IssueSerializer(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
-    @tag('serializer')
-    def test_create_serializer_not_model(self):
+    def test_create_serializer_empty_wrong_uuid(self):
         data = {
-            'object_id': self.user.pk,
-            'message': 'this is a repport!'
+            'message': 'lalalalalal',
+            'uuid': "uuid",
+            'object_id': self.event.id,
+        }
+        serializer = IssueSerializer(data=data, context=self.get_anonymous_user())
+        self.assertFalse(serializer.is_valid())
+
+    def test_create_serializer_no_uuid(self):
+        data = {
+            'message': 'lalalalalal',
+            'object_id': self.event.id,
         }
         serializer = IssueSerializer(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
-    @tag('serializer')
-    def test_create_serializer_wrong_pk(self):
+    def test_create_serializer_empty_message(self):
         data = {
-            'uuid': 'user',
-            'object_id': 'erfer',
-            'message': 'this is a repport!'
+            'message': '',
+            'uuid': self.uuid,
+            'object_id': self.event.id,
         }
         serializer = IssueSerializer(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
-    @tag('serializer')
-    def test_create_serializer_wrong_pk2(self):
+    @tag('client', 'create')
+    def test_create_client(self):
         data = {
-            'uuid': 'user',
-            'object_id': -5,
-            'message': 'this is a repport!'
+            'message': 'lalalalalal',
+            'uuid': self.uuid,
+            'object_id': self.event.id,
         }
-        serializer = IssueSerializer(data=data, context=self.context)
-        self.assertFalse(serializer.is_valid())
+        response = self.factory.post(reverse("issue-list"), data=data)
+        self.assertEqual(response.status_code, 201)
+        content = json.loads(response.content)
+        obj = Issue.objects.get(id=content['id'])
+        self.check_creator(obj)
+        self.check_not_commit_created(obj)
 
-    @tag('serializer')
-    def test_create_serializer_not_pk(self):
+    @tag('client', 'create')
+    def test_create_client_no_message(self):
         data = {
-            'uuid': 'user',
-            'message': 'this is a repport!'
+            'uuid': self.uuid,
+            'object_id': self.event.id,
         }
-        serializer = IssueSerializer(data=data, context=self.context)
-        self.assertFalse(serializer.is_valid())
+        response = self.factory.post(reverse("issue-list"), data=data)
+        self.assertEqual(response.status_code, 400)
 
-    @tag('serializer')
-    def test_create_serializer_not_message(self):
+    @tag('client', 'create')
+    def test_create_client_empty_message(self):
         data = {
-            'uuid': 'user',
-            'object_id': self.user.pk
+            'message': '',
+            'uuid': self.uuid,
+            'object_id': self.event.id,
         }
-        serializer = IssueSerializer(data=data, context=self.context)
-        self.assertFalse(serializer.is_valid())
+        response = self.factory.post(reverse("issue-list"), data=data)
+        self.assertEqual(response.status_code, 400)
+
+    @tag('client', 'create')
+    def test_create_client_no_uuid(self):
+        data = {
+            'message': 'lalalalalal',
+            'object_id': self.event.id,
+        }
+        response = self.factory.post(reverse("issue-list"), data=data)
+        self.assertEqual(response.status_code, 400)
+
+    @tag('client', 'create')
+    def test_create_client_wrong_uuid(self):
+        data = {
+            'message': 'lalalalalal',
+            'uuid': "uuid",
+            'object_id': self.event.id,
+        }
+        response = self.factory.post(reverse("issue-list"), data=data)
+        self.assertEqual(response.status_code, 400)
+
+    @tag('client', 'create')
+    def test_create_client_wrong_object_id(self):
+        data = {
+            'message': 'lalalalalal',
+            'uuid': self.uuid,
+            'object_id': self.event.id + 1,
+        }
+        response = self.factory.post(reverse("issue-list"), data=data)
+        self.assertEqual(response.status_code, 400)
+
+    @tag('client', 'create')
+    def test_create_client_wrong_emoty_object_id(self):
+        data = {
+            'message': 'lalalalalal',
+            'uuid': self.uuid,
+        }
+        response = self.factory.post(reverse("issue-list"), data=data)
+        self.assertEqual(response.status_code, 400)
+
+    @tag('client', 'get')
+    def test_create_client_get(self):
+        response = self.factory.get(reverse("issue-list"))
+        self.assertEqual(response.status_code, 403)
+
+    @tag('client', 'get')
+    def test_create_client_no_connect(self):
+        data = {
+            'message': 'lalalalalal',
+            'uuid': self.uuid,
+            'object_id': self.event.id,
+        }
+        response = self.client.post(reverse("issue-list"), data=data)
+        self.assertEqual(response.status_code, 403)

@@ -53,10 +53,10 @@ class BaseTest(TestCase):
         self.document2 = SimpleUploadedFile('small2.gif', self.image, content_type='image/gif')
         self.picture = self.document
         self.picture2 = self.document2
-        
+
         self.factory = APIClient()
         self.factory.force_authenticate(user=self.user)
-    
+
     def get_user(self):
         return get_user_model().objects.get(
             username=self.username,
@@ -91,8 +91,6 @@ class BaseTest(TestCase):
         self.assertNotEqual(obj.language, old_language)
         self.assertEqual(obj.language, new_language)
 
-
-
     def check_commit_created(self, instance, creator=None):
         if not creator:
             creator = self.user
@@ -103,6 +101,10 @@ class BaseTest(TestCase):
         self.assertEqual(commit.creator, creator)
         self.assertIsNone(commit.updated_fields)
         self.assertTrue(commit.created)
+
+    def check_not_commit_created(self, instance):
+        query = Commit.objects.filter(uuid=contenttypes_uuid(instance))
+        self.assertEqual(query.count(), 0)
 
     def check_commit_update(self, instance, diff, creator=None):
         if not creator:

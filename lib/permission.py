@@ -53,3 +53,21 @@ class UpdateOnly(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return self.has_permission(request, view)
+
+
+class CreateOnly(permissions.BasePermission):
+
+    def _global_permission(self, request, view):
+        if not request.user.is_authenticated:
+            return False
+        # staff and admin user can do anythings (like delete object )
+        elif request.user.is_staff or request.user.is_superuser:
+            return True
+        # only partial update
+        return view.action == "create"
+
+    def has_permission(self, request, view):
+        return self._global_permission(request, view)
+
+    def has_object_permission(self, request, view, obj):
+        return self.has_permission(request, view)
