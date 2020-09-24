@@ -12,14 +12,14 @@ class PopulateTest(BaseTest):
     @tag('auth')
     def test_auth(self):
         response = self.client.get(reverse('populate_store'))
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 200)
         response = self.client.get(reverse('populate_picture'))
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 200)
         response = self.client.get(reverse('populate_people'))
-        self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse('populate_overview'))
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 200)
         response = self.client.get(reverse('populate_contributors'))
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(reverse('populate_overview'))
         self.assertEqual(response.status_code, 403)
 
     def test_store(self):

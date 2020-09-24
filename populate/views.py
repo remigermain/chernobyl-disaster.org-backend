@@ -18,7 +18,6 @@ def serialize(obj, display_name):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
 def picture(request):
     return Response({
         'photographers': [serialize(obj, 'name') for obj in People.objects.all()]
@@ -26,7 +25,6 @@ def picture(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
 def people(request):
     lst = [
         {
@@ -40,7 +38,6 @@ def people(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
 def populate(request):
     langs = [{'value': lang[0], 'display_name': lang[1]} for lang in settings.LANGUAGES]
 
@@ -55,7 +52,6 @@ def populate(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
 def contributor(request):
     return Response({
         'results': get_user_model().objects.filter(commit_creator__gte=1).distinct().values_list('username', flat=True)
