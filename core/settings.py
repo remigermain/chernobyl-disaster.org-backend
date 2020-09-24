@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'gallery',
     'populate',
     'utils',
+    'lib',
 
     # extra package
     'django_cleanup.apps.CleanupConfig',

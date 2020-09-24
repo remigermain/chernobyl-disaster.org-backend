@@ -3,6 +3,7 @@ from lib.parser.parser import NestedParser
 from rest_framework.parsers import JSONParser, FormParser, MultiPartParser
 from distutils.util import strtobool
 from lib.permission import ChernobylPermission
+# from drf_nested_multipart_parser import NestedMultipartParser
 
 
 class ModelViewSetBase(viewsets.ModelViewSet):

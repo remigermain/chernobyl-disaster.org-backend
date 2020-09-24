@@ -4,6 +4,7 @@ from common.serializers.tag import TagSerializer
 from common.models import TagLang
 from django.urls import reverse
 
+# TODO check creation tag object
 
 @tag('tag')
 class TagTest(BaseTest):

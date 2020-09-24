@@ -76,7 +76,7 @@ class EventTest(BaseTest):
         return obj
 
     @tag('serializer')
-    def test_create_serializer_wrong_langs2(self):
+    def test_create_serializer_same_langs2(self):
         data = {
             'title': 'test-title',
             'date': str(self.time),

@@ -1,139 +1,343 @@
-from .mixins import ParserKeyDimensional
-from .exeptions import ParserError
-import unittest
+from .parser import ParserMultiDimensional
+from django.test import tag
+from lib.test import BaseTest
 
 
-class Parser(unittest.TestCase):
+class Parser(BaseTest):
 
-    def test_is_list(self):
-        parser = ParserKeyDimensional()
-        self.assertTrue(parser.is_list(""))
-        self.assertTrue(parser.is_list(None))
-        self.assertTrue(parser.is_list("55555"))
-        self.assertTrue(parser.is_list("0"))
-        self.assertFalse(parser.is_list("-0"))
-        self.assertFalse(parser.is_list("dd"))
+    def setUp(self):
+        self.parser = ParserMultiDimensional("")
 
-    def test_is_object(self):
-        parser = ParserKeyDimensional()
-        self.assertFalse(parser.is_object(""))
-        self.assertFalse(parser.is_object(None))
-        self.assertFalse(parser.is_object("55555"))
-        self.assertTrue(parser.is_object("ferfef"))
-        self.assertTrue(parser.is_object("dfFFRGRtrgrt"))
-        self.assertTrue(parser.is_object("f"))
-        self.assertTrue(parser.is_object("f4"))
-        self.assertTrue(parser.is_object("F4"))
-        self.assertFalse(parser.is_object("effef+fe"))
+    def test_split(self):
+        key = self.parser.split_key("langs[0][id]")
+        self.assertEqual(['langs', '[0]', '[id]'], key)
+        key = self.parser.split_key("langs[][id]")
+        self.assertEqual(['langs', '[]', '[id]'], key)
+        key = self.parser.split_key("langs[][id][0000][lengh]")
+        self.assertEqual(['langs', '[]', '[id]', '[0000]', '[lengh]'], key)
+        key = self.parser.split_key("langs[][id][0000]lengh")
+        self.assertEqual(['langs', '[]', '[id]', '[0000]', 'lengh'], key)
+        key = self.parser.split_key("langs[]element")
+        self.assertEqual(['langs', '[]', 'element'], key)
 
-    def test_list(self):
-        data = "data[0]"
-        parser = ParserKeyDimensional(data)
-        ret = parser.split()
-        self.assertEqual(ret, ['data', '[0]'])
-        self.assertTrue(parser.is_valid(ret))
-        ret = parser.construct({}, ret, "value")
-        self.assertEqual(ret, {'data': ["value"]})
+    def test_split_space(self):
+        key = self.parser.split_key("    langs        [0]   [id]      ")
+        self.assertEqual(['langs', '[0]', '[id]'], key)
+        key = self.parser.split_key("    langs        [0        ]   [        id]      ")
+        self.assertEqual(['langs', '[0]', '[id]'], key)
+        key = self.parser.split_key("    langs        [       0    ]   [   id   ]      ")
+        self.assertEqual(['langs', '[0]', '[id]'], key)
+        key = self.parser.split_key("    langs        [  0]       ")
+        self.assertEqual(['langs', '[0]'], key)
+        key = self.parser.split_key("    langs        [  ]       ")
+        self.assertEqual(['langs', '[]'], key)
+        key = self.parser.split_key("    langs        [  ]    [       ]   ")
+        self.assertEqual(['langs', '[]', '[]'], key)
+        key = self.parser.split_key("    langs        [ lo lo ]    [   op op    op   ]   ")
+        self.assertEqual(['langs', '[lolo]', '[opopop]'], key)
 
-    def test_list_list(self):
-        data = "data[0][0]"
-        parser = ParserKeyDimensional(data)
-        ret = parser.split()
-        self.assertEqual(ret, ['data', '[0]', '[0]'])
-        self.assertTrue(parser.is_valid(ret))
-        ret = parser.construct({}, ret, "value")
-        self.assertEqual(ret, {'data': [["value"]]})
+    def test_valid_key(self):
+        self.assertTrue(self.parser.valid_key("    langs        [0]   [id]      "))
+        self.assertTrue(self.parser.valid_key("    langs        [   0]   [id]      "))
+        self.assertTrue(self.parser.valid_key("    langs   [0 ]   [  id  ]      "))
+        self.assertTrue(self.parser.valid_key("    langs   [0 ]   [  id  ][ loloolo ]      "))
+        self.assertTrue(self.parser.valid_key("    langs   [0 ]   "))
+        self.assertTrue(self.parser.valid_key("    langs     "))
+        self.assertTrue(self.parser.valid_key("    l     "))
+        self.assertTrue(self.parser.valid_key("    l[l][l]     "))
 
-    def test_list_list_index_null(self):
-        data = "data[0][]"
-        parser = ParserKeyDimensional(data)
-        ret = parser.split()
-        self.assertEqual(ret, ['data', '[0]', '[]'])
-        self.assertTrue(parser.is_valid(ret))
-        ret = parser.construct({}, ret, "value")
-        self.assertEqual(ret, {'data': [["value"]]})
+    def test_invalid_key(self):
+        self.assertFalse(self.parser.valid_key("    l[l [l]     "))
+        self.assertFalse(self.parser.valid_key("    l[l l]]     "))
+        self.assertFalse(self.parser.valid_key("    [l] [l]     "))
+        self.assertFalse(self.parser.valid_key("    [ ]     "))
+        self.assertFalse(self.parser.valid_key("    [d  ] loll     "))
+        self.assertFalse(self.parser.valid_key("  lolo  [d  ] loll     "))
+        self.assertFalse(self.parser.valid_key("  lolo [     "))
+        self.assertFalse(self.parser.valid_key("  lolo ]     "))
+        self.assertFalse(self.parser.valid_key("  lolo[ l{ ]     "))
+        self.assertFalse(self.parser.valid_key("  lolo[ 4lolo ]     "))
+        self.assertFalse(self.parser.valid_key("  lolo[ 4lolo ]     "))
+        self.assertFalse(self.parser.valid_key("  lolo[ 4lolo ]     "))
+        self.assertFalse(self.parser.valid_key("  lolo[ 4lolo ]     "))
+        self.assertFalse(self.parser.valid_key("  lolo[ 4lolo ]    [ "))
+        self.assertFalse(self.parser.valid_key("  lolo[ 4lolo ] [[]]     "))
+        self.assertFalse(self.parser.valid_key("      "))
+        self.assertFalse(self.parser.valid_key("  3443343    "))
+        self.assertFalse(self.parser.valid_key("  fwe [***]   "))
 
-    def test_list_index_null_object(self):
-        data = "data[][title]"
-        parser = ParserKeyDimensional(data)
-        ret = parser.split()
-        self.assertEqual(ret, ['data', '[]', '[title]'])
-        self.assertTrue(parser.is_valid(ret))
-        ret = parser.construct({}, ret, "value")
-        self.assertEqual(ret, {'data': [{'title': 'value'}]})
+    def test_conv_list_index(self):
+        self.assertEqual(self.parser.conv_list_index("[7777]"), 7777)
+        self.assertEqual(self.parser.conv_list_index("[]"), -1)
+        self.assertEqual(self.parser.conv_list_index("[23]"), 23)
+        self.assertEqual(self.parser.conv_list_index("[0]"), 0)
 
-    def test_space(self):
-        data = "data[  title  ]"
-        parser = ParserKeyDimensional(data)
-        ret = parser.split()
-        self.assertEqual(ret, ['data', '[  title  ]'])
-        self.assertTrue(parser.is_valid(ret))
-        ret = parser.construct({}, ret, "value")
-        self.assertEqual(ret, {'data': {'title': 'value'}})
+    def test_conv_object_index(self):
+        self.assertEqual(self.parser.conv_object_index("[anme]"), 'anme')
+        self.assertEqual(self.parser.conv_object_index("[lalallala]"), 'lalallala')
+        self.assertEqual(self.parser.conv_object_index("[dddd0]"), 'dddd0')
+        self.assertEqual(self.parser.conv_object_index("[name]"), 'name')
 
-    def test_space_list_space_index_null(self):
-        data = "data[  title  ][     ]"
-        parser = ParserKeyDimensional(data)
-        ret = parser.split()
-        self.assertEqual(ret, ['data', '[  title  ]', '[     ]'])
-        self.assertTrue(parser.is_valid(ret))
-        ret = parser.construct({}, ret, "value")
-        self.assertEqual(ret, {'data': {'title': ['value']}})
+    def test_conv_index(self):
+        self.assertEqual(self.parser.conv_index("[7777]"), 7777)
+        self.assertEqual(self.parser.conv_index("[]"), -1)
+        self.assertEqual(self.parser.conv_index("[23]"), 23)
+        self.assertEqual(self.parser.conv_index("[0]"), 0)
+        self.assertEqual(self.parser.conv_index("[anme]"), 'anme')
+        self.assertEqual(self.parser.conv_index("[lalallala]"), 'lalallala')
+        self.assertEqual(self.parser.conv_index("[dddd0]"), 'dddd0')
+        self.assertEqual(self.parser.conv_index("[name]"), 'name')
 
-    def test_wrong_name(self):
-        data = "data[  ti tle  ][     ]"
-        parser = ParserKeyDimensional(data)
-        ret = parser.split()
-        self.assertEqual(ret, ['data', '[  ti tle  ]', '[     ]'])
-        self.assertFalse(parser.is_valid(ret))
+    def test_parser_object(self):
+        data = {
+            'title[id][length]': 'lalal'
+        }
+        parser = ParserMultiDimensional(data)
+        self.assertTrue(parser.is_valid())
+        result = parser.construct(data)
+        expected = {
+            'title': {
+                'id': {
+                    'length': 'lalal'
+                }
+            }
+        }
+        self.assertDictEqual(result, expected)
 
-    def test_object_object(self):
-        data = "data[  title  ][  ggg   ]"
-        parser = ParserKeyDimensional(data)
-        ret = parser.split()
-        self.assertEqual(ret, ['data', '[  title  ]', '[  ggg   ]'])
-        self.assertTrue(parser.is_valid(ret))
-        ret = parser.construct({}, ret, "value")
-        self.assertEqual(ret, {'data': {'title': {'ggg': 'value'}}})
+    def test_parser_object2(self):
+        data = {
+            'title[id][length]': 'lalal',
+            'title[id][value]': 'lalal'
+        }
+        parser = ParserMultiDimensional(data)
+        result = parser.construct(data)
+        expected = {
+            'title': {
+                'id': {
+                    'length': 'lalal',
+                    'value': 'lalal'
+                }
+            }
+        }
+        self.assertDictEqual(result, expected)
 
-    def test_object_list_object(self):
-        data = "data[  title  ][][  ggg   ]"
-        parser = ParserKeyDimensional(data)
-        ret = parser.split()
-        self.assertEqual(ret, ['data', '[  title  ]', '[]', '[  ggg   ]'])
-        self.assertTrue(parser.is_valid(ret))
-        ret = parser.construct({}, ret, "value")
-        self.assertEqual(ret, {'data': {'title': [{'ggg': 'value'}]}})
+    def test_parser_object3(self):
+        data = {
+            'title[id][length]': 'lalal',
+            'title[id][value]': 'lalal',
+            'title[id][value]': 'lalal',
+            'title[value]': 'lalal'
+        }
+        parser = ParserMultiDimensional(data)
+        self.assertTrue(parser.is_valid())
+        result = parser.construct(data)
+        expected = {
+            'title': {
+                'id': {
+                    'length': 'lalal',
+                    'value': 'lalal'
+                },
+                'value': 'lalal'
+            }
+        }
+        self.assertDictEqual(result, expected)
 
-    def test_list_list_list(self):
-        data = "data[    ][][  0  ]"
-        parser = ParserKeyDimensional(data)
-        ret = parser.split()
-        self.assertEqual(ret, ['data', '[    ]', '[]', '[  0  ]'])
-        self.assertTrue(parser.is_valid(ret))
-        ret = parser.construct({}, ret, "value")
-        self.assertEqual(ret, {'data': [[['value']]]})
+    def test_parser_object4(self):
+        data = {
+            'title[id][length]': 'lalal',
+            'title[id][value]': 'lalal',
+            'title[id][value]': 'lalal',
+            'title[value]': 'lalal',
+            'sub': 'lalal',
+            'title[id][recusrive][only][field]': 'icci'
+        }
+        parser = ParserMultiDimensional(data)
+        self.assertTrue(parser.is_valid())
+        result = parser.construct(data)
+        expected = {
+            'title': {
+                'id': {
+                    'length': 'lalal',
+                    'value': 'lalal',
+                    'recusrive': {
+                        'only': {
+                            'field': 'icci'
+                        }
+                    }
+                },
+                'value': 'lalal'
+            },
+            'sub': 'lalal'
+        }
+        self.assertDictEqual(result, expected)
 
-    def test_index_out_of_range(self):
-        data = "data[5]"
-        parser = ParserKeyDimensional(data)
-        ret = parser.split()
-        self.assertEqual(ret, ['data', '[5]'])
-        self.assertTrue(parser.is_valid(ret))
-        try:
-            parser.construct({}, ret, "value")
-        except Exception as e:
-            self.assertIsInstance(e, ParserError)
+    def test_parser_object_reasing(self):
+        data = {
+            'title[id][length]': 'lalal',
+            'title[id][  length  ]': 'lalal',
+        }
+        parser = ParserMultiDimensional(data)
+        self.assertTrue(parser.is_valid())
+        result = parser.construct(data)
+        expected = {
+            'title': {
+                'id': {
+                    'length': 'lalal'
+                }
+            }
+        }
+        self.assertEqual(expected, result)
 
-    def test_before_valid(self):
-        data = "data[++fer]"
-        parser = ParserKeyDimensional(data)
-        ret = parser.split()
-        try:
-            parser.construct({}, ret, "value")
-        except Exception as e:
-            self.assertIsInstance(e, ValueError)
+    def test_parser_object_reasing2(self):
+        data = {
+            'title[id][length]': 'lalal',
+            'title[value]': 'lalal',
+            'sub': 'lalal',
+            'title[id][recusrive][only][field]': 'icci',
+        }
+        parser = ParserMultiDimensional(data)
+        self.assertTrue(parser.is_valid())
+        result = parser.construct(data)
+        expected = {
+            'title': {
+                'id': {
+                    'length': 'lalal',
+                    'recusrive': {
+                        'only': {
+                            'field': 'icci'
+                        },
+                    },
+                },
+                'value': 'lalal',
+            },
+            'sub': 'lalal',
+        }
+        self.assertEqual(expected, result)
 
+    def test_parser_classic(self):
+        data = {
+            'title': 'lalal'
+        }
+        parser = ParserMultiDimensional(data)
+        self.assertTrue(parser.is_valid())
+        result = parser.construct(data)
+        expected = {
+            'title': 'lalal'
+        }
+        self.assertDictEqual(result, expected)
 
-if __name__ == '__main__':
-    unittest.main()
+    def test_parser_classic_double_assign(self):
+        data = {
+            'title   ': 'lalal',
+            'title': 'dddddddddddddd'
+        }
+        parser = ParserMultiDimensional(data)
+        self.assertTrue(parser.is_valid())
+        result = parser.construct(data)
+        expected = {'title': 'lalal'}
+        self.assertEqual(result, expected)
+
+    def test_parser_list(self):
+        data = {
+            'title': 'lalal',
+            'list[]': 'icicici'
+        }
+        parser = ParserMultiDimensional(data)
+        result = parser.construct(data)
+        expected = {
+            'title': 'lalal',
+            'list': [
+                'icicici'
+            ]
+        }
+        self.assertTrue(parser.is_valid())
+        self.assertEqual(result, expected)
+
+    def test_parser_list_index_out_of_range(self):
+        data = {
+            'title': 'lalal',
+            'list[2]': 'icicici'
+        }
+        parser = ParserMultiDimensional(data)
+        self.assertTrue(parser.is_valid())
+        result = parser.construct(data)
+        expected = {
+            'title': 'lalal',
+            'list': [
+                "icicici"
+            ]
+        }
+        self.assertEqual(result, expected)
+
+    def test_parser_list_object_index(self):
+        data = {
+            'title': 'lalal',
+            'list[length][]': 'icicici'
+        }
+        parser = ParserMultiDimensional(data)
+        result = parser.construct(data)
+        expected = {
+            'title': 'lalal',
+            'list': {
+                'length': [
+                    'icicici'
+                ]
+            }
+        }
+        self.assertTrue(parser.is_valid())
+        self.assertEqual(result, expected)
+
+    def test_parser_list_double_assign(self):
+        data = {
+            'title': 'lalal',
+            'list[]': 'icicici',
+            'list[ ]': 'new',
+            'list[1]': 'neeew',
+        }
+        parser = ParserMultiDimensional(data)
+        self.assertTrue(parser.is_valid())
+        result = parser.construct(data)
+        expected = {
+            'title': 'lalal',
+            'list': [
+                'icicici',
+                'neeew'
+            ]
+        }
+        self.assertEqual(result, expected)
+
+    def test_real(self):
+        data = {
+            'title': 'title',
+            'date': "time",
+            'langs[0][id]': "id",
+            'langs[0][title]': 'title',
+            'langs[0][description]': 'description',
+            'langs[0][language]': "language",
+            'langs[1][id]': "id1",
+            'langs[1][title]': 'title1',
+            'langs[1][description]': 'description1',
+            'langs[1][language]': "language1"
+        }
+        parser = ParserMultiDimensional(data)
+        self.assertTrue(parser.is_valid())
+        result = parser.construct(data)
+        expected = {
+            'title': 'title',
+            'date': "time",
+            'langs': [
+                {
+                    'id': 'id',
+                    'title': 'title',
+                    'description': 'description',
+                    'language': 'language'
+                },
+                {
+                    'id': 'id1',
+                    'title': 'title1',
+                    'description': 'description1',
+                    'language': 'language1'
+                }
+            ]
+        }
+        self.assertEqual(result, expected)

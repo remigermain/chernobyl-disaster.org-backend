@@ -3,6 +3,15 @@ from drf_writable_nested.serializers import WritableNestedModelSerializer
 from django.core.exceptions import ValidationError
 from django.utils.text import capfirst
 from utils.models import Commit
+from rest_framework.fields import empty
+from django.http import QueryDict
+
+
+class ListSerializer(serializers.ListSerializer):
+    def get_value(self, dictionary):
+        if isinstance(dictionary, QueryDict):
+            return dictionary.getlist(self.field_name, empty)
+        return super().get_value(dictionary)
 
 
 class ModelSerializerBaseNested(WritableNestedModelSerializer):
@@ -10,7 +19,7 @@ class ModelSerializerBaseNested(WritableNestedModelSerializer):
         if hasattr(self.Meta, 'fields'):
             if 'id' not in self.Meta.fields:
                 self.Meta.fields.insert(0, 'id')  # allway add id
-
+        setattr(self.Meta, 'list_serializer_class', ListSerializer)
         super().__init__(*args, **kwargs)
 
     def validate_langs(self, data):
