@@ -1,8 +1,11 @@
 from rest_framework.parsers import MultiPartParser
 from django.http.multipartparser import MultiPartParserError
-from rest_framework.exceptions import ParseError
 from django.http import QueryDict
+import logging
 import re
+
+# create logger
+logger = logging.getLogger("ParserMultiDimensional")
 
 
 class ParserMultiDimensional:
@@ -93,15 +96,13 @@ class ParserMultiDimensional:
         for key, value in data.items():
             keys = self.valid_key(key)
             if not keys:
+                logger.error(f"{self.__class__.__name__} error parsing {key} from {keys}")
                 raise MultiPartParserError(f"invalid key {keys}")
             tmp = dictionary
             for curr, nxt in zip(keys, keys[1:]):
                 set_type = [] if self.is_list(nxt) else {}
                 tmp = tmp[self.set_type(tmp, curr, set_type)]
-            # try:
             self.set_type(tmp, keys[-1], self.get_values(data, key))
-            # except AttributeError:
-            #     print(type(self.data))
         self.__validate_data = dictionary
         return dictionary
 
@@ -111,29 +112,32 @@ class ParserMultiDimensional:
         self._valid = True
         return self._valid
 
-    def _set_list(self, dtc, field, values):
+    def _append_list(self, dtc, field, values):
         lst_mutable = []
         for ele in values:
             if isinstance(ele, dict):
-                depth_dtc, lst_mutable = self._convert_dict(ele)
+                depth_dtc, lst_mutable = self._append_list(ele)
                 dtc.appendlist(field, depth_dtc)
             elif isinstance(ele, list):
-                lst_mutable.extend(self._set_list(dtc, field, ele))
+                lst_mutable.extend(self._append_list(dtc, field, ele))
             else:
                 dtc.appendlist(field, ele)
         return lst_mutable
 
-    def _convert_dict(self, data):
+    def _convert_to_querydict(self, data):
         dct = QueryDict(mutable=True)
         lst_mutable = [dct]
         for field, values in data.items():
             if isinstance(values, list):
-                lst_mutable.extend(self._set_list(dct, field, values))
+                lst_mutable.extend(self._append_list(dct, field, values))
             else:
                 dct.appendlist(field, values)
         return dct, lst_mutable
 
     def _set_mutable(self, query):
+        """
+            set mutable to false on all querydict
+        """
         for dtc in query:
             dtc.mutable = False
 
@@ -143,7 +147,7 @@ class ParserMultiDimensional:
             raise ValueError("You need to be call is_valid() before access validate_data")
         if self._valid is False:
             raise ValueError("You can't get validate data")
-        dtc, mutable = self._convert_dict(self.__validate_data)
+        dtc, mutable = self._convert_to_querydict(self.__validate_data)
         self._set_mutable(mutable)
         return dtc
 
@@ -158,6 +162,5 @@ class NestedParser(MultiPartParser):
             copy.update(parsed.files)
         parser = ParserMultiDimensional(copy)
         if parser.is_valid():
-            data = parser.validate_data
-            return data
+            return parser.validate_data
         return parsed
