@@ -185,6 +185,9 @@ REST_AUTH_SERIALIZERS = {
 }
 
 
+# #-----------------------------------------
+#   DEBUG
+# #-----------------------------------------
 if DEBUG:
     # INSTALLED_APPS += [
     #     'debug_toolbar'
@@ -227,6 +230,11 @@ if DEBUG:
             'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
         }
     }
+
+# #-----------------------------------------
+#   PRODUCTION
+# #-----------------------------------------
+
 else:
     CORS_ORIGIN_ALLOW_ALL = False
 
@@ -248,3 +256,47 @@ else:
             "PORT": os.environ.get("SQL_PORT"),
         }
     }
+
+
+# #-----------------------------------------
+#   LOGGIN
+# #-----------------------------------------
+
+DEFAULT_LOG = ["file", "mail_admins"] if not DEBUG else ["console"]
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': './log/django.log',
+        },
+        "console": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+        }
+    },
+    'loggers': {
+        'django': {
+            'handlers': DEFAULT_LOG,
+            'level': 'WARNING',
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': DEFAULT_LOG,
+            'level': 'ERROR',
+            'propagate': True,
+        },
+        'ParserMultiDimensional': {
+            'handlers': DEFAULT_LOG,
+            'level': 'WARNING',
+            'propagate': True,
+        },
+    },
+}

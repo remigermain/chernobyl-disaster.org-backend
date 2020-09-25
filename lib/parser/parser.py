@@ -95,8 +95,8 @@ class ParserMultiDimensional:
 
         for key, value in data.items():
             keys = self.valid_key(key)
+            logger.error(f"{self.__class__.__name__} error parsing {key} from {keys}")
             if not keys:
-                logger.error(f"{self.__class__.__name__} error parsing {key} from {keys}")
                 raise MultiPartParserError(f"invalid key {keys}")
             tmp = dictionary
             for curr, nxt in zip(keys, keys[1:]):
