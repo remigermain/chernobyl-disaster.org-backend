@@ -9,8 +9,8 @@ class TagLangInline(AdminInlineBase):
 
 @admin.register(Tag)
 class TagAdmin(AdminBase):
-    list_display = ('name',)
-    search_fields = ('name',)
+    list_display = ('name', 'langs_available', 'commit', 'issue')
+    search_fields = ('name', )
     inlines = [
         TagLangInline
     ]
@@ -22,7 +22,7 @@ class TranslateLangInline(AdminInlineBase):
 
 @admin.register(Translate)
 class TranslateAdmin(AdminBase):
-    list_display = ('key',)
+    list_display = ('key', 'langs_available', 'commit', 'issue')
     search_fields = ('key',)
     inlines = [
         TranslateLangInline

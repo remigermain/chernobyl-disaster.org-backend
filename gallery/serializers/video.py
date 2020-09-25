@@ -5,7 +5,7 @@ from gallery.models import Video, VideoLang
 class VideoLangSerializer(ModelSerializerBase):
     class Meta:
         model = VideoLang
-        fields = ['title', 'language']
+        fields = ['id', 'title', 'language']
 
 
 class VideoSerializer(ModelSerializerBase):
@@ -13,19 +13,9 @@ class VideoSerializer(ModelSerializerBase):
 
     class Meta:
         model = Video
-        fields = ['title', 'tags', 'event', 'video', 'langs']
+        fields = ['id', 'title', 'tags', 'event', 'video', 'langs']
 
 
-class VideoSerializerPost(VideoSerializer):
+class VideoSerializerEvent(VideoSerializer):
     class Meta(VideoSerializer.Meta):
-        pass
-
-
-class VideoSerializerGet(VideoSerializerPost):
-    class Meta(VideoSerializerPost.Meta):
-        pass
-
-
-class VideoSerializerMinGet(VideoSerializerGet):
-    class Meta(VideoSerializerGet.Meta):
         fields = ['title', 'video', 'langs']

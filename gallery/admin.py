@@ -9,8 +9,8 @@ class PeopleLangInline(AdminInlineBase):
 
 @admin.register(People)
 class PeopleAdmin(AdminBase):
-    list_display = ('name', 'born', 'death', 'pictures')
-    search_fields = ('name', 'born', 'death')
+    list_display = ('id', 'name', 'langs_available', 'commit', 'issue')
+    search_fields = ('id', 'name', 'born', 'death')
     inlines = [
         PeopleLangInline
     ]
@@ -25,7 +25,8 @@ class PictureLangInline(AdminInlineBase):
 
 @admin.register(Picture)
 class PictureAdmin(AdminBase):
-    list_display = ('picture', 'photographer')
+    list_display = ('id', 'title', 'langs_available', 'commit', 'issue')
+    search_fields = ('id', 'title')
     inlines = [
         PictureLangInline
     ]
@@ -37,7 +38,8 @@ class VideoLangInline(AdminInlineBase):
 
 @admin.register(Video)
 class VideoAdmin(AdminBase):
-    list_display = ('video', )
+    list_display = ('id', 'title', 'langs_available', 'commit', 'issue')
+    search_fields = ('id', 'title')
     inlines = [
         VideoLangInline
     ]

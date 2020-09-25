@@ -1,13 +1,13 @@
 from lib.serializers import ModelSerializerBase
 from timeline.models import Event, EventLang
-from gallery.serializers.picture import PictureSerializerMinGet
-from gallery.serializers.video import VideoSerializerMinGet
+from gallery.serializers.picture import PictureSerializerEvent
+from gallery.serializers.video import VideoSerializerEvent
 
 
 class EventLangSerializer(ModelSerializerBase):
     class Meta:
         model = EventLang
-        fields = ['title', 'description', 'language']
+        fields = ['id', 'title', 'description', 'language']
 
 
 class EventSerializer(ModelSerializerBase):
@@ -15,18 +15,13 @@ class EventSerializer(ModelSerializerBase):
 
     class Meta:
         model = Event
-        fields = ['title', 'tags', 'date', 'langs']
+        fields = ['id', 'title', 'tags', 'date', 'langs']
 
 
-class EventSerializerPost(EventSerializer):
+class EventSerializerTimeline(EventSerializer):
+    pictures = PictureSerializerEvent(many=True, required=False)
+    videos = VideoSerializerEvent(many=True, required=False)
+
     class Meta(EventSerializer.Meta):
-        pass
-
-
-class EventSerializerGet(EventSerializerPost):
-    pictures = PictureSerializerMinGet(many=True, required=False)
-    videos = VideoSerializerMinGet(many=True, required=False)
-
-    class Meta(EventSerializerPost.Meta):
-        fields = EventSerializerPost.Meta.fields + \
+        fields = EventSerializer.Meta.fields + \
             ['pictures', 'videos', 'slug']

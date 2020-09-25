@@ -44,6 +44,17 @@ class PictureTest(BaseTest):
         response = self.factory_admin.delete(reverse("picture-detail", args=[instance.id]))
         self.assertEqual(response.status_code, 204)
 
+    def test_put(self):
+        instance = self.test_create_serializer()
+        response = self.client.put(reverse("picture-detail", args=[instance.id]), data={})
+        self.assertEqual(response.status_code, 403)
+        response = self.factory.put(reverse("picture-detail", args=[instance.id]), data={})
+        self.assertEqual(response.status_code, 403)
+        response = self.factory_admin.put(reverse("picture-detail", args=["wrong"]), data={})
+        self.assertEqual(response.status_code, 404)
+        response = self.factory_admin.put(reverse("picture-detail", args=[instance.id]), data={})
+        self.assertEqual(response.status_code, 400)
+
     def test_create_serializer(self):
         data = {
             'title': 'title',
@@ -165,6 +176,22 @@ class PictureTest(BaseTest):
         instance = serializer.save()
         self.check_commit_update(instance, diff=['title'])
 
+    def test_update_client_picture_empty(self):
+        instance = self.test_create_serializer()
+        data = {
+            'picture': '',
+        }
+        response = self.factory.patch(reverse('picture-detail', args=[instance.id]), data=data)
+        self.assertEqual(response.status_code, 400)
+
+    def test_update_client_picture_wrong(self):
+        instance = self.test_create_serializer()
+        data = {
+            'picture': 'efrff',
+        }
+        response = self.factory.patch(reverse('picture-detail', args=[instance.id]), data=data)
+        self.assertEqual(response.status_code, 400)
+
     def test_update_client(self):
         instance = self.test_create_serializer()
         data = {
@@ -225,14 +252,14 @@ class PictureTest(BaseTest):
         response = self.factory.post(reverse('picture-list'), data=data)
         self.assertEqual(response.status_code, 400)
 
-    def test_create_client_no_video(self):
+    def test_create_client_no_picture(self):
         data = {
             'title': 'title',
         }
         response = self.factory.post(reverse('picture-list'), data=data)
         self.assertEqual(response.status_code, 400)
 
-    def test_create_client_empty_video(self):
+    def test_create_client_empty_picture(self):
         data = {
             'title': 'title',
             'picture': ''
@@ -240,7 +267,7 @@ class PictureTest(BaseTest):
         response = self.factory.post(reverse('picture-list'), data=data)
         self.assertEqual(response.status_code, 400)
 
-    def test_create_client_wrong_video(self):
+    def test_create_client_wrong_picture(self):
         data = {
             'title': 'title',
             'picture': 'worng_url'
@@ -354,14 +381,14 @@ class PictureTest(BaseTest):
         serializer = PictureSerializerPost(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
-    def test_create_serializer_no_video(self):
+    def test_create_serializer_no_picture(self):
         data = {
             'title': 'title',
         }
         serializer = PictureSerializerPost(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
-    def test_create_serializer_empty_video(self):
+    def test_create_serializer_empty_picture(self):
         data = {
             'title': 'title',
             'picture': ''
@@ -369,7 +396,7 @@ class PictureTest(BaseTest):
         serializer = PictureSerializerPost(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
-    def test_create_serializer_wrong_video(self):
+    def test_create_serializer_wrong_picture(self):
         data = {
             'title': 'title',
             'picture': 'worng_url'

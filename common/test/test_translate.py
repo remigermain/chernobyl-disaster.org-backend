@@ -35,6 +35,13 @@ class TranslateTest(BaseTest):
         response = self.factory.get(reverse("translate-detail", args=[instance.id]))
         self.assertEqual(response.status_code, 200)
 
+    def test_put(self):
+        instance = self.test_create_serializer()
+        response = self.client.put(reverse("translate-detail", args=[instance.id]), data={})
+        self.assertEqual(response.status_code, 403)
+        response = self.factory.put(reverse("translate-detail", args=[instance.id]), data={})
+        self.assertEqual(response.status_code, 403)
+
     @tag('serializer', 'create')
     def test_create_serializer(self):
         data = {

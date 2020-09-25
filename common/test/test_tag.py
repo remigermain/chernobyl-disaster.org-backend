@@ -4,7 +4,6 @@ from common.serializers.tag import TagSerializer
 from common.models import TagLang
 from django.urls import reverse
 
-# TODO check creation tag object
 
 @tag('tag')
 class TagTest(BaseTest):
@@ -27,6 +26,17 @@ class TagTest(BaseTest):
         self.assertEqual(response.status_code, 200)
         response = self.factory.get(reverse("tag-detail", args=[instance.id]))
         self.assertEqual(response.status_code, 200)
+
+    def test_put(self):
+        instance = self.test_create_serializer()
+        response = self.client.put(reverse("tag-detail", args=[instance.id]), data={})
+        self.assertEqual(response.status_code, 403)
+        response = self.factory.put(reverse("tag-detail", args=[instance.id]), data={})
+        self.assertEqual(response.status_code, 403)
+        response = self.factory_admin.put(reverse("tag-detail", args=["wrong"]), data={})
+        self.assertEqual(response.status_code, 404)
+        response = self.factory_admin.put(reverse("tag-detail", args=[instance.id]), data={})
+        self.assertEqual(response.status_code, 400)
 
     @tag('serializer', 'create')
     def test_create_serializer(self):

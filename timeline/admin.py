@@ -9,7 +9,8 @@ class EventLangInline(AdminInlineBase):
 
 @admin.register(Event)
 class EventAdmin(AdminBase):
-    list_display = ('title', 'date')
+    list_display = ('id', 'title', 'date', 'langs_available', 'commit', 'issue')
+    search_fields = ('id', 'title', 'date')
     inlines = [
         EventLangInline
     ]

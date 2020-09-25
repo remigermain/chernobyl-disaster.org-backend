@@ -7,20 +7,16 @@ from common.models import Tag
 class PeopleLangSerializer(ModelSerializerBase):
     class Meta:
         model = PeopleLang
-        fields = ['biography', 'language']
+        fields = ['id', 'biography', 'language']
 
 
 class PeopleSerializer(ModelSerializerBase):
     langs = PeopleLangSerializer(many=True, required=False)
+    profil = SerializerMethodField()
 
     class Meta:
         model = People
-        fields = ['name', 'born', 'death', 'profil', 'wikipedia', 'langs', 'tags']
-
-
-class PeopleSerializerPost(PeopleSerializer):
-    class Meta(PeopleSerializer.Meta):
-        pass
+        fields = ['id', 'name', 'born', 'death', 'profil', 'wikipedia', 'langs', 'tags']
 
     def create(self, validated_data):
         # alway create tag same name has people name
@@ -47,13 +43,6 @@ class PeopleSerializerPost(PeopleSerializer):
         obj.tags.add(tag)
         return obj
 
-
-class PeopleSerializerGet(PeopleSerializerPost):
-    profil = SerializerMethodField()
-
-    class Meta(PeopleSerializerPost.Meta):
-        pass
-
     def get_profil(self, obj):
         return {
             'original_jpeg': obj.to_url('profil'),
@@ -61,3 +50,10 @@ class PeopleSerializerGet(PeopleSerializerPost):
             'thumbnail_webp': obj.to_url('profil_thumbnail_webp'),
             'thumbnail_jpeg': obj.to_url('profil_thumbnail_jpeg'),
         }
+
+
+class PeopleSerializerPost(PeopleSerializer):
+    profil = None
+
+    class Meta(PeopleSerializer.Meta):
+        pass

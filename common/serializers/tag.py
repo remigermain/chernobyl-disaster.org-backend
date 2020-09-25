@@ -5,7 +5,7 @@ from common.models import Tag, TagLang
 class TagLangSerializer(ModelSerializerBase):
     class Meta:
         model = TagLang
-        fields = ['name', 'language']
+        fields = ['id', 'name', 'language']
 
 
 class TagSerializer(ModelSerializerBase):
@@ -13,14 +13,4 @@ class TagSerializer(ModelSerializerBase):
 
     class Meta:
         model = Tag
-        fields = ['name', 'langs']
-
-
-class TagSerializerPost(TagSerializer):
-    class Meta(TagSerializer.Meta):
-        pass
-
-
-class TagSerializerGet(TagSerializerPost):
-    class Meta(TagSerializerPost.Meta):
-        pass
+        fields = ['id', 'name', 'langs']

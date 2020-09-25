@@ -1,50 +1,30 @@
 from django.contrib import admin
 from django.conf import settings
+from utils.function import contenttypes_uuid
+from utils.models import Issue, Commit
 
 
 class AdminBase(admin.ModelAdmin):
     """
         model base for admin, with glocal function
     """
-
     empty_value_display = "- empty -"
     list_per_page = 20
 
-    def __init__(self, model, admin_site):
-
-        # TODO
-        __list_display = ('issue_count', 'commit_count')
-        __list_filter = ()
-        __search_fields = ()
-
-        # check if models have i18n field
-        if hasattr(model, 'langs'):
-            __list_display = ('langs_available',) + __list_display
-            __list_filter = ('langs__language',) + __list_filter
-            __search_fields = ('lang__language',) + __search_fields
-
-        # assing default value
-        self.list_display = ('id',) + self.list_display + __list_display
-        self.list_filter = ('id',) + self.list_filter + __list_filter
-        self.search_fields = ('id',) + self.search_fields + __search_fields
-
-        super().__init__(model, admin_site)
-
     def langs_available(self, obj):
-        lst = [obj['language'] for obj in obj.langs.values('language')]
-        return " | ".join(lst) or None
+        return obj.langs.values('language', flat=True)
 
-    def issue_count(self, obj):
-        return obj.issue_count
+    def issue(self, obj):
+        return Issue.objects.filter(uuid=contenttypes_uuid(obj)).count()
 
-    def commit_count(self, obj):
-        return obj.commit_count
+    def commit(self, obj):
+        return Commit.objects.filter(uuid=contenttypes_uuid(obj)).count()
 
 
 class AdminInlineBase(admin.TabularInline):
     def get_extra(self, request, obj=None, **kwargs):
         """
-            return minimuin of laungage availables
+            return minimuin of language availables
         """
         _min = obj.langs.count() if obj else 1
         return min(_min, len(settings.LANGUAGES))

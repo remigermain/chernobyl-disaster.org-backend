@@ -4,7 +4,7 @@ from gallery.serializers.people import PeopleSerializerPost
 from gallery.models import PeopleLang, People
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
-
+from common.models import Tag
 
 @tag('people')
 class PeopleTest(BaseTest):
@@ -36,6 +36,17 @@ class PeopleTest(BaseTest):
         self.assertEqual(response.status_code, 404)
         response = self.factory_admin.delete(reverse("people-detail", args=[instance.id]))
         self.assertEqual(response.status_code, 204)
+
+    def test_put(self):
+        instance = self.test_create_serializer()
+        response = self.client.put(reverse("people-detail", args=[instance.id]), data={})
+        self.assertEqual(response.status_code, 403)
+        response = self.factory.put(reverse("people-detail", args=[instance.id]), data={})
+        self.assertEqual(response.status_code, 403)
+        response = self.factory_admin.put(reverse("people-detail", args=["wrong"]), data={})
+        self.assertEqual(response.status_code, 404)
+        response = self.factory_admin.put(reverse("people-detail", args=[instance.id]), data={})
+        self.assertEqual(response.status_code, 400)
 
     def test_create_serializer(self):
         data = {
@@ -222,6 +233,14 @@ class PeopleTest(BaseTest):
         response = self.factory.post(reverse('people-list'), data=data)
         self.assertEqual(response.status_code, 400)
 
+    def test_update_client_profil_wrong(self):
+        instance = self.test_create_serializer()
+        data = {
+            'profil': 'efrff',
+        }
+        response = self.factory.patch(reverse('people-detail', args=[instance.id]), data=data)
+        self.assertEqual(response.status_code, 400)
+
     def test_update_serializer(self):
         instance = self.test_create_serializer()
         data = {
@@ -231,6 +250,44 @@ class PeopleTest(BaseTest):
         self.assertTrue(serializer.is_valid())
         obj = serializer.save()
         self.check_commit_update(obj, diff=['name', 'tags'])
+
+    def test_update_serializer_only_date(self):
+        instance = self.test_create_serializer()
+        data = {
+            'death': self.date2,
+        }
+        serializer = PeopleSerializerPost(instance=instance, data=data, context=self.context, partial=True)
+        self.assertTrue(serializer.is_valid())
+        obj = serializer.save()
+        self.check_commit_update(obj, diff=['death', 'tags'])
+
+    def test_create_serializer_check_create_tags(self):
+        data = {
+            'name': 'name tags create',
+        }
+        serializer = PeopleSerializerPost(data=data, context=self.context)
+        self.assertTrue(serializer.is_valid())
+        self.assertEqual(Tag.objects.count(), 0)
+        obj = serializer.save()
+        self.check_commit_created(obj)
+        self.assertEqual(Tag.objects.count(), 1)
+        self.assertEqual(Tag.objects.first().name, data['name'])
+        return obj
+
+    def test_update_serializer_check_update_tags(self):
+        instance = self.test_create_serializer_check_create_tags()
+        data = {
+            'name': 'new change name tags create',
+        }
+        serializer = PeopleSerializerPost(instance=instance, data=data, context=self.context, partial=True)
+        self.assertTrue(serializer.is_valid())
+        old_name = instance.name
+        self.assertEqual(Tag.objects.filter(name=old_name).count(), 1)
+        obj = serializer.save()
+        self.check_commit_update(obj, diff=['name', 'tags'])
+        self.assertEqual(Tag.objects.filter(name=old_name).count(), 0)
+        self.assertEqual(Tag.objects.count(), 1)
+        self.assertEqual(Tag.objects.first().name, data['name'])
 
     def test_update_serializer_langs(self):
         instance = self.test_create_serializer()

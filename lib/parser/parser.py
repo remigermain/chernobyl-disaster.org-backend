@@ -95,8 +95,8 @@ class ParserMultiDimensional:
 
         for key, value in data.items():
             keys = self.valid_key(key)
-            logger.error(f"{self.__class__.__name__} error parsing {key} from {keys}")
             if not keys:
+                logger.error(f"{self.__class__.__name__} error parsing {key} from {keys}")
                 raise MultiPartParserError(f"invalid key {keys}")
             tmp = dictionary
             for curr, nxt in zip(keys, keys[1:]):
@@ -116,7 +116,7 @@ class ParserMultiDimensional:
         lst_mutable = []
         for ele in values:
             if isinstance(ele, dict):
-                depth_dtc, lst_mutable = self._append_list(ele)
+                depth_dtc, lst_mutable = self._convert_to_querydict(ele)
                 dtc.appendlist(field, depth_dtc)
             elif isinstance(ele, list):
                 lst_mutable.extend(self._append_list(dtc, field, ele))

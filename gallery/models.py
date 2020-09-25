@@ -4,6 +4,7 @@ from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
 from timeline.models import EventExtraAbstract
 from common.models import Tag
+from lib.mixins.picture import PictureMixins
 
 
 def uuid_path(instance, filename):
@@ -22,7 +23,7 @@ def picture_path(instance, filename):
     return f"pictures/{uuid_path(instance, filename)}/{name}"
 
 
-class Picture(EventExtraAbstract):
+class Picture(PictureMixins, EventExtraAbstract):
     picture = models.ImageField(upload_to=picture_path)
     picture_webp = ImageSpecField(source='picture', format='WEBP')
     picture_thumbnail_webp = ImageSpecField(source='picture',
@@ -77,14 +78,14 @@ def profil_path(instance, filename):
     return f"people/{instance.id}/{name}.{extentions}"
 
 
-class People(ChernobylModelAbstract):
+class People(PictureMixins, ChernobylModelAbstract):
     """
         models for personality of chernobyl
     """
-    name = models.CharField(max_length=80, unique=True)
+    name = models.CharField(max_length=80, unique=True, null=False, blank=False)
     born = models.DateField(null=True, blank=True)
     death = models.DateField(null=True, blank=True)
-    profil = models.ImageField(upload_to=profil_path, null=True, blank=True)
+    profil = models.ImageField(upload_to=profil_path, null=True, blank=False)
     profil_webp = ImageSpecField(source='profil', format='WEBP')
     profil_thumbnail_webp = ImageSpecField(source='profil',
                                            processors=[ResizeToFill(250, 160)],

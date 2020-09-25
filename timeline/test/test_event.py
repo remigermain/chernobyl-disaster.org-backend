@@ -19,6 +19,17 @@ class EventTest(BaseTest):
         response = self.client.patch(reverse('event-detail', args=[instance.id]))
         self.assertEqual(response.status_code, 403)
 
+    def test_put(self):
+        instance = self.test_create_serializer()
+        response = self.client.put(reverse("event-detail", args=[instance.id]), data={})
+        self.assertEqual(response.status_code, 403)
+        response = self.factory.put(reverse("event-detail", args=[instance.id]), data={})
+        self.assertEqual(response.status_code, 403)
+        response = self.factory_admin.put(reverse("event-detail", args=["wrong"]), data={})
+        self.assertEqual(response.status_code, 404)
+        response = self.factory_admin.put(reverse("event-detail", args=[instance.id]), data={})
+        self.assertEqual(response.status_code, 400)
+
     @tag('serializer')
     def test_create_serializer(self):
         data = {

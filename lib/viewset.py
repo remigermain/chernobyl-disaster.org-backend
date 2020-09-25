@@ -10,39 +10,6 @@ class ModelViewSetBase(viewsets.ModelViewSet):
     parser_classes = (NestedParser, MultiPartParser, FormParser, JSONParser)
     permission_classes = (ChernobylPermission,)
 
-    def __init__(self, *args, **kwargs):
-        # TODO
-        if not hasattr(self, 'filterset_fields'):
-            self.filterset_fields = []
-        if not hasattr(self, 'search_fields'):
-            self.search_fields = []
-        if not hasattr(self, 'ordering_fields'):
-            self.ordering_fields = []
-        # we allway ad tags if models is not tags
-        fields = ['id']
-
-        from common.models import Tag, TagLang
-        if self.get_model not in [Tag, TagLang] and hasattr(self.get_model, 'tags'):
-            fields.extend(['tags__name', 'tags__langs__name'])
-
-        if hasattr(self.get_model, "langs"):
-            self.search_fields.append('langs__language')
-
-        self.ordering_fields.extend(fields)
-        self.search_fields.extend(fields)
-        self.filterset_fields.extend(fields)
-
-        self.ordering_fields = list(set(self.ordering_fields))
-        self.search_fields = list(set(self.search_fields))
-        self.filterset_fields = list(set(self.filterset_fields))
-
-        super().__init__(*args, **kwargs)
-
-    @property
-    def get_model(self):
-        # return model of class
-        return self.serializer_class.Meta.model
-
     def paginate_queryset(self, queryset):
         """
             no paginate if no_page in query params
@@ -62,11 +29,9 @@ class ModelViewSetBase(viewsets.ModelViewSet):
         completed = self.request.query_params.get('completed', None)
         queryset = super().get_queryset()
         if completed is not None:
-            completed = bool(strtobool(completed))
-            if completed:
-                queryset = queryset.completed()
-            else:
-                queryset = queryset.uncompleted()
+            if bool(strtobool(completed)):
+                return queryset.completed()
+            return queryset.uncompleted()
         return queryset
 
     def get_serializer_class(self, *args):
@@ -75,13 +40,12 @@ class ModelViewSetBase(viewsets.ModelViewSet):
             serializer_class_get and serializer_class_post
             change seriaizer by method name
         """
-        actions = [
-            {'method': 'GET', 'serializer': 'serializer_class_get'},
-            {'method': 'POST', 'serializer': 'serializer_class_post'},
-            {'method': 'PATCH', 'serializer': 'serializer_class_post'},
-        ]
+        actions = {
+            'GET': 'serializer_class_get',
+            'POST': 'serializer_class_post',
+            'PATCH': 'serializer_class_post',
+        }
         method = self.request.method.upper()
-        for action in actions:
-            if method == action['method'] and hasattr(self, action['serializer']):
-                return getattr(self, action['serializer'])
+        if method in actions and hasattr(self, actions[method]):
+            return getattr(self, actions[method])
         return super().get_serializer_class()

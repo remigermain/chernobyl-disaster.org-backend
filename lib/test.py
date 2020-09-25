@@ -38,8 +38,8 @@ class BaseTest(TestCase):
         cls.context = {'request': cls.request}
 
         cls.lang = settings.LANGUAGES_DEFAULT
-        cls.__available_langs = [lang[0] for lang in settings.LANGUAGES]
-        cls.lang2 = [lang for lang in cls.__available_langs if lang is not cls.lang][0]
+        langs = [lang[0] for lang in settings.LANGUAGES]
+        cls.lang2 = [lang for lang in langs if lang is not cls.lang][0]
         cls.time = timezone.now()
         cls.time2 = timezone.now() - timezone.timedelta(days=9)
 

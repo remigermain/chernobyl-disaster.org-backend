@@ -1,6 +1,5 @@
 from django.db import models
 from django.conf import settings
-from utils.function import contenttypes_uuid
 from lib.manager import QuerySetBase
 
 
@@ -15,15 +14,6 @@ class ChernobylModelAbstract(models.Model):
         abstract = True
         ordering = ['-id']
 
-    def to_url(self, field):
-        link = getattr(self, field)
-        if not link:
-            return None
-        link = link.url
-        if not link[0] == "/":
-            return f"{settings.SITE_URL}/{getattr(self, field).url}"
-        return f"{settings.SITE_URL}{getattr(self, field).url}"
-
     def save(self, *args, **kwargs):
         # override the save for check every time the field
         if settings.DEBUG:
@@ -33,6 +23,7 @@ class ChernobylModelAbstract(models.Model):
 
     @property
     def get_commit_id(self):
+        # need it for generate commit
         return self.id
 
 
@@ -49,4 +40,3 @@ class LanguageAbstract(ChernobylModelAbstract):
     class Meta:
         abstract = True
         ordering = ['language', '-id']
-

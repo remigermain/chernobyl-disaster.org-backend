@@ -15,53 +15,52 @@ class ListSerializer(serializers.ListSerializer):
 
 
 class ModelSerializerBaseNested(WritableNestedModelSerializer):
+
     def __init__(self, *args, **kwargs):
-        if hasattr(self.Meta, 'fields'):
-            if 'id' not in self.Meta.fields:
-                self.Meta.fields.insert(0, 'id')  # allway add id
         setattr(self.Meta, 'list_serializer_class', ListSerializer)
         super().__init__(*args, **kwargs)
 
-    def validate_langs(self, data):
+    def validate_langs(self, datas):
         """
             replace of unique together and constaits for language
         """
-        objects = self.get_initial().get('langs', None)
-        _raise = False
-
-        def check_obj(obj):
-            if isinstance(obj['id'], str) and not obj['id'].isdigit():
-                return False
-            return int(obj['id']) == lang['id']
-
+        # get actual language on models
+        exist = []
         if self.instance:
-            list_id = list(filter(lambda obj: 'id' in obj, objects))
-            list_id_exist = []
-            for lang in self.instance.langs.values('id', 'language'):
-                current = list(filter(check_obj, list_id))
-                if not current:
-                    objects.append(lang)
-                else:
-                    list_id_exist.append(lang['id'])
+            exist = list(self.instance.langs.all().values("id", "language"))
 
-            # if other id refered by not in this instance, raise error
-            if len(list_id_exist) != len(list_id):
-                _raise = True
+        news = []
+        error = False
+        for item in self.get_initial().get('langs', []):
+            pk = item.get('id', None)
+            if pk:
+                atc = list(filter(lambda o: o['id'] == int(pk), exist))[0]
+                if not atc:
+                    error = True
+                    break
+                # reasign language in current object
+                atc['language'] = item.get('language')
+            else:
+                news.append(item.get('language'))
 
-        unique = list(set([obj.get('language', None) for obj in objects]))
-        unique = list(filter(lambda x: x, unique))
-        if _raise or len(unique) != len(objects):
+        # check if a same language
+        for lang in news:
+            atc = list(filter(lambda o: o['language'] == lang, exist))
+            if atc:
+                error = True
+                break
+
+        if error or len(list(set(news))) != len(news):
             field = self.Meta.model.langs.field.model.language.field
-            params = {
-                'model_name': self.Meta.model.__name__,
-                'field_label': capfirst(field.verbose_name)
-            }
             raise ValidationError(
                 message="101",
                 code='unique',
-                params=params,
+                params={
+                    'model_name': self.Meta.model.__name__,
+                    'field_label': capfirst(field.verbose_name)
+                },
             )
-        return data
+        return datas
 
     def __diff_field(self, old, new):
         """
@@ -117,7 +116,6 @@ class ModelSerializerBaseNested(WritableNestedModelSerializer):
 class ModelSerializerBase(ModelSerializerBaseNested):
     def __init__(self, *args, **kwargs):
         context = kwargs.get('context', None)
-        # TODO
         if context and \
            hasattr(context['request'], 'query_params') and \
            hasattr(context['request'].query_params, 'contribute') and \
@@ -130,29 +128,16 @@ class ModelSerializerBase(ModelSerializerBaseNested):
 
         super().__init__(*args, **kwargs)
 
-    commit_count = serializers.SerializerMethodField()
     available_languages = serializers.SerializerMethodField()
     not_available_languages = serializers.SerializerMethodField()
 
     def get_not_available_languages(self, obj):
-        # get all langs available
-        langs = [lang[0] for lang in obj.langs.model.lang_choices]
-        # remove languages exsits
-        langs_not_exist = list(set([o.language for o in obj.langs.all()]) ^ set(langs))
-        langs_not_exist.sort()
-        return langs_not_exist
+        exist = self.get_available_languages(obj)
+        diff = list(set(exist) ^ set([lang[0] for lang in obj.langs.model.lang_choices]))
+        diff.sort()
+        return diff
 
     def get_available_languages(self, obj):
-        # remove languages exsits
         langs_exist = [o.language for o in obj.langs.all()]
         langs_exist.sort()
         return langs_exist
-
-    def get_commit_count(self, obj):
-        # obj has annotate contributures count we return it or by queryset
-        return obj.commit_count
-
-    def updated(self, obj):
-        # obj has annotate contributures count we return it or by queryset
-        return obj.updated
-

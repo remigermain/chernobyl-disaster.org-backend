@@ -5,7 +5,7 @@ from common.models import Translate, TranslateLang
 class TranslateLangSerializer(ModelSerializerBase):
     class Meta:
         model = TranslateLang
-        fields = ['value', 'language', 'parent_key']
+        fields = ['id', 'value', 'language', 'parent_key']
 
 
 class TranslateSerializer(ModelSerializerBase):
@@ -13,4 +13,4 @@ class TranslateSerializer(ModelSerializerBase):
 
     class Meta:
         model = Translate
-        fields = ['key', 'langs']
+        fields = ['id', 'key', 'langs']

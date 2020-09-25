@@ -11,15 +11,6 @@ class IssueSerializer(ModelSerializerBase):
     def get_contenttype(self, model, pk):
         return model.objects.get(pk=pk)
 
-    def commit_create(self, *args):
-        pass
-
-    def commit_update(self, *args):
-        pass
-
-    def get_model(self, obj):
-        return obj.contenttype.__class__ if obj.contenttype else None
-
     def validate_uuid(self, value):
         from django.contrib.contenttypes.models import ContentType
 
@@ -38,5 +29,6 @@ class IssueSerializer(ModelSerializerBase):
             raise ValidationError(e)
 
     def create(self, validated_data):
+        # add create of the issue directyl to instance
         validated_data['creator'] = self.context['request'].user
         return Issue.objects.create(**validated_data)
