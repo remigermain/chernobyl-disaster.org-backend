@@ -33,6 +33,10 @@ class EventLang(LanguageAbstract):
     def __str__(self):
         return f"{self.event} {self.language}"
 
+    @property
+    def get_commit_id(self):
+        return self.event.id
+
 
 class EventExtraAbstract(ChernobylModelAbstract):
     title = models.CharField(max_length=50)

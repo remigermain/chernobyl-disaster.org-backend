@@ -31,6 +31,10 @@ class ChernobylModelAbstract(models.Model):
         super(ChernobylModelAbstract, self).save(*args, **kwargs)
         return self
 
+    @property
+    def get_commit_id(self):
+        return self.id
+
 
 class LanguageAbstract(ChernobylModelAbstract):
     """
@@ -45,3 +49,4 @@ class LanguageAbstract(ChernobylModelAbstract):
     class Meta:
         abstract = True
         ordering = ['language', '-id']
+

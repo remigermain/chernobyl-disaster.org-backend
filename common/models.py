@@ -22,6 +22,10 @@ class TagLang(LanguageAbstract):
     def __str__(self):
         return f"{self.name} {self.language}"
 
+    @property
+    def get_commit_id(self):
+        return self.tag.id
+
 
 class Translate(ChernobylModelAbstract):
     key = models.TextField(null=False, blank=True, unique=True)
@@ -40,3 +44,7 @@ class TranslateLang(LanguageAbstract):
 
     def __str__(self):
         return f"{self.get_language_display()}: {str(self.parent_key)}"
+
+    @property
+    def get_commit_id(self):
+        return self.parent_key.id

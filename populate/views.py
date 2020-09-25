@@ -100,7 +100,7 @@ def overview(request):
     def conv_id(obj):
         if isinstance(obj.content_object, TranslateLang):
             return obj.content_object.language
-        return obj.content_object.id
+        return obj.content_object.get_commit_id
 
     def conv_query(obj):
         if isinstance(obj.content_object, TranslateLang):
@@ -222,7 +222,7 @@ def translate_json(request):
     diff = list(set(exist) ^ set(list_path))
 
     if len(diff) > 0:
-        bulk = [Translate(key=key) for key in list_path]
+        bulk = [Translate(key=key) for key in diff]
         Translate.objects.bulk_create(bulk)
         data['created'] = len(diff)
 

@@ -57,6 +57,10 @@ class EventExtraLangAbstract(LanguageAbstract):
     def __str__(self):
         return f"{self.extra} {self.language}"
 
+    @property
+    def get_commit_id(self):
+        return self.extra.id
+
 
 class PictureLang(EventExtraLangAbstract):
     extra = models.ForeignKey(Picture, on_delete=models.CASCADE, related_name="langs")
@@ -101,3 +105,7 @@ class People(ChernobylModelAbstract):
 class PeopleLang(LanguageAbstract):
     people = models.ForeignKey(People, on_delete=models.CASCADE, related_name="langs")
     biography = models.TextField()
+
+    @property
+    def get_commit_id(self):
+        return self.people.id
