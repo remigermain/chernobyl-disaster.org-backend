@@ -12,7 +12,7 @@ class AdminBase(admin.ModelAdmin):
     list_per_page = 20
 
     def langs_available(self, obj):
-        return obj.langs.values('language', flat=True)
+        return ", ".join(list(obj.langs.all().values_list('language', flat=True))) or self.empty_value_display
 
     def issue(self, obj):
         return Issue.objects.filter(uuid=contenttypes_uuid(obj)).count()
