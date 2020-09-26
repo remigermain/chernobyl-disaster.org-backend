@@ -17,12 +17,18 @@ def deleteAcount(request):
 
 
 class PasswordReset(PasswordResetConfirmView):
+    """
+        view for password reset in frontend , not backend
+    """
     def get(self, *args, **kwargs):
         query = f"uid={kwargs['uidb64']}&token={kwargs['token']}"
         return redirect(f"{settings.FRONTEND_URL}/auth/change-password/?{query}")
 
 
 class VerifyEmail(VerifyEmailView):
+    """
+        view for verify email in frontend , not backend
+    """
     def get(self, *args, **kwargs):
         query = f"key={kwargs['key']}"
         return redirect(f"{settings.FRONTEND_URL}/auth/verify-email/?{query}")

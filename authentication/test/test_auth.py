@@ -1,11 +1,23 @@
 from django.test import tag
 from lib.test import BaseTest
 from django.urls import reverse
+from django.core import mail
+from django.conf import settings
 import json
 
 
-@tag('auth')
+@tag('auth', 'authentication')
 class AuthTest(BaseTest):
+
+    def setUp(self):
+        super().setUp()
+        self.set_email_none()
+
+    def set_email_mandatory(self):
+        settings.ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+
+    def set_email_none(self):
+        settings.ACCOUNT_EMAIL_VERIFICATION = 'none'
 
     def test_register_valid(self):
         data = {
@@ -16,6 +28,18 @@ class AuthTest(BaseTest):
         }
         response = self.factory.post(reverse("rest_register"), data=data)
         self.assertEqual(response.status_code, 201)
+
+    def test_register_valid_with_email(self):
+        self.set_email_mandatory()
+        data = {
+            'username': 'username2',
+            'email': 'email@email.fr',
+            'password1': self.password,
+            'password2': self.password,
+        }
+        response = self.factory.post(reverse("rest_register"), data=data)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(len(mail.outbox), 1)
 
     def test_register_same_username(self):
         self.test_register_valid()
@@ -101,6 +125,16 @@ class AuthTest(BaseTest):
         content = json.loads(response.content)
         self.assertIsNotNone(content['key'])
 
+    def test_login_with_email_verification(self):
+        self.test_register_valid_with_email()
+        self.set_email_mandatory()
+        data = {
+            'username': 'username2',
+            'password': self.password,
+        }
+        response = self.factory.post(reverse("rest_login"), data=data)
+        self.assertEqual(response.status_code, 400)
+
     def test_login_wrong(self):
         data = {
             'username': 'usernam',
@@ -144,6 +178,15 @@ class AuthTest(BaseTest):
         }
         response = self.factory.post(reverse("rest_password_reset"), data=data)
         self.assertEqual(response.status_code, 200)
+
+    def test_reset_password_with_email(self):
+        self.set_email_mandatory()
+        data = {
+            'email': 'email@email.fr'
+        }
+        response = self.factory.post(reverse("rest_password_reset"), data=data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(mail.outbox), 1)
 
     def test_reset_password_wrong_email(self):
         data = {
