@@ -28,7 +28,9 @@ class AuthTest(BaseTest):
         }
         response = self.factory.post(reverse("rest_register"), data=data)
         self.assertEqual(response.status_code, 201)
+        return data
 
+    @tag('email', 'register')
     def test_register_valid_with_email(self):
         self.set_email_mandatory()
         data = {
@@ -179,10 +181,21 @@ class AuthTest(BaseTest):
         response = self.factory.post(reverse("rest_password_reset"), data=data)
         self.assertEqual(response.status_code, 200)
 
-    def test_reset_password_with_email(self):
+    def test_reset_password_with_email_dont_exits(self):
         self.set_email_mandatory()
         data = {
             'email': 'email@email.fr'
+        }
+        response = self.factory.post(reverse("rest_password_reset"), data=data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(mail.outbox), 0)
+
+    @tag('email', 'password')
+    def test_reset_password_with_email_exits(self):
+        dict_instance = self.test_register_valid()
+        self.set_email_mandatory()
+        data = {
+            'email': dict_instance['email']
         }
         response = self.factory.post(reverse("rest_password_reset"), data=data)
         self.assertEqual(response.status_code, 200)

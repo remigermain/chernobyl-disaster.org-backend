@@ -153,12 +153,13 @@ AUTHENTICATION_BACKENDS = (
     'allauth.account.auth_backends.AuthenticationBackend',
 )
 
-# ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_AUTHENTICATION_METHOD = 'username'
 OLD_PASSWORD_FIELD_ENABLED = True
 LOGOUT_ON_PASSWORD_CHANGE = False
+ACCOUNT_EMAIL_SUBJECT_PREFIX = ""
+EMAIL_SUBJECT_PREFIX = ""
 
 #
 # email backend
@@ -258,9 +259,9 @@ else:
     }
 
 
-# #-----------------------------------------
+# -----------------------------------------
 #   LOGGIN
-# #-----------------------------------------
+# -----------------------------------------
 
 DEFAULT_LOG = ["file", "mail_admins"] if not DEBUG else ["console"]
 
