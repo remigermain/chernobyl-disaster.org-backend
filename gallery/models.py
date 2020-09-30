@@ -58,6 +58,9 @@ class Picture(PictureMixins, DateMixins, EventExtraAbstract):
     class Meta:
         ordering = ['-id']
 
+    def __str__(self):
+        return self.title
+
 
 class Video(DateMixins, EventExtraAbstract):
     date = models.DateTimeField(blank=True, null=True)
@@ -66,6 +69,9 @@ class Video(DateMixins, EventExtraAbstract):
 
     class Meta:
         ordering = ['-id']
+
+    def __str__(self):
+        return self.title
 
 
 class PictureLang(EventExtraLangAbstract):

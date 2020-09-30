@@ -13,7 +13,7 @@ class Event(DateMixins, ChernobylModelAbstract):
     slug = models.SlugField(max_length=100)
     title = models.CharField(max_length=100)
     tags = models.ManyToManyField('common.Tag', related_name="events", blank=True)
-    date = models.DateTimeField(null=False, blank=False, unique=True)
+    date = models.DateTimeField(null=False, blank=False)
 
     def __str__(self):
         return self.title
