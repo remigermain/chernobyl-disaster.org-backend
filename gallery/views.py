@@ -23,6 +23,7 @@ class PictureViewSet(ModelViewSetBase):
 class VideoViewSet(ModelViewSetBase):
     queryset = Video.objects.all()
     serializer_class = video.VideoSerializer
+    serializer_class_post = video.VideoSerializerPost
     filterset_fields = ['id', 'title', 'event']
     search_fields = [
                     'title', 'event__title', 'event__langs__title', 'event__langs__description',

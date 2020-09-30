@@ -1,6 +1,6 @@
 from django.test import tag
 from lib.test import BaseTest
-from timeline.serializers.event import EventSerializer
+from timeline.serializers.event import EventSerializerPost
 from django.urls import reverse
 
 
@@ -36,7 +36,7 @@ class EventTest(BaseTest):
             'title': 'test-title',
             'date': str(self.time)
         }
-        serializer = EventSerializer(data=data, context=self.context)
+        serializer = EventSerializerPost(data=data, context=self.context)
         self.assertTrue(serializer.is_valid())
         obj = serializer.save()
         self.check_commit_created(obj)
@@ -55,7 +55,7 @@ class EventTest(BaseTest):
                 }
             ]
         }
-        serializer = EventSerializer(data=data, context=self.context)
+        serializer = EventSerializerPost(data=data, context=self.context)
         self.assertTrue(serializer.is_valid())
         obj = serializer.save()
         self.check_commit_created(obj)
@@ -79,7 +79,7 @@ class EventTest(BaseTest):
                 }
             ]
         }
-        serializer = EventSerializer(data=data, context=self.context)
+        serializer = EventSerializerPost(data=data, context=self.context)
         self.assertTrue(serializer.is_valid())
         obj = serializer.save()
         self.assertEqual(obj.langs.count(), 2)
@@ -104,7 +104,7 @@ class EventTest(BaseTest):
                 }
             ]
         }
-        serializer = EventSerializer(data=data, context=self.context)
+        serializer = EventSerializerPost(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     @tag('serializer')
@@ -123,7 +123,7 @@ class EventTest(BaseTest):
                 }
             ]
         }
-        serializer = EventSerializer(data=data, context=self.context)
+        serializer = EventSerializerPost(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     @tag('serializer')
@@ -134,7 +134,7 @@ class EventTest(BaseTest):
             'title': 'test-title22',
             'date': str(self.time)
         }
-        serializer = EventSerializer(instance=instance, data=data, context=self.context)
+        serializer = EventSerializerPost(instance=instance, data=data, context=self.context)
         self.assertTrue(serializer.is_valid())
         obj = serializer.save()
         self.check_commit_update(obj, diff=['title'])
@@ -145,7 +145,7 @@ class EventTest(BaseTest):
             'title': '',
             'date': str(self.time)
         }
-        serializer = EventSerializer(data=data, context=self.context)
+        serializer = EventSerializerPost(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     @tag('serializer')
@@ -153,7 +153,7 @@ class EventTest(BaseTest):
         data = {
             'date': str(self.time)
         }
-        serializer = EventSerializer(data=data, context=self.context)
+        serializer = EventSerializerPost(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     @tag('serializer')
@@ -161,7 +161,7 @@ class EventTest(BaseTest):
         data = {
             'title': 'title',
         }
-        serializer = EventSerializer(data=data, context=self.context)
+        serializer = EventSerializerPost(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     @tag('serializer')
@@ -170,7 +170,7 @@ class EventTest(BaseTest):
             'title': 'title',
             'date': str(self.time) + 'aa'
         }
-        serializer = EventSerializer(data=data, context=self.context)
+        serializer = EventSerializerPost(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     @tag('serializer')
@@ -179,7 +179,7 @@ class EventTest(BaseTest):
             'title': 'title',
             'date': ''
         }
-        serializer = EventSerializer(data=data, context=self.context)
+        serializer = EventSerializerPost(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     @tag('client')
@@ -315,7 +315,7 @@ class EventTest(BaseTest):
     @tag('client')
     def test_update_client_langs_change_lang(self):
         instance = self.test_create_serializer_langs2()
-        data = EventSerializer(instance=instance).data
+        data = EventSerializerPost(instance=instance).data
         data = {
             'title': 'title',
             'date': self.time,
@@ -334,7 +334,7 @@ class EventTest(BaseTest):
     @tag('client')
     def test_update_client_langs_create_same_lang(self):
         instance = self.test_create_serializer_langs2()
-        data = EventSerializer(instance=instance).data
+        data = EventSerializerPost(instance=instance).data
         data = {
             'title': 'title',
             'date': self.time,

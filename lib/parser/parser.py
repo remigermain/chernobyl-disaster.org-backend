@@ -82,6 +82,7 @@ class ParserMultiDimensional:
                 dtc.append(value)
                 key = len(dtc) - 1
         elif index not in dtc:
+            # TODO dict same as list
             dtc[index] = value
         return index
 

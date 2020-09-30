@@ -1,7 +1,7 @@
 from django.test import tag
 from lib.test import BaseTest
 from django.urls import reverse
-from timeline.serializers.event import EventSerializer
+from timeline.serializers.event import EventSerializerPost
 from common.serializers.tag import TagSerializer
 from django.utils import timezone
 
@@ -40,7 +40,7 @@ class PopulateTest(BaseTest):
             serializer = TagSerializer(data={'name': f"name{i}"}, context=self.context)
             self.assertTrue(serializer.is_valid())
             serializer.save()
-            serializer = EventSerializer(data={'title': f"name{i}", 'date': timezone.now() + timezone.timedelta(days=i)}, context=self.context)
+            serializer = EventSerializerPost(data={'title': f"name{i}", 'date': timezone.now() + timezone.timedelta(days=i)}, context=self.context)
             self.assertTrue(serializer.is_valid())
             serializer.save()
 

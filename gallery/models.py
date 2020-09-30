@@ -2,28 +2,40 @@ from django.db import models
 from lib.models import ChernobylModelAbstract, LanguageAbstract
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
-from timeline.models import EventExtraAbstract
+from timeline.models import EventExtraAbstract, EventExtraLangAbstract
 from common.models import Tag
 from lib.mixins.picture import PictureMixins
+from lib.mixins.date import DateMixins
+from django.template.defaultfilters import slugify
 
 
-def uuid_path(instance, filename):
+def primary_key_gen(instance):
     """
         function to generate path file name
         ex: for Picture models as imagefiled named "my_pictures.png"
         the path is:
             50/Picture/10/my_pictures.png
     """
-    return instance.pk if instance.pk else instance.__class__.objects.count() + 1
+    return str(instance.pk if instance.pk else instance.__class__.objects.count() + 1)
+
+
+def name_files(title, filename):
+    extentions = filename.split('.')[-1]
+    return f"{slugify(title)}.{extentions}"
 
 
 def picture_path(instance, filename):
-    # get only filename , not path
-    name = filename.split('/')[-1]
-    return f"pictures/{uuid_path(instance, filename)}/{name}"
+    name = [
+        instance.__class__.__name__.lower(),
+        primary_key_gen(instance),
+        name_files(instance.title, filename)
+    ]
+    return "/".join(name)
 
 
-class Picture(PictureMixins, EventExtraAbstract):
+class Picture(PictureMixins, DateMixins, EventExtraAbstract):
+    date = models.DateTimeField(blank=True, null=True)
+
     picture = models.ImageField(upload_to=picture_path)
     picture_webp = ImageSpecField(source='picture', format='WEBP')
     picture_thumbnail_webp = ImageSpecField(source='picture',
@@ -43,24 +55,17 @@ class Picture(PictureMixins, EventExtraAbstract):
         related_name="pictures"
     )
 
+    class Meta:
+        ordering = ['-id']
 
-class Video(EventExtraAbstract):
+
+class Video(DateMixins, EventExtraAbstract):
+    date = models.DateTimeField(blank=True, null=True)
+
     video = models.URLField(unique=True)
 
-
-# Extra i18n
-class EventExtraLangAbstract(LanguageAbstract):
-    title = models.CharField(max_length=50)
-
-    class Meta(LanguageAbstract.Meta):
-        abstract = True
-
-    def __str__(self):
-        return f"{self.extra} {self.language}"
-
-    @property
-    def get_commit_id(self):
-        return self.extra.id
+    class Meta:
+        ordering = ['-id']
 
 
 class PictureLang(EventExtraLangAbstract):
@@ -72,10 +77,12 @@ class VideoLang(EventExtraLangAbstract):
 
 
 def profil_path(instance, filename):
-    import re
-    name = re.sub(r"[^a-zA-Z0-9]+", "", instance.name)
-    extentions = filename.split('.')[-1]
-    return f"people/{instance.id}/{name}.{extentions}"
+    name = [
+        instance.__class__.__name__.lower(),
+        primary_key_gen(instance),
+        name_files(instance.name, filename)
+    ]
+    return "/".join(name)
 
 
 class People(PictureMixins, ChernobylModelAbstract):

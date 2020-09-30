@@ -40,3 +40,12 @@ class LanguageAbstract(ChernobylModelAbstract):
     class Meta:
         abstract = True
         ordering = ['language', '-id']
+
+
+class DateAbstract(ChernobylModelAbstract):
+    have_seconds = models.BooleanField(default=False)
+    have_minutes = models.BooleanField(default=False)
+    have_hours = models.BooleanField(default=False)
+
+    class Meta(ChernobylModelAbstract.Meta):
+        abstract = True

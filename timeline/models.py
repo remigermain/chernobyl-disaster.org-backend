@@ -1,18 +1,19 @@
 from django.db import models
 from lib.models import ChernobylModelAbstract, LanguageAbstract
 from django.template.defaultfilters import slugify
+from lib.mixins.date import DateMixins
 
 
-class Event(ChernobylModelAbstract):
+class Event(DateMixins, ChernobylModelAbstract):
     """
         event models is a date event on chernobyl
         the title is for indication , tags for easy find here, and the date ...
         date is unnique , is not possible to have same date
     """
+    slug = models.SlugField(max_length=100)
     title = models.CharField(max_length=100)
     tags = models.ManyToManyField('common.Tag', related_name="events", blank=True)
     date = models.DateTimeField(null=False, blank=False, unique=True)
-    slug = models.SlugField(max_length=100)
 
     def __str__(self):
         return self.title
@@ -41,7 +42,6 @@ class EventLang(LanguageAbstract):
 class EventExtraAbstract(ChernobylModelAbstract):
     title = models.CharField(max_length=50)
     tags = models.ManyToManyField("common.Tag", related_name="%(class)s", blank=True)
-    date = models.DateTimeField(blank=True, null=True)
     event = models.ForeignKey(
         Event,
         on_delete=models.SET_NULL,
@@ -53,7 +53,17 @@ class EventExtraAbstract(ChernobylModelAbstract):
     class Meta(ChernobylModelAbstract.Meta):
         abstract = True
 
+
+# Extra i18n
+class EventExtraLangAbstract(LanguageAbstract):
+    title = models.CharField(max_length=50)
+
+    class Meta(LanguageAbstract.Meta):
+        abstract = True
+
     def __str__(self):
-        if self.event:
-            return f"{self.event} {self.__class__.__name__} {self.title}"
-        return f"{self.__class__.__name__} {self.title}"
+        return f"{self.extra} {self.language}"
+
+    @property
+    def get_commit_id(self):
+        return self.extra.id
