@@ -104,7 +104,7 @@ AUTH_PASSWORD_VALIDATORS = [
 MEDIA_URL = "media/"
 STATIC_URL = "/static/"
 
-STATIC_ROOT = os.path.join(BASE_DIR, "assets")
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 #
@@ -153,6 +153,11 @@ AUTHENTICATION_BACKENDS = (
     'allauth.account.auth_backends.AuthenticationBackend',
 )
 
+APPEND_SLASH = False
+REST_AUTH_SERIALIZERS = {
+    "USER_DETAILS_SERIALIZER": "authentication.serializers.UserDetailsSerializer",
+}
+
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_AUTHENTICATION_METHOD = 'username'
@@ -176,13 +181,6 @@ DEFAULT_FROM_EMAIL = f'Chernobyl <no-reply@{DOMAIN_NAME}>'
 GRAPH_MODELS = {
     'all_applications': True,
     'group_models': True,
-}
-
-APPEND_SLASH = False
-
-
-REST_AUTH_SERIALIZERS = {
-    "USER_DETAILS_SERIALIZER": "authentication.serializers.UserDetailsSerializer",
 }
 
 
@@ -263,41 +261,40 @@ else:
 #   LOGGIN
 # -----------------------------------------
 
-DEFAULT_LOG = ["file", "mail_admins"] if not DEBUG else ["console"]
-
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'file': {
-            'class': 'logging.FileHandler',
-            'filename': './log/django.log',
+if not DEBUG:
+    DEFAULT_LOG = ["file", "mail_admins"]
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'handlers': {
+            'file': {
+                'class': 'logging.FileHandler',
+                'filename': './log/django.log',
+            },
+            "console": {
+                "level": "DEBUG",
+                "class": "logging.StreamHandler",
+            },
+            'mail_admins': {
+                'level': 'ERROR',
+                'class': 'django.utils.log.AdminEmailHandler',
+            }
         },
-        "console": {
-            "level": "DEBUG",
-            "class": "logging.StreamHandler",
+        'loggers': {
+            'django': {
+                'handlers': DEFAULT_LOG,
+                'level': 'WARNING',
+                'propagate': True,
+            },
+            'django.request': {
+                'handlers': DEFAULT_LOG,
+                'level': 'ERROR',
+                'propagate': True,
+            },
+            'ParserMultiDimensional': {
+                'handlers': DEFAULT_LOG,
+                'level': 'WARNING',
+                'propagate': True,
+            },
         },
-        'mail_admins': {
-            'level': 'ERROR',
-            'class': 'django.utils.log.AdminEmailHandler',
-        }
-    },
-    'loggers': {
-        'django': {
-            'handlers': DEFAULT_LOG,
-            'level': 'WARNING',
-            'propagate': True,
-        },
-        'django.request': {
-            'handlers': DEFAULT_LOG,
-            'level': 'ERROR',
-            'propagate': True,
-        },
-        'ParserMultiDimensional': {
-            'handlers': DEFAULT_LOG,
-            'level': 'WARNING',
-            'propagate': True,
-        },
-    },
-}
+    }
