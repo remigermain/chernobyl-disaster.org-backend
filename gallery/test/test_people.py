@@ -99,6 +99,7 @@ class PeopleTest(BaseTest):
         self.assertEqual(instance.langs.count(), 2)
         return instance
 
+    @tag('lala')
     def test_create_client(self):
         data = {
             'name': 'name',
@@ -415,7 +416,7 @@ class PeopleTest(BaseTest):
             'wikipedia': ''
         }
         serializer = PeopleSerializerPost(data=data, context=self.context)
-        self.assertFalse(serializer.is_valid())
+        self.assertTrue(serializer.is_valid())
 
     def test_create_serializer_wrong_wiki(self):
         data = {

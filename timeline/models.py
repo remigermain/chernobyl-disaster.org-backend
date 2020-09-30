@@ -15,6 +15,9 @@ class Event(DateMixins, ChernobylModelAbstract):
     tags = models.ManyToManyField('common.Tag', related_name="events", blank=True)
     date = models.DateTimeField(null=False, blank=False)
 
+    class Meta:
+        ordering = ['-id']
+
     def __str__(self):
         return self.title
 

@@ -98,7 +98,7 @@ class People(PictureMixins, ChernobylModelAbstract):
     name = models.CharField(max_length=80, unique=True, null=False, blank=False)
     born = models.DateField(null=True, blank=True)
     death = models.DateField(null=True, blank=True)
-    profil = models.ImageField(upload_to=profil_path, null=True, blank=False)
+    profil = models.ImageField(upload_to=profil_path, null=True, blank=True)
     profil_webp = ImageSpecField(source='profil', format='WEBP')
     profil_thumbnail_webp = ImageSpecField(source='profil',
                                            processors=[ResizeToFill(250, 160)],
@@ -109,7 +109,7 @@ class People(PictureMixins, ChernobylModelAbstract):
                                            format='JPEG',
                                            options={'quality': 60})
 
-    wikipedia = models.URLField(null=True)
+    wikipedia = models.URLField(null=True, blank=True)
     tags = models.ManyToManyField(Tag, related_name="peoples", blank=True)
 
     def __str__(self):
@@ -119,6 +119,9 @@ class People(PictureMixins, ChernobylModelAbstract):
 class PeopleLang(LanguageAbstract):
     people = models.ForeignKey(People, on_delete=models.CASCADE, related_name="langs")
     biography = models.TextField()
+
+    def __str__(self):
+        return str(self.people)
 
     @property
     def get_commit_id(self):

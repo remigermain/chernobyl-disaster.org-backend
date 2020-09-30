@@ -7,7 +7,6 @@ from django.utils import timezone, datetime_safe
 from utils.models import Commit
 from rest_framework.test import APIClient
 
-
 class BaseTest(TestCase):
 
     @classmethod
