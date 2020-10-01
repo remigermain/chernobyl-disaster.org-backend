@@ -54,7 +54,12 @@ def populate(request):
 @api_view(['GET'])
 def contributor(request):
     return Response({
-        'results': get_user_model().objects.filter(commit_creator__gte=1).distinct().values_list('username', flat=True)
+        'contributors': get_user_model().objects.filter(commit_creator__gte=1)
+                                                .distinct()
+                                                .values_list('username', flat=True),
+        'donators': get_user_model().objects.filter(amount__gte=1)
+                                            .order_by('-amount')
+                                            .values_list('username', flat=True)
     })
 
 
