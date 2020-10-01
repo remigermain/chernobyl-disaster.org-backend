@@ -189,11 +189,11 @@ GRAPH_MODELS = {
 #   DEBUG
 # #-----------------------------------------
 if DEBUG:
-    # INSTALLED_APPS += [
-    #     'debug_toolbar'
-    # ]
+    INSTALLED_APPS += [
+        'debug_toolbar'
+    ]
 
-    # MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware'] + MIDDLEWARE
+    MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware'] + MIDDLEWARE
 
     INTERNAL_IPS = [
         '127.0.0.1'
@@ -242,7 +242,7 @@ else:
         'localhost',
         '127.0.0.1',
         '[::1]',
-        *os.environ.get("ALLOWED_HOSTS", "").split(" ")
+        *os.environ.get("ALLOWED_HOSTS", "").split(",")
     ]
     INTERNAL_IPS = []
 
@@ -256,11 +256,6 @@ else:
             "PORT": os.environ.get("POSTGRES_PORT"),
         }
     }
-
-
-
-
-
 
 # -----------------------------------------
 #   LOGGIN

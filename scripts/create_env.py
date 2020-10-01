@@ -25,6 +25,8 @@ def main():
         "EMAIL_HOST": "postfix",
         "EMAIL_PORT": 587,
 
+        "ALLOWED_HOSTS": "",
+
         "POSTGRES_DB": "",
         "POSTGRES_USER": "",
         "POSTGRES_PASSWORD": "",
