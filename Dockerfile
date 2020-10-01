@@ -1,21 +1,36 @@
 FROM python:3.8.3-alpine
 
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+# create directory for the app user
+RUN mkdir -p /var/www/backend
 
-#postgre
-RUN apk update && apk add postgresql-dev gcc python3-dev musl-dev
+# create the app user
+RUN addgroup -S app && adduser -S app -G app
+
+# create the appropriate directories
+ENV HOME=/var/www/backend
+ENV APP_HOME=/var/www/backend
+RUN mkdir $APP_HOME
+WORKDIR $APP_HOME
+
 # for pillow / image kit
+RUN apk update && apk add postgresql-dev gcc python3-dev musl-dev
 RUN apk add zlib-dev jpeg-dev libwebp libwebp-dev
-
 RUN pip install --upgrade pip
 
 COPY ./requirements/common.txt /requirements.txt
 RUN pip install -r /requirements.txt
 
-COPY . .
+# copy entrypoint-prod.sh
+COPY ./entrypoint.sh $APP_HOME
 
-RUN export $(cat .env | xargs) && ./manage.py migrate --no-input
-RUN export $(cat .env | xargs) && ./manage.py collectstatic --no-input --clear --link
-RUN export $(cat .env | xargs) && ./manage.py loaddata data.json
-RUN export $(cat .env | xargs) && ./manage.py generateimages
+# copy project
+COPY . $APP_HOME
+
+# chown all the files to the app user
+RUN chown -R app:app $APP_HOME
+
+# change to the app user
+USER app
+
+# run entrypoint.sh
+ENTRYPOINT ["/var/www/backend/entrypoint.sh"]

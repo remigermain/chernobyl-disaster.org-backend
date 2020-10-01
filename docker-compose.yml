@@ -1,8 +1,16 @@
-version: "3.7"
+version: "3.5"
 
 services:
+  postgres:
+    container_name: postgres
+    image: postgres:12.0-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file: ./.env
+    networks:
+      - nginx-proxy
   backend:
-    container_name: backend-chernobyl
+    container_name: backend
     restart: unless-stopped
     build: ./
     command: gunicorn core.wsgi:application --bind 0.0.0.0:8001
@@ -11,20 +19,19 @@ services:
       - static:/var/www/chernobyl/backend/assets
       - media:/var/www/chernobyl/backend/media
     expose:
-      - 8001
+      - 8000
     env_file: ./.env
     networks:
       - nginx-proxy
-      - postgres-proxy
+    depends_on:
+      - postgres
 
 networks:
   nginx-proxy:
     external: true
     name: nginx-proxy
-  postgres-proxy:
-    external: true
-    name: postgres-proxy
 
 volumes:
   static:
   media:
+  postgres_data:

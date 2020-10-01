@@ -25,11 +25,11 @@ def main():
         "EMAIL_HOST": "postfix",
         "EMAIL_PORT": 587,
 
-        "SQL_DATABASE": "",
-        "SQL_USER": "",
-        "SQL_PASSWORD": "",
-        "SQL_HOST": "",
-        "SQL_PORT": "",
+        "POSTGRES_DB": "",
+        "POSTGRES_USER": "",
+        "POSTGRES_PASSWORD": "",
+        "POSTGRES_HOST": "",
+        "POSTGRES_PORT": "",
     }
 
     if flag.merge:
