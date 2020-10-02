@@ -20,7 +20,6 @@ services:
     build: ./
     command: gunicorn core.wsgi:application --bind 0.0.0.0:8000
     volumes:
-      - ./log/:/var/www/backend
       - ./static:/var/www/backend/static
       - ./media:/var/www/backend/media
     expose:
