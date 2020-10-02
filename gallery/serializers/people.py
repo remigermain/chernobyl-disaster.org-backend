@@ -45,10 +45,10 @@ class PeopleSerializer(ModelSerializerBase):
 
     def get_profil(self, obj):
         return {
-            'original_jpeg': obj.to_url('profil'),
-            'original_webp': obj.to_url('profil_webp'),
-            'thumbnail_webp': obj.to_url('profil_thumbnail_webp'),
-            'thumbnail_jpeg': obj.to_url('profil_thumbnail_jpeg'),
+            'original_jpeg': obj.profil.url,
+            'original_webp': obj.profil_webp.url,
+            'thumbnail_webp': obj.profil_thumbnail_webp.url,
+            'thumbnail_jpeg': obj.profil_thumbnail_jpeg.url,
         }
 
 

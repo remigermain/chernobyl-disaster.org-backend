@@ -28,11 +28,14 @@ def picture(request):
 def people(request):
     lst = [
         {
-            'id': p.id,
-            'name': p.name,
-            'profil': p.to_url('profil'),
+            'id': obj.id,
+            'name': obj.name,
+            'profil': {
+                'thumbnail_webp': obj.profil_thumbnail_webp.url,
+                'thumbnail_jpeg': obj.profil_thumbnail_jpeg.url,
+            }
         }
-        for p in People.objects.all().order_by('name')
+        for obj in People.objects.all().order_by('name')
     ]
     return Response({'peoples': lst})
 

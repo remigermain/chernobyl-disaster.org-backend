@@ -4,7 +4,6 @@ from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
 from timeline.models import EventExtraAbstract, EventExtraLangAbstract
 from common.models import Tag
-from lib.mixins.picture import PictureMixins
 from lib.mixins.date import DateMixins
 from django.template.defaultfilters import slugify
 
@@ -33,7 +32,7 @@ def picture_path(instance, filename):
     return "/".join(name)
 
 
-class Picture(PictureMixins, DateMixins, EventExtraAbstract):
+class Picture(DateMixins, EventExtraAbstract):
     date = models.DateTimeField(blank=True, null=True)
 
     picture = models.ImageField(upload_to=picture_path)
@@ -91,7 +90,7 @@ def profil_path(instance, filename):
     return "/".join(name)
 
 
-class People(PictureMixins, ChernobylModelAbstract):
+class People(ChernobylModelAbstract):
     """
         models for personality of chernobyl
     """

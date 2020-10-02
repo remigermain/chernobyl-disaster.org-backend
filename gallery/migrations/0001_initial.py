@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                 'ordering': ['-id'],
                 'abstract': False,
             },
-            bases=(lib.mixins.picture.PictureMixins, models.Model),
+            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='PeopleLang',
@@ -56,7 +56,7 @@ class Migration(migrations.Migration):
             options={
                 'ordering': ['-id'],
             },
-            bases=(lib.mixins.picture.PictureMixins, models.Model),
+            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='PictureLang',

@@ -1,30 +1,35 @@
-version: "3.5"
+version: "3"
 
 services:
   postgres:
+    restart: unless-stopped
     container_name: postgres
     image: postgres:12.0-alpine
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
-    env_file: ./.env
+      - postgres:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=chernobyl
+      - POSTGRES_USER=remi
+      - POSTGRES_PASSWORD=nicolas69700
     networks:
       - nginx-proxy
+
   backend:
-    container_name: backend
     restart: unless-stopped
+    container_name: backend
     build: ./
-    command: gunicorn core.wsgi:application --bind 0.0.0.0:8001
+    command: gunicorn core.wsgi:application --bind 0.0.0.0:8000
     volumes:
-      - ./log/:/usr/src/core
-      - static:/var/www/chernobyl/backend/assets
-      - media:/var/www/chernobyl/backend/media
+      - ./log/:/var/www/backend
+      - ./static:/var/www/backend/static
+      - ./media:/var/www/backend/media
     expose:
       - 8000
     env_file: ./.env
-    networks:
-      - nginx-proxy
     depends_on:
       - postgres
+    networks:
+      - nginx-proxy
 
 networks:
   nginx-proxy:
@@ -34,4 +39,4 @@ networks:
 volumes:
   static:
   media:
-  postgres_data:
+  postgres:

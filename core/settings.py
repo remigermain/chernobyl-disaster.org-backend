@@ -231,12 +231,20 @@ if DEBUG:
         }
     }
 
-# #-----------------------------------------
-#   PRODUCTION
-# #-----------------------------------------
+# # #-----------------------------------------
+# #   PRODUCTION
+# # #-----------------------------------------
 
 else:
     CORS_ORIGIN_ALLOW_ALL = False
+    CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",")
+    CORS_ALLOW_METHODS = [
+        'DELETE',
+        'GET',
+        'OPTIONS',
+        'PATCH',
+        'POST',
+    ]
 
     ALLOWED_HOSTS = [
         'localhost',
@@ -261,7 +269,7 @@ else:
 #   LOGGIN
 # -----------------------------------------
 
-if not DEBUG:
+if DEBUG:
     DEFAULT_LOG = ["file", "mail_admins"]
     LOGGING = {
         'version': 1,
@@ -269,7 +277,7 @@ if not DEBUG:
         'handlers': {
             'file': {
                 'class': 'logging.FileHandler',
-                'filename': './log/django.log',
+                'filename': './django.log',
             },
             "console": {
                 "level": "DEBUG",

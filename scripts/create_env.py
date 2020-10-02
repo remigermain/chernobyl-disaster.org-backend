@@ -26,6 +26,7 @@ def main():
         "EMAIL_PORT": 587,
 
         "ALLOWED_HOSTS": "",
+        "CORS_ALLOWED_ORIGINS": "",
 
         "POSTGRES_DB": "",
         "POSTGRES_USER": "",
