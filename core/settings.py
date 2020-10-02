@@ -8,10 +8,8 @@ DEBUG = os.environ.get("DEBUG", "False").lower() in ["true", "1"]
 SECRET_KEY = os.environ.get("SECRET_KEY", get_random_secret_key())
 
 SITE_ID = 1
-SITE_NAME = os.environ.get("SITE_NAME", "chernobyl")
 
 DOMAIN_NAME = os.environ.get("DOMAIN_NAME")
-SITE_URL = os.environ.get("SITE_URL")
 FRONTEND_URL = os.environ.get("FRONTEND_URL")
 
 # SECURITY WARNING: don't run with debug turned on in production!

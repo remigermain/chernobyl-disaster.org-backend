@@ -17,9 +17,7 @@ def main():
     env = {
         "DEBUG": True,
         "SECRET_KEY": f"\"{get_random_secret_key()}\"",
-        "SITE_NAME": "",
         "DOMAIN_NAME": "",
-        "SITE_URL": "http://localhost:8000",
         "FRONTEND_URL": "http://localhost:3000",
 
         "EMAIL_HOST": "postfix",
