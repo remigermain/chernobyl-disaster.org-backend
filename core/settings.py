@@ -115,17 +115,28 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
+# https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
 LANGUAGE_CODE = 'en'
 LANGUAGES = [
     ('en', _('English')),
     ('fr', _('Français')),
+    ('de', _('Deutsch')),
+    ('it', _('Italiano')),
+    ('es', _('Español')),
+    # ukrainian
+    ('uk', _('Українська')),
+    # russia
+    ('ru', _('русский')),
+    # chinese
+    ('zh', _('漢語')),
+    # japan
+    ('ja', _('日本語 (にほんご)')),
 ]
 LANGUAGES_DEFAULT = LANGUAGES[0][0]
 
 #
 # rest framework
 #
-
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
