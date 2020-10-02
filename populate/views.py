@@ -4,7 +4,7 @@ from timeline.models import Event
 from gallery.models import People
 from common.models import Tag, Translate, TranslateLang
 from utils.models import Commit
-from django.db.models import Q
+from django.db.models import Q, Count
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_204_NO_CONTENT
@@ -71,36 +71,18 @@ def contributor(request):
 def overview(request):
     week = timezone.now() - timezone.timedelta(days=7)
 
-    query = Commit.objects.all().select_related('creator')
-    dtc = {}
-    for commit in query:
-        key = commit.creator.username
-        if key not in dtc:
-            dtc[key] = {
-                'total': 1,
-                'week': 1 if commit.date and commit.date >= week else 0
-            }
-        else:
-            dtc[key]['total'] += 1
-            if commit.date and commit.date >= week:
-                dtc[key]['week'] += 1
-
-    def to_ranking(objs, key):
-        name = ["first", "second", "third"]
-        dtc = {}
-        for i in range(3):
-            if len(objs) > i:
-                dtc[name[i]] = {
-                    'username': objs[i]['username'],
-                    'count': objs[i][key]
-                }
-        return dtc
-
-    lst = [{'username': key, **val} for key, val in dtc.items()]
-    lst.sort(key=lambda x: x['total'], reverse=True)
-    lst_total = to_ranking(lst[:3], 'total')
-    lst.sort(key=lambda x: x['week'], reverse=True)
-    lst_week = to_ranking(lst[:3], 'week')
+    lst_week = get_user_model().objects\
+                               .all()\
+                               .annotate(count=Count('commit_creator'))\
+                               .order_by('-count')\
+                               .prefetch_related('commit_creator')\
+                               .values('count', 'username')[:3]
+    lst_total = get_user_model().objects\
+                                .filter(commit_creator__date__gte=week)\
+                                .annotate(count=Count('commit_creator'))\
+                                .order_by('-count')\
+                                .prefetch_related('commit_creator')\
+                                .values('count', 'username')[:3]
 
     def conv_uuid(obj):
         return obj.__class__.__name__.lower().replace("lang", "")
@@ -125,9 +107,9 @@ def overview(request):
             'created': commit.created,
             **conv_query(commit)
         }
-        for commit in query.all()
-                           .prefetch_related("content_object")
-                           .order_by('-date')[:50]
+        for commit in Commit.objects.all()
+                                    .prefetch_related("content_object")
+                                    .order_by('-date')[:50]
     ]
 
     query = {
