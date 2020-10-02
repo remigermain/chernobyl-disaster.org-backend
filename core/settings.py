@@ -237,7 +237,9 @@ if DEBUG:
 
 else:
     CORS_ORIGIN_ALLOW_ALL = False
-    CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",")
+    origin = os.environ.get("CORS_ALLOWED_ORIGINS", None)
+    if origin:
+        CORS_ALLOWED_ORIGINS = origin.split(",")
     CORS_ALLOW_METHODS = [
         'DELETE',
         'GET',

@@ -20,10 +20,10 @@ class PictureSerializer(ModelSerializerBase):
 
     def get_picture(self, obj):
         return {
-            'original_jpeg': obj.picture,
-            'original_webp': obj.picture_webp,
-            'thumbnail_webp': obj.picture_thumbnail_webp,
-            'thumbnail_jpeg': obj.picture_thumbnail_jpeg,
+            'original_jpeg': obj.picture.url,
+            'original_webp': obj.picture_webp.url,
+            'thumbnail_webp': obj.picture_thumbnail_webp.url,
+            'thumbnail_jpeg': obj.picture_thumbnail_jpeg.url,
         }
 
     def get_date(self, obj):

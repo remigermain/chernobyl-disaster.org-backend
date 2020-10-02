@@ -3,7 +3,6 @@
 from django.db import migrations, models
 import django.db.models.deletion
 import gallery.models
-import lib.mixins.picture
 
 
 class Migration(migrations.Migration):
