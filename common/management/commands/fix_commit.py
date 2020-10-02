@@ -4,6 +4,7 @@ from utils.models import Commit
 from common.models import Tag, TagLang, Translate, TranslateLang
 from timeline.models import Event, EventLang
 from gallery.models import People, PeopleLang, Picture, PictureLang, Video, VideoLang
+from utils.function import contenttypes_uuid
 
 
 class Command(BaseCommand):
@@ -15,29 +16,26 @@ class Command(BaseCommand):
             People, PeopleLang, Picture, PictureLang, Video, VideoLang
         ]
 
-        dict_model = {}
-        for m in models:
-            dict_model[m.__name__.lower()] = m
-
-        total = {'delete': {}, 'create': {}}
-
-        bulk = []
+        total = {'delete': 0, 'create': {}}
         for commit in Commit.objects.all():
             if not commit.content_object:
-                uuid = commit.uuid.split('|')
-                obj = dict_model[uuid[1]].objects.filter(id=uuid[2])
-                if not obj.exists():
-                    commit.delete()
-                    if not uuid[1] in total['delete']:
-                        total['delete'][uuid[1]] = 1
+                commit.delete()
+                total['delete'] += 1
+
+        bulk = []
+        for model in models:
+            for obj in model.objects.all():
+                uuid = contenttypes_uuid(obj)
+                if not Commit.objects.filter(uuid=uuid).exists():
+                    bulk.append(Commit(
+                        creator=user,
+                        uuid=uuid,
+                        content_object=obj
+                    ))
+                    key = model.__name__.lower()
+                    if key not in total['create']:
+                        total['create'][key] = 1
                     else:
-                        total['delete'][uuid[1]] += 1
-                else:
-                    obj = obj.get()
-                    bulk.append(Commit(creator=user, content_object=obj, uuid=uuid, created=True))
-                    if not uuid[1] in total['create']:
-                        total['create'][uuid[1]] = 1
-                    else:
-                        total['create'][uuid[1]] += 1
+                        total['create'][key] += 1
         Commit.objects.bulk_create(bulk)
         print(total)

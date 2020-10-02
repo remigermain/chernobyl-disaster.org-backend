@@ -7,19 +7,20 @@ from utils import urls as utils_urls
 from rest_framework import routers
 from django.contrib.staticfiles.urls import static
 from django.conf import settings
+import os
 
 
 router = routers.DefaultRouter()
 # load the url of all app
-apps = [
-    common_urls,
-    timeline_urls,
-    gallery_urls,
-    utils_urls
+urls = [
+    *common_urls.drf_routers,
+    *timeline_urls.drf_routers,
+    *gallery_urls.drf_routers,
+    *utils_urls.drf_routers
 ]
-for app in apps:
-    for url in app.drf_routers:
-        router.register(*url)
+for url in urls:
+    router.register(*url)
+
 
 urlpatterns = [
     # api models
@@ -28,15 +29,27 @@ urlpatterns = [
 
     # account / auth
     path('auth/', include('authentication.urls')),
-
-    # admin
-    path('admin/', admin.site.urls),
 ]
 
+
 if settings.DEBUG:
+
+    urlpatterns.append(path('admin/', admin.site.urls))
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-    import debug_toolbar
-    urlpatterns = [
-        path('__debug__/', include(debug_toolbar.urls)),
-    ] + urlpatterns
+
+    try:
+        import debug_toolbar
+        urlpatterns = [
+            path('__debug__/', include(debug_toolbar.urls)),
+        ] + urlpatterns
+    except Exception:
+        pass
+
+# for produdction
+else:
+
+    # add admin django only if sufffix_admin is set and min length 8 char
+    SUFFIX_ADMIN = os.environ.get("SUFFIX_ADMIN", None)
+    if SUFFIX_ADMIN and len(SUFFIX_ADMIN) >= 8:
+        urlpatterns.append(path(f'admin-{SUFFIX_ADMIN}/', admin.site.urls))
