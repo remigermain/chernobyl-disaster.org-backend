@@ -3,6 +3,7 @@ from lib.test import BaseTest
 from django.urls import reverse
 from django.core import mail
 from django.conf import settings
+from django.contrib.auth import get_user_model
 import json
 
 
@@ -167,13 +168,6 @@ class AuthTest(BaseTest):
         response = self.factory.post(reverse("rest_login"), data=data)
         self.assertEqual(response.status_code, 400)
 
-    def test_login_delete(self):
-        data = {
-            'email': 'email@email.fr'
-        }
-        response = self.factory.post(reverse("rest_password_reset"), data=data)
-        self.assertEqual(response.status_code, 200)
-
     def test_reset_password(self):
         data = {
             'email': 'email@email.fr'
@@ -248,11 +242,18 @@ class AuthTest(BaseTest):
         response = self.factory.post(reverse("rest_password_change"), data=data)
         self.assertEqual(response.status_code, 400)
 
-    def test_auccount_delete(self):
+    def test_account_delete(self):
         self.test_register_valid()
+        user = self.user
         response = self.factory.post(reverse("account_delete"))
         self.assertEqual(response.status_code, 200)
-        self.assertFalse(self.user.is_active)
+        self.assertFalse(get_user_model().objects.filter(id=user.id).exists())
+
+    def test_account_delete(self):
+        self.test_register_valid()
+        user = self.user
+        response = self.client.post(reverse("account_delete"))
+        self.assertEqual(response.status_code, 403)
 
     def test_get_user(self):
         response = self.factory.get(reverse("rest_user_details"))
