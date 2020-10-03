@@ -10,9 +10,7 @@ from django.conf import settings
 @api_view(['POST', 'delete'])
 def deleteAcount(request):
     user = request.user
-    user.is_active = False
-    # user.delete()
-    user.save()
+    user.delete()
     return Response(status=HTTP_200_OK)
 
 
