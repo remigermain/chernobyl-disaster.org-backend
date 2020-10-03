@@ -279,7 +279,7 @@ else:
 #   LOGGIN
 # -----------------------------------------
 
-if DEBUG:
+if not DEBUG:
     DEFAULT_LOG = ["file", "mail_admins"]
     LOGGING = {
         'version': 1,
