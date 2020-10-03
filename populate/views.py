@@ -57,8 +57,10 @@ def populate(request):
 @api_view(['GET'])
 def contributor(request):
     return Response({
-        'contributors': get_user_model().objects.filter(commit_creator__gte=1)
+        'contributors': get_user_model().objects.annotate(count=Count('commit_creator'))
+                                                .filter(count__gte=1)
                                                 .distinct()
+                                                .prefetch_related('commit_creator')
                                                 .values_list('username', flat=True),
         'donators': get_user_model().objects.filter(amount__gte=1)
                                             .order_by('-amount')
