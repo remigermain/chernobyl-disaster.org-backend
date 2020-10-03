@@ -60,6 +60,7 @@ def contributor(request):
         'contributors': get_user_model().objects.annotate(count=Count('commit_creator'))
                                                 .filter(count__gte=1)
                                                 .distinct()
+                                                .order_by('username')
                                                 .prefetch_related('commit_creator')
                                                 .values_list('username', flat=True),
         'donators': get_user_model().objects.filter(amount__gte=1)
