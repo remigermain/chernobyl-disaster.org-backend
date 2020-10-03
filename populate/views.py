@@ -72,14 +72,14 @@ def overview(request):
     week = timezone.now() - timezone.timedelta(days=7)
 
     lst_week = get_user_model().objects\
-                               .all()\
-                               .annotate(count=Count('commit_creator'))\
+                               .annotate(count=Count('commit_creator', filter=Q(commit_creator__date__gte=week)))\
+                               .filter(count__gte=1)\
                                .order_by('-count')\
                                .prefetch_related('commit_creator')\
                                .values('count', 'username')[:3]
     lst_total = get_user_model().objects\
-                                .filter(commit_creator__date__gte=week)\
                                 .annotate(count=Count('commit_creator'))\
+                                .filter(count__gte=1)\
                                 .order_by('-count')\
                                 .prefetch_related('commit_creator')\
                                 .values('count', 'username')[:3]
