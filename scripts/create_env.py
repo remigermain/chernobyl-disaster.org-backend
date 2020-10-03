@@ -19,6 +19,7 @@ def main():
         "SECRET_KEY": f"\"{get_random_secret_key()}\"",
         "DOMAIN_NAME": "",
         "FRONTEND_URL": "http://localhost:3000",
+        "SUFFIX_ADMIN": "",
 
         "EMAIL_HOST": "postfix",
         "EMAIL_PORT": 587,
