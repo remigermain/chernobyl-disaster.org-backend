@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 from common.models import Translate, TranslateLang
 import json
 
-PATH = "output"
+PATH = "locales"
 
 
 class Command(BaseCommand):
