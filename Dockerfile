@@ -22,7 +22,7 @@ RUN mkdir -p logs backup
 # update
 RUN apk update
 # add postgre
-RUN apk add postgresql-dev gcc python3-dev musl-dev
+RUN apk add postgresql-dev postgresql-client gcc python3-dev musl-dev gnupg
 # for pillow / image kit
 RUN apk add zlib-dev jpeg-dev libwebp libwebp-dev
 # utils
