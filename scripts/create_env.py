@@ -20,6 +20,7 @@ def main():
         "DOMAIN_NAME": "",
         "FRONTEND_URL": "http://localhost:3000",
         "SUFFIX_ADMIN": "",
+        "GPG_KEY": "",
 
         "EMAIL_HOST": "postfix",
         "EMAIL_PORT": 587,

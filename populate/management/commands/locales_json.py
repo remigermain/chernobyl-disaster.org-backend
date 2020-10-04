@@ -35,7 +35,10 @@ class Command(BaseCommand):
 
         print("[ KEY ]")
         for key, value in missing.items():
-            diff = int((count - len(value)) * 100 / count)
+            if count > 0:
+                diff = int((count - len(value)) * 100 / count)
+            else:
+                diff = 0
             print(f"\t{key}: {diff}%")
 
         for key, value in langs.items():

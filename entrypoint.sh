@@ -18,5 +18,15 @@ echo "fix commit..."
 echo "generate images..."
 ./manage.py generateimages
 
+# ------
+# crontab
+# ------
+echo "* 0 * * * ./manage.py dbbackup --encrypt --clean --compress >/dev/null 2>&1 " > cronfile.txt
+echo "* 0 * * * ./manage.py mediabackup --encrypt --clean --compress >/dev/null 2>&1 " >> cronfile.txt
+echo "* 0 * * * ./manage.py locales_json >/dev/null 2>&1 " >> cronfile.txt
+crontab cronfile.txt
+cron -f
+
+
 # exec command from docker-compose file
 exec "$@"

@@ -9,7 +9,7 @@ ENV PYTHONUNBUFFERED 1
 # # ------
 # # create dir
 # # ------
-RUN mkdir -p logs
+RUN mkdir -p logs backup
 # ENV HOME=/var/www/backend
 # RUN mkdir -p $HOME $HOME/media $HOME/static
 # RUN touch $HOME/django.log
@@ -39,5 +39,6 @@ RUN pip install -r /requirements.txt
 # copy DIR
 # ------
 COPY . .
+
 
 ENTRYPOINT [ "./entrypoint.sh" ]

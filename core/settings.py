@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'lib',
 
     # extra package
+    'dbbackup',
     'django_cleanup.apps.CleanupConfig',
 ]
 
@@ -274,6 +275,15 @@ else:
             "PORT": os.environ.get("POSTGRES_PORT"),
         }
     }
+
+
+# -----------------------------------------
+#   BACKUP
+# -----------------------------------------
+DBBACKUP_GPG_RECIPIENT = os.environ.get("GPG_KEY")
+DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'
+DBBACKUP_STORAGE_OPTIONS = {'location': './backup'}
+
 
 # -----------------------------------------
 #   LOGGIN
