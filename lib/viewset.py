@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from lib.parser.parser import NestedParser
 from rest_framework.parsers import JSONParser, FormParser, MultiPartParser
-from distutils.util import strtobool
+from lib.utils import to_bool
 from lib.permission import ChernobylPermission
 # from drf_nested_multipart_parser import NestedMultipartParser
 
@@ -29,7 +29,7 @@ class ModelViewSetBase(viewsets.ModelViewSet):
         completed = self.request.query_params.get('completed', None)
         queryset = super().get_queryset()
         if completed is not None:
-            if bool(strtobool(completed)):
+            if to_bool(completed):
                 return queryset.completed()
             return queryset.uncompleted()
         return queryset

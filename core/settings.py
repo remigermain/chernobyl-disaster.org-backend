@@ -1,9 +1,14 @@
 from django.utils.translation import gettext_lazy as _
 from django.core.management.utils import get_random_secret_key
+from lib.utils import to_bool
 import os
 
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DEBUG = os.environ.get("DEBUG", "False").lower() in ["true", "1"]
+DEBUG = to_bool(os.environ.get("DEBUG", "False"))
+
+DEBUG_TOOLBAR = to_bool(os.environ.get("DEBUG_TOOLBAR", "False"))
+
 
 SECRET_KEY = os.environ.get("SECRET_KEY", get_random_secret_key())
 
@@ -199,11 +204,23 @@ GRAPH_MODELS = {
 #   DEBUG
 # #-----------------------------------------
 if DEBUG:
-    INSTALLED_APPS += [
-        'debug_toolbar'
-    ]
-
-    MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware'] + MIDDLEWARE
+    if DEBUG_TOOLBAR:
+        INSTALLED_APPS += [
+            'debug_toolbar'
+        ]
+        MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware'] + MIDDLEWARE
+        DEBUG_TOOLBAR_PANELS = [
+            'debug_toolbar.panels.timer.TimerPanel',
+            'debug_toolbar.panels.settings.SettingsPanel',
+            'debug_toolbar.panels.headers.HeadersPanel',
+            'debug_toolbar.panels.request.RequestPanel',
+            'debug_toolbar.panels.sql.SQLPanel',
+            'debug_toolbar.panels.cache.CachePanel',
+            'debug_toolbar.panels.signals.SignalsPanel',
+            'debug_toolbar.panels.logging.LoggingPanel',
+        ]
+        SHOW_COLLAPSED = True
+        SHOW_TEMPLATE_CONTEXT = False
 
     INTERNAL_IPS = [
         '127.0.0.1'
@@ -215,19 +232,6 @@ if DEBUG:
 
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
     ACCOUNT_EMAIL_VERIFICATION = 'none'
-
-    DEBUG_TOOLBAR_PANELS = [
-        'debug_toolbar.panels.timer.TimerPanel',
-        'debug_toolbar.panels.settings.SettingsPanel',
-        'debug_toolbar.panels.headers.HeadersPanel',
-        'debug_toolbar.panels.request.RequestPanel',
-        'debug_toolbar.panels.sql.SQLPanel',
-        'debug_toolbar.panels.cache.CachePanel',
-        'debug_toolbar.panels.signals.SignalsPanel',
-        'debug_toolbar.panels.logging.LoggingPanel',
-    ]
-    SHOW_COLLAPSED = True
-    SHOW_TEMPLATE_CONTEXT = False
 
     REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'].append(
         'rest_framework.renderers.BrowsableAPIRenderer'
