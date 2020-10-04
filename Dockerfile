@@ -9,6 +9,7 @@ ENV PYTHONUNBUFFERED 1
 # # ------
 # # create dir
 # # ------
+RUN mkdir -p logs
 # ENV HOME=/var/www/backend
 # RUN mkdir -p $HOME $HOME/media $HOME/static
 # RUN touch $HOME/django.log

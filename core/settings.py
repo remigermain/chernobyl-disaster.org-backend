@@ -287,7 +287,7 @@ if not DEBUG:
         'handlers': {
             'file': {
                 'class': 'logging.FileHandler',
-                'filename': './django.log',
+                'filename': './logs/django.log',
             },
             "console": {
                 "level": "DEBUG",
