@@ -58,7 +58,10 @@ def populate(request):
 def contributor(request):
     return Response({
         'contributors': get_user_model().objects.annotate(count=Count('commit_creator'))
-                                                .filter(count__gte=1)
+                                                .filter(
+                                                    ~Q(username=settings.ADMIN_USERNAME),
+                                                    count__gte=1
+                                                )
                                                 .distinct()
                                                 .order_by('username')
                                                 .prefetch_related('commit_creator')
@@ -76,13 +79,13 @@ def overview(request):
 
     lst_week = get_user_model().objects\
                                .annotate(count=Count('commit_creator', filter=Q(commit_creator__date__gte=week)))\
-                               .filter(count__gte=1)\
+                               .filter(~Q(username=settings.ADMIN_USERNAME), count__gte=1)\
                                .order_by('-count')\
                                .prefetch_related('commit_creator')\
                                .values('count', 'username')[:3]
     lst_total = get_user_model().objects\
                                 .annotate(count=Count('commit_creator'))\
-                                .filter(count__gte=1)\
+                                .filter(~Q(username=settings.ADMIN_USERNAME), count__gte=1)\
                                 .order_by('-count')\
                                 .prefetch_related('commit_creator')\
                                 .values('count', 'username')[:3]

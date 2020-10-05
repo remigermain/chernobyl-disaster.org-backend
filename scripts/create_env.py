@@ -23,6 +23,8 @@ def main():
         "SUFFIX_ADMIN": "",
         "GPG_KEY": "",
 
+        "ADMIN_USERNAME": "",
+
         "EMAIL_HOST": "postfix",
         "EMAIL_PORT": 587,
 

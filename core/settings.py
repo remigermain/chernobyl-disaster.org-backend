@@ -8,6 +8,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEBUG = to_bool(os.environ.get("DEBUG", "False"))
 
 DEBUG_TOOLBAR = to_bool(os.environ.get("DEBUG_TOOLBAR", "False"))
+ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "")
 
 
 SECRET_KEY = os.environ.get("SECRET_KEY", get_random_secret_key())
