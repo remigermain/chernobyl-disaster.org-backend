@@ -9,7 +9,7 @@ ENV PYTHONUNBUFFERED 1
 # # ------
 # # create dir
 # # ------
-RUN mkdir -p logs backup
+RUN mkdir -p logs backup gpg_keys
 # ENV HOME=/var/www/backend
 # RUN mkdir -p $HOME $HOME/media $HOME/static
 # RUN touch $HOME/django.log
@@ -22,7 +22,9 @@ RUN mkdir -p logs backup
 # update
 RUN apk update
 # add postgre
-RUN apk add postgresql-dev postgresql-client gcc python3-dev musl-dev gnupg
+RUN apk add postgresql-dev postgresql-client gcc python3-dev musl-dev
+# add gnupgp for backup
+RUN apk add gnupg
 # for pillow / image kit
 RUN apk add zlib-dev jpeg-dev libwebp libwebp-dev
 # utils
@@ -39,6 +41,5 @@ RUN pip install -r /requirements.txt
 # copy DIR
 # ------
 COPY . .
-
 
 ENTRYPOINT [ "./entrypoint.sh" ]
