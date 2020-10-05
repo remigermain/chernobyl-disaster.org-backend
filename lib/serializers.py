@@ -19,38 +19,12 @@ class ModelSerializerBaseNested(WritableNestedModelSerializer):
     def __init__(self, *args, **kwargs):
         setattr(self.Meta, 'list_serializer_class', ListSerializer)
         super().__init__(*args, **kwargs)
-
+    
     def validate_langs(self, datas):
         """
             replace of unique together and constaits for language
         """
-        # get actual language on models
-        exist = []
-        if self.instance:
-            exist = list(self.instance.langs.all().values("id", "language"))
-
-        news = []
-        error = False
-        for item in self.get_initial().get('langs', []):
-            pk = item.get('id', None)
-            if pk:
-                atc = list(filter(lambda o: o['id'] == int(pk), exist))[0]
-                if not atc:
-                    error = True
-                    break
-                # reasign language in current object
-                atc['language'] = item.get('language')
-            else:
-                news.append(item.get('language'))
-
-        # check if a same language
-        for lang in news:
-            atc = list(filter(lambda o: o['language'] == lang, exist))
-            if atc:
-                error = True
-                break
-
-        if error or len(list(set(news))) != len(news):
+        def raise_error():
             field = self.Meta.model.langs.field.model.language.field
             raise ValidationError(
                 message="101",
@@ -60,6 +34,33 @@ class ModelSerializerBaseNested(WritableNestedModelSerializer):
                     'field_label': capfirst(field.verbose_name)
                 },
             )
+
+        # get actual language on models
+        exist = []
+        if self.instance:
+            exist = list(self.instance.langs.all().values("id", "language"))
+
+        news = []
+        for item in self.get_initial().get('langs', []):
+            pk = item.get('id', None)
+            if pk:
+                atc = list(filter(lambda o: o['id'] == int(pk), exist))[0]
+                if not atc:
+                    raise_error()
+                # reasign language in current object
+                atc['language'] = item.get('language')
+            else:
+                news.append(item.get('language'))
+
+        # check if a same language
+        for lang in news:
+            atc = list(filter(lambda o: o['language'] == lang, exist))
+            if atc:
+                raise_error()
+
+        if len(list(set(news))) != len(news):
+            raise_error()
+        
         return datas
 
     def __diff_field(self, old, new):
