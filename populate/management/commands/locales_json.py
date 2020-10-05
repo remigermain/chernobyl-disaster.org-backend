@@ -3,6 +3,7 @@ from common.models import Translate, TranslateLang
 import json
 
 PATH = "locales"
+KEY_PERCENTAGE = "percentage"
 
 
 class Command(BaseCommand):
@@ -36,10 +37,11 @@ class Command(BaseCommand):
         print("[ KEY ]")
         for key, value in missing.items():
             if count > 0:
-                diff = int((count - len(value)) * 100 / count)
+                percentage = int((count - len(value)) * 100 / count)
             else:
-                diff = 0
-            print(f"\t{key}: {diff}%")
+                percentage = 0
+            langs[key][KEY_PERCENTAGE] = percentage
+            print(f"\t{key}: {percentage}%")
 
         for key, value in langs.items():
             with open(f"{PATH}/{key.lower()}-{key.upper()}.json", "w") as f:
