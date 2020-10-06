@@ -16,6 +16,10 @@ source ./venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements/dev.txt # or common.txt for production
 
+# create local env file
+python ./scripts/create_env -e
+source .env
+
 ./manage.py migrate
 ./manage.py runserver
 ```
