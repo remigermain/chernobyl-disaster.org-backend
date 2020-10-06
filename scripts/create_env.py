@@ -2,6 +2,7 @@
 import argparse
 import re
 import secrets
+import os
 
 
 def get_random_secret_key():
@@ -31,6 +32,8 @@ def main():
         "ALLOWED_HOSTS": "",
         "CORS_ALLOWED_ORIGINS": "",
 
+        "POSTGRES_ENGINE": "django.db.backends.postgresql",
+        "POSTGRES_NAME": "",
         "POSTGRES_DB": "",
         "POSTGRES_USER": "",
         "POSTGRES_PASSWORD": "",
@@ -38,7 +41,7 @@ def main():
         "POSTGRES_PORT": "",
     }
 
-    if flag.merge:
+    if flag.merge and os.path.exists(flag.input) and os.path.isfile(flag.input):
         with open(flag.input, "r") as f:
             _file = reg_space.sub(" ", f.read()).split("\n")
             for line in _file:
@@ -49,6 +52,14 @@ def main():
                     key = key[6:].strip()
                 if key in env and value:
                     env[key] = value
+
+    # add/replace new flag
+    for n in flag.other:
+        _split = n.split("=")
+        if len(_split) != 2:
+            print(f"wrong flag value {_split}")
+            exit(0)
+        env[_split[0]] = _split[1]
 
     with open(flag.output, "w") as f:
         for key, val in env.items():
@@ -64,5 +75,6 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--output", help="set the outupt file name", default=".env")
     parser.add_argument("-i", "--input", help="set the input file name", default=".env")
     parser.add_argument("-e", "--export", action="store_true", help="ad export prefix", default=False)
+    parser.add_argument('other', nargs='*')
     flag = parser.parse_args()
     main()
