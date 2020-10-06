@@ -8,16 +8,16 @@ image: python:latest
 # Check out: http://docs.gitlab.com/ce/ci/docker/using_docker_images.html#what-is-a-service
 services:
   - mysql:latest
-  - postgres:latest
+# - postgres:latest
 
 variables:
-  POSTGRES_DB: database_name
+  # POSTGRES_DB: database_name
   DEBUG: 'True'
-  POSTGRES_NAME: 'ci'
-  POSTGRES_USER: 'postgres'
-  POSTGRES_PASSWORD: 'postgres'
-  POSTGRES_PORT: '5432'
-  POSTGRES_HOST: 'postgres'
+  # POSTGRES_NAME: 'ci'
+  # POSTGRES_USER: 'postgres'
+  # POSTGRES_PASSWORD: 'postgres'
+  # POSTGRES_PORT: '5432'
+  # POSTGRES_HOST: 'postgres'
 
 # This folder is cached between builds
 # http://docs.gitlab.com/ce/ci/yaml/README.html#cache
@@ -54,8 +54,9 @@ before_script:
 #
 # and then adding `--settings app.settings.ci` (or similar) to the test command
 
+# test only with mysql
 test:
-  variables:
-    DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/$POSTGRES_DB"
+  # variables:
+  #   DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/$POSTGRES_DB"
   script:
     - python manage.py test
