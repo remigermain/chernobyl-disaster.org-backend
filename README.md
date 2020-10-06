@@ -1,4 +1,4 @@
-<div align="center"><img align="center" width="300" src="/static/icon.png"/></div><br/>
+<div align="center"><img align="center" width="300" src="https://gitlab.com/chernobyl-disaster.org/frontend/-/raw/master/static/icon.png"/></div><br/>
 
 >  The Chernobyl nuclear disaster is a major nuclear accident that occurred on April 26, 1986 in the V.I. Lenin nuclear power plant, then located in the Ukrainian Soviet Socialist Republic, USSR. It is the most serious nuclear disaster of the 20th century, classified at level 7 (the highest) of the International Nuclear Event Scale (INES), surpassing, according to the Institute for Radiation Protection and Nuclear Safety (IRSN), by its immediate environmental impacts the Fukushima nuclear accident of 2011, classified at the same level. The IRSN mentions for these accidents potential health effects, lasting contamination of territories and important economic and social consequences. This site recounts the events of the accident that led to this disaster and its consequences, illustrated by photo, video and archive document. 
 
@@ -23,7 +23,8 @@ pip install -r requirements/dev.txt # or common.txt for production
 ## Testing
 
 ```sh
-#create virtual environment 
+# need virtual env
+
 ./manage.py test
 ```
 
