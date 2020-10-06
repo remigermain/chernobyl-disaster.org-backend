@@ -31,7 +31,8 @@ before_script:
   # Uncomment next line if your Django app needs a JS runtime:
   # - apt-get update -q && apt-get install nodejs -yqq
   - pip install -r requirements/common.txt
-  - python scripts/env -e POSTGRES_NAME=ci POSTGRES_USER=postgres POSTGRES_PASSWORD=postgres POSTGRES_PORT=5432 POSTGRES_HOST=postgres
+  - python manage.py migrate
+  - python scripts/create_env.py -e POSTGRES_NAME=ci POSTGRES_USER=postgres POSTGRES_PASSWORD=postgres POSTGRES_PORT=5432 POSTGRES_HOST=postgres
 
 # To get Django tests to work you may need to create a settings file using
 # the following DATABASES:
