@@ -46,6 +46,10 @@ class ModelViewSetBase(viewsets.ModelViewSet):
             'PATCH': 'serializer_class_post',
         }
         method = self.request.method.upper()
+
+        if 'contribute' in self.request.query_params and \
+                to_bool(self.request.query_params['contribute']):
+            return self.serializer_class_contribute
         if method in actions and hasattr(self, actions[method]):
             return getattr(self, actions[method])
         return super().get_serializer_class()

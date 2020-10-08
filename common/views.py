@@ -8,6 +8,7 @@ from common.serializers import tag, translate
 class TagViewSet(ModelViewSetBase):
     queryset = Tag.objects.all()
     serializer_class = tag.TagSerializer
+    serializer_class_contribute = tag.TagSerializerMini
     filterset_fields = ['name', 'langs__name']
     search_fields = ['name', 'langs__name']
 

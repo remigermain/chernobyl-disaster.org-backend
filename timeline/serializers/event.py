@@ -3,6 +3,7 @@ from timeline.models import Event, EventLang
 from gallery.serializers.picture import PictureSerializerEvent
 from gallery.serializers.video import VideoSerializerEvent
 from rest_framework.serializers import SerializerMethodField
+from common.serializers.tag import TagSerializerMini
 
 
 class EventLangSerializer(ModelSerializerBase):
@@ -29,6 +30,7 @@ class EventSerializer(ModelSerializerBase):
 
 
 class EventSerializerPost(EventSerializer):
+    tags = TagSerializerMini(many=True, required=False)
     date = None
 
     class Meta(EventSerializer.Meta):
@@ -42,3 +44,8 @@ class EventSerializerTimeline(EventSerializer):
     class Meta(EventSerializer.Meta):
         fields = EventSerializer.Meta.fields + \
             ['pictures', 'videos', 'slug']
+
+
+class EventSerializerMini(EventSerializer):
+    class Meta(EventSerializer.Meta):
+        fields = ['id', 'title', 'date']

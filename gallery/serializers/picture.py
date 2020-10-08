@@ -46,3 +46,15 @@ class PictureSerializerPost(PictureSerializer):
 class PictureSerializerEvent(PictureSerializer):
     class Meta(PictureSerializer.Meta):
         fields = ['id', 'title', 'picture', 'langs']
+
+
+class PictureSerializerMini(PictureSerializer):
+    event = SerializerMethodField()
+
+    class Meta(PictureSerializer.Meta):
+        fields = ['id', 'title', 'event']
+
+    def get_event(self, obj):
+        if obj.event:
+            return str(obj.event)
+        return None

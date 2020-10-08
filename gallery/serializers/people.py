@@ -57,3 +57,8 @@ class PeopleSerializerPost(PeopleSerializer):
 
     class Meta(PeopleSerializer.Meta):
         pass
+
+
+class PeopleSerializerMini(PeopleSerializer):
+    class Meta(PeopleSerializer.Meta):
+        fields = ['id', 'name']

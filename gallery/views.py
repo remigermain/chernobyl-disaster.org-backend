@@ -7,6 +7,7 @@ class PictureViewSet(ModelViewSetBase):
     queryset = Picture.objects.all()
     serializer_class = picture.PictureSerializer
     serializer_class_post = picture.PictureSerializerPost
+    serializer_class_contribute = picture.PictureSerializerMini
     filterset_fields = ['id', 'title', 'event', 'photographer']
     search_fields = [
                     'title', 'event__title', 'event__langs__title', 'event__langs__description',
@@ -24,6 +25,7 @@ class VideoViewSet(ModelViewSetBase):
     queryset = Video.objects.all()
     serializer_class = video.VideoSerializer
     serializer_class_post = video.VideoSerializerPost
+    serializer_class_contribute = video.VideoSerializerMini
     filterset_fields = ['id', 'title', 'event']
     search_fields = [
                     'title', 'event__title', 'event__langs__title', 'event__langs__description',
@@ -41,6 +43,7 @@ class PeopleViewSet(ModelViewSetBase):
     queryset = People.objects.all()
     serializer_class = people.PeopleSerializer
     serializer_class_post = people.PeopleSerializerPost
+    serializer_class_contribute = people.PeopleSerializerMini
     filterset_fields = ['id', 'name', 'born', 'death']
     search_fields = ['name', 'born', 'death', 'langs__biography', 'tags__name', 'tags__langs__name']
     search_fields = ['name', 'born', 'death', 'langs__biography']

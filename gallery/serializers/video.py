@@ -36,3 +36,15 @@ class VideoSerializerPost(VideoSerializer):
 class VideoSerializerEvent(VideoSerializer):
     class Meta(VideoSerializer.Meta):
         fields = ['id', 'title', 'video', 'langs']
+
+
+class VideoSerializerMini(VideoSerializer):
+    event = SerializerMethodField()
+
+    class Meta(VideoSerializer.Meta):
+        fields = ['id', 'title', 'event']
+
+    def get_event(self, obj):
+        if obj.event:
+            return str(obj.event)
+        return None

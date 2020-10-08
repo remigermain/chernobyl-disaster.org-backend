@@ -44,11 +44,11 @@ class ModelSerializerBaseNested(WritableNestedModelSerializer):
         for item in self.get_initial().get('langs', []):
             pk = item.get('id', None)
             if pk:
-                atc = list(filter(lambda o: o['id'] == int(pk), exist))[0]
-                if not atc:
+                atc = list(filter(lambda o: o['id'] == int(pk), exist))
+                if not len(atc):
                     raise_error()
                 # reasign language in current object
-                atc['language'] = item.get('language')
+                atc[0]['language'] = item.get('language')
             else:
                 news.append(item.get('language'))
 

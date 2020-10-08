@@ -2,6 +2,7 @@ from django.test import tag
 from lib.test import BaseTest
 from timeline.serializers.event import EventSerializerPost
 from django.urls import reverse
+from timeline.models import EventLang
 
 
 @tag('event')
@@ -409,3 +410,35 @@ class EventTest(BaseTest):
         self.assertNotEqual(Commit.objects.filter(uuid=uuid).count(), 0)
         langs.delete()
         self.assertEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+
+    ## event lang
+
+    def test_client_auth(self):
+        instance = self.test_create_serializer_langs().langs.first()
+
+        response = self.client.get(reverse("eventlang-detail", args=[instance.pk]))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.patch(reverse("eventlang-detail", args=[instance.pk]))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.put(reverse("eventlang-detail", args=[instance.pk]))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.options(reverse("eventlang-detail", args=[instance.pk]))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.delete(reverse("eventlang-detail", args=[instance.pk]))
+        self.assertEqual(response.status_code, 403)
+
+        response = self.factory.get(reverse("eventlang-detail", args=[instance.pk]))
+        self.assertEqual(response.status_code, 403)
+        response = self.factory.patch(reverse("eventlang-detail", args=[instance.pk]))
+        self.assertEqual(response.status_code, 403)
+        response = self.factory.put(reverse("eventlang-detail", args=[instance.pk]))
+        self.assertEqual(response.status_code, 403)
+        response = self.factory.options(reverse("eventlang-detail", args=[instance.pk]))
+        self.assertEqual(response.status_code, 403)
+        response = self.factory.delete(reverse("eventlang-detail", args=[instance.pk]))
+        self.assertEqual(response.status_code, 403)
+
+        self.assertEqual(EventLang.objects.count(), 1)
+        response = self.factory_admin.delete(reverse("eventlang-detail", args=[instance.pk]))
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(EventLang.objects.count(), 0)
