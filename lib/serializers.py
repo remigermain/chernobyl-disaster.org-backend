@@ -99,9 +99,6 @@ class ModelSerializerBaseNested(WritableNestedModelSerializer):
         t1 = self.__class__(instance=instance).data
 
         obj = super().update(instance, validated_data)
-        # clean multi select tags
-        if hasattr(self.Meta.model, 'tags') and 'tags' not in validated_data:
-            obj.tags.clear()
 
         # serialize new instance
         t2 = self.__class__(instance=obj).data

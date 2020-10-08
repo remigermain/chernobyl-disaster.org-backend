@@ -251,7 +251,7 @@ class PeopleTest(BaseTest):
         serializer = PeopleSerializerPost(instance=instance, data=data, context=self.context, partial=True)
         self.assertTrue(serializer.is_valid())
         obj = serializer.save()
-        self.check_commit_update(obj, diff=['name', 'tags'])
+        self.check_commit_update(obj, diff=['name'])
 
     def test_update_serializer_only_date(self):
         instance = self.test_create_serializer()
@@ -261,7 +261,7 @@ class PeopleTest(BaseTest):
         serializer = PeopleSerializerPost(instance=instance, data=data, context=self.context, partial=True)
         self.assertTrue(serializer.is_valid())
         obj = serializer.save()
-        self.check_commit_update(obj, diff=['death', 'tags'])
+        self.check_commit_update(obj, diff=['death'])
 
     def test_create_serializer_check_create_tags(self):
         data = {
@@ -286,7 +286,7 @@ class PeopleTest(BaseTest):
         old_name = instance.name
         self.assertEqual(Tag.objects.filter(name=old_name).count(), 1)
         obj = serializer.save()
-        self.check_commit_update(obj, diff=['name', 'tags'])
+        self.check_commit_update(obj, diff=['name'])
         self.assertEqual(Tag.objects.filter(name=old_name).count(), 0)
         self.assertEqual(Tag.objects.count(), 1)
         self.assertEqual(Tag.objects.first().name, data['name'])
@@ -308,7 +308,7 @@ class PeopleTest(BaseTest):
         serializer = PeopleSerializerPost(instance=instance, data=data, context=self.context, partial=True)
         self.assertTrue(serializer.is_valid())
         obj = serializer.save()
-        self.check_commit_update(obj, diff=['tags', 'langs'])
+        self.check_commit_update(obj, diff=['langs'])
         self.assertEqual(obj.langs.count(), 2)
 
     def test_create_serializer_same_langs(self):
