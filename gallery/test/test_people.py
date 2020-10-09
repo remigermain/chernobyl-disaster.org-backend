@@ -276,6 +276,7 @@ class PeopleTest(BaseTest):
         self.assertEqual(Tag.objects.first().name, data['name'])
         return obj
 
+    @tag('t')
     def test_update_serializer_check_update_tags(self):
         instance = self.test_create_serializer_check_create_tags()
         data = {
@@ -287,8 +288,7 @@ class PeopleTest(BaseTest):
         self.assertEqual(Tag.objects.filter(name=old_name).count(), 1)
         obj = serializer.save()
         self.check_commit_update(obj, diff=['name'])
-        self.assertEqual(Tag.objects.filter(name=old_name).count(), 0)
-        self.assertEqual(Tag.objects.count(), 1)
+        self.assertEqual(Tag.objects.count(), 2)
         self.assertEqual(Tag.objects.first().name, data['name'])
 
     def test_update_serializer_langs(self):
@@ -455,6 +455,20 @@ class PeopleTest(BaseTest):
         self.assertNotEqual(Commit.objects.filter(uuid=uuid).count(), 0)
         langs.delete()
         self.assertEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+
+    def test_client_max_length_name(self):
+        data = {
+            'name': "a" * 120
+        }
+        response = self.factory.post(reverse("people-list"), data)
+        self.assertEqual(response.status_code, 400)
+
+    def test_client_max_length_name_tag(self):
+        data = {
+            'name': "a" * 80
+        }
+        response = self.factory.post(reverse("people-list"), data)
+        self.assertEqual(response.status_code, 201)
 
     # def test_client_add_tags(self):
     #     data = {

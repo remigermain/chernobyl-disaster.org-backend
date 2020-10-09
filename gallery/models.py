@@ -94,7 +94,7 @@ class People(ChernobylModelAbstract):
     """
         models for personality of chernobyl
     """
-    name = models.CharField(max_length=80, unique=True, null=False, blank=False)
+    name = models.CharField(max_length=100, unique=True, null=False, blank=False)
     born = models.DateField(null=True, blank=True)
     death = models.DateField(null=True, blank=True)
     profil = models.ImageField(upload_to=profil_path, null=True, blank=True)
@@ -113,6 +113,10 @@ class People(ChernobylModelAbstract):
 
     def __str__(self):
         return self.name
+
+    @property
+    def tag_fields(self):
+        return ['name']
 
 
 class PeopleLang(LanguageAbstract):

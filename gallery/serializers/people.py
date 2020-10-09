@@ -19,31 +19,6 @@ class PeopleSerializer(ModelSerializerBase):
         model = People
         fields = ['id', 'name', 'born', 'death', 'profil', 'wikipedia', 'langs', 'tags']
 
-    def create(self, validated_data):
-        # alway create tag same name has people name
-        try:
-            tag = Tag.objects.get(name=validated_data['name'])
-        except Tag.DoesNotExist:
-            tag = Tag.objects.create(name=validated_data['name'])
-        instance = super().create(validated_data)
-        instance.tags.add(tag)
-        return instance
-
-    def update(self, instance, validated_data):
-        # alway update tag same name has people name
-        try:
-            tag = Tag.objects.get(name=instance.name)
-        except Tag.DoesNotExist:
-            tag = Tag.objects.create(name=validated_data['name'])
-
-        obj = super().update(instance, validated_data)
-
-        if 'name' in validated_data and tag.name != validated_data['name']:
-            tag.name = validated_data['name']
-            tag.save()
-        obj.tags.add(tag)
-        return obj
-
     def get_profil(self, obj):
         if not obj.profil:
             return None

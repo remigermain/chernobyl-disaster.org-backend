@@ -90,7 +90,11 @@ class BaseTest(TestCase):
         self.assertEqual(query.count(), 1)
         commit = query.first()
         self.assertEqual(commit.creator, creator)
-        self.assertSetEqual(set(commit.updated_fields.split("|")), set(diff))
+
+        lst = commit.updated_fields.split("|")
+        if 'tags' in lst:
+            lst.remove('tags')
+        self.assertSetEqual(set(lst), set(diff))
 
     def assertListSame(self, l1, l2):
         self.assertCountEqual(l1, l2)
