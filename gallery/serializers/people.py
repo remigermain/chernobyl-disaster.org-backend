@@ -1,7 +1,6 @@
 from lib.serializers import ModelSerializerBase
 from rest_framework.serializers import SerializerMethodField
 from gallery.models import People, PeopleLang
-from common.models import Tag
 from common.serializers.tag import TagSerializerMini
 
 

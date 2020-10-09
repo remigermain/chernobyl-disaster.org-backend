@@ -1,6 +1,14 @@
 from lib.viewset import ModelViewSetBase
-from gallery.models import Picture, Video, People
+from gallery.models import Picture, Video, People, PictureLang, VideoLang, PeopleLang
 from gallery.serializers import picture, video, people
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework import mixins, viewsets
+
+
+class PictureLangViewSet(mixins.DestroyModelMixin, viewsets.GenericViewSet):
+    queryset = PictureLang.objects.all()
+    serializer_class = picture.PictureLangSerializer
+    permission_classes = (IsAdminUser, IsAuthenticated)
 
 
 class PictureViewSet(ModelViewSetBase):
@@ -21,6 +29,12 @@ class PictureViewSet(ModelViewSetBase):
                       .select_related("photographer", "event")
 
 
+class VideoLangViewSet(mixins.DestroyModelMixin, viewsets.GenericViewSet):
+    queryset = VideoLang.objects.all()
+    serializer_class = video.VideoLangSerializer
+    permission_classes = (IsAdminUser, IsAuthenticated)
+
+
 class VideoViewSet(ModelViewSetBase):
     queryset = Video.objects.all()
     serializer_class = video.VideoSerializer
@@ -37,6 +51,12 @@ class VideoViewSet(ModelViewSetBase):
         return super().get_queryset()\
                       .prefetch_related("langs", "tags__langs")\
                       .select_related("event")
+
+
+class PeopleLangViewSet(mixins.DestroyModelMixin, viewsets.GenericViewSet):
+    queryset = PeopleLang.objects.all()
+    serializer_class = people.PeopleLangSerializer
+    permission_classes = (IsAdminUser, IsAuthenticated)
 
 
 class PeopleViewSet(ModelViewSetBase):
