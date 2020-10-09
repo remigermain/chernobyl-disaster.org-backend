@@ -14,9 +14,6 @@ class TagSerializer(ModelSerializerBase):
     class Meta:
         model = Tag
         fields = ['id', 'name', 'langs']
-        extra_kwargs = {
-            'name': {'validators': []},
-        }
 
 
 class TagSerializerMini(TagSerializer):

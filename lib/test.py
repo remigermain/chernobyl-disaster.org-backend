@@ -7,6 +7,7 @@ from django.utils import timezone, datetime_safe
 from utils.models import Commit
 from rest_framework.test import APIClient
 
+
 class BaseTest(TestCase):
 
     @classmethod
@@ -90,3 +91,7 @@ class BaseTest(TestCase):
         commit = query.first()
         self.assertEqual(commit.creator, creator)
         self.assertSetEqual(set(commit.updated_fields.split("|")), set(diff))
+
+    def assertListSame(self, l1, l2):
+        self.assertCountEqual(l1, l2)
+        self.assertEqual(sorted(l1), sorted(l2))

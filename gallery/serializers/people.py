@@ -2,6 +2,7 @@ from lib.serializers import ModelSerializerBase
 from rest_framework.serializers import SerializerMethodField
 from gallery.models import People, PeopleLang
 from common.models import Tag
+from common.serializers.tag import TagSerializerMini
 
 
 class PeopleLangSerializer(ModelSerializerBase):
@@ -44,6 +45,8 @@ class PeopleSerializer(ModelSerializerBase):
         return obj
 
     def get_profil(self, obj):
+        if not obj.profil:
+            return None
         return {
             'original_jpeg': obj.profil.url,
             'original_webp': obj.profil_webp.url,
@@ -53,6 +56,7 @@ class PeopleSerializer(ModelSerializerBase):
 
 
 class PeopleSerializerPost(PeopleSerializer):
+    tags = TagSerializerMini(many=True, required=False)
     profil = None
 
     class Meta(PeopleSerializer.Meta):

@@ -455,3 +455,57 @@ class PeopleTest(BaseTest):
         self.assertNotEqual(Commit.objects.filter(uuid=uuid).count(), 0)
         langs.delete()
         self.assertEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+
+    # def test_client_add_tags(self):
+    #     data = {
+    #         'name': 'name',
+    #         'tags[0][name]': 'lalala',
+    #         'tags[1][name]': 'lalalafff',
+    #     }
+    #     response = self.factory.post(reverse("people-list"), data)
+    #     self.assertEqual(response.status_code, 201)
+    #     self.assertEqual(Tag.objects.count(), 3)
+    #     instance = People.objects.first()
+    #     self.assertListSame(instance.tags.values_list("name", flat=True), ["name", "lalala", "lalalafff"])
+
+    # def test_client_add_tags2(self):
+    #     data = {
+    #         'name': 'name',
+    #         'tags[0][name]': 'lalala',
+    #         'tags[1][name]': 'lalalafff',
+    #         'tags[2][name]': 'lalalafff',
+    #         'tags[3][name]': 'lalalafff',
+    #     }
+    #     response = self.factory.post(reverse("people-list"), data)
+    #     self.assertEqual(response.status_code, 201)
+    #     self.assertEqual(Tag.objects.count(), 3)
+    #     instance = People.objects.first()
+    #     self.assertListSame(instance.tags.values_list("name", flat=True), ["name", "lalala", "lalalafff"])
+
+    # def test_client_add_tags3(self):
+    #     data = {
+    #         'name': 'name',
+    #         'tags[0][name]': 'lalala',
+    #         'tags[1][name]': 'lalalafff',
+    #         'tags[2][name]': 'lalalafff',
+    #         'tags[3][name]': 'lalalafff',
+    #     }
+    #     response = self.factory.post(reverse("people-list"), data)
+    #     self.assertEqual(response.status_code, 201)
+    #     self.assertEqual(Tag.objects.count(), 3)
+    #     instance = People.objects.first()
+    #     self.assertListSame(instance.tags.values_list("name", flat=True), ["name", "lalala", "lalalafff"])
+
+    # def test_client_add_tags4(self):
+    #     tag = Tag.objects.create(name="test")
+    #     data = {
+    #         'name': 'name',
+    #         'tags[0][name]': 'lalala',
+    #         'tags[1][name]': 'test',
+    #         'tags[1][id]': tag.id,
+    #     }
+    #     response = self.factory.post(reverse("people-list"), data)
+    #     self.assertEqual(response.status_code, 201)
+    #     self.assertEqual(Tag.objects.count(), 3)
+    #     instance = People.objects.first()
+    #     self.assertListSame(instance.tags.values_list("name", flat=True), ["name", "lalala", "test"])

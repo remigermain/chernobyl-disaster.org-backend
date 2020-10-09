@@ -6,7 +6,7 @@ class Tag(ChernobylModelAbstract):
     """
         tags content for easy to find element by tag
     """
-    name = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=50)
 
     def __str__(self):
         return self.name

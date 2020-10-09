@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from drf_writable_nested.serializers import WritableNestedModelSerializer
+from drf_writable_nested.mixins import UniqueFieldsMixin
 from django.core.exceptions import ValidationError
 from django.utils.text import capfirst
 from utils.models import Commit
@@ -62,7 +63,7 @@ class ModelSerializerBaseNested(WritableNestedModelSerializer):
             raise_error()
         
         return datas
-
+    
     def __diff_field(self, old, new):
         """
             find field are changed before update
