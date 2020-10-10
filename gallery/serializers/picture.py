@@ -1,6 +1,7 @@
 from lib.serializers import ModelSerializerBase
 from gallery.models import Picture, PictureLang
 from rest_framework.serializers import SerializerMethodField
+from common.serializers.tag import TagSerializerMini
 
 
 class PictureLangSerializer(ModelSerializerBase):
@@ -16,7 +17,7 @@ class PictureSerializer(ModelSerializerBase):
 
     class Meta:
         model = Picture
-        fields = ['id', 'title', 'event', 'picture', 'photographer', 'langs', 'tags', 'date']
+        fields = ['id', 'title', 'event', 'picture', 'langs', 'tags', 'date']
 
     def get_picture(self, obj):
         return {
@@ -36,6 +37,7 @@ class PictureSerializer(ModelSerializerBase):
 
 
 class PictureSerializerPost(PictureSerializer):
+    tags = TagSerializerMini(many=True, required=False)
     picture = None
     date = None
 

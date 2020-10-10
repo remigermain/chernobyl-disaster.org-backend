@@ -1,8 +1,15 @@
 from lib.viewset import ModelViewSetBase
-from common.models import Tag, Translate, TranslateLang
+from common.models import Tag, Translate, TranslateLang, TagLang
 from lib.permission import ReadOnlyLamda, ChernobylPermission
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from common.serializers import tag, translate
+from rest_framework import mixins, viewsets
+
+
+class TagLangViewSet(mixins.DestroyModelMixin, viewsets.GenericViewSet):
+    queryset = TagLang.objects.all()
+    serializer_class = tag.TagLangSerializer
+    permission_classes = (IsAdminUser, IsAuthenticated)
 
 
 class TagViewSet(ModelViewSetBase):

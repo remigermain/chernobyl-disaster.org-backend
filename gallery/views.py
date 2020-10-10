@@ -16,17 +16,17 @@ class PictureViewSet(ModelViewSetBase):
     serializer_class = picture.PictureSerializer
     serializer_class_post = picture.PictureSerializerPost
     serializer_class_contribute = picture.PictureSerializerMini
-    filterset_fields = ['id', 'title', 'event', 'photographer']
+    filterset_fields = ['id', 'title', 'event']
     search_fields = [
                     'title', 'event__title', 'event__langs__title', 'event__langs__description',
-                    'photographer__name', 'langs__title', 'tags__name', 'tags__langs__name'
+                    'langs__title', 'tags__name', 'tags__langs__name'
                 ]
     ordering_fields = ['id', 'title', 'date', 'event__date']
 
     def get_queryset(self):
         return super().get_queryset()\
                       .prefetch_related("langs", "tags__langs")\
-                      .select_related("photographer", "event")
+                      .select_related("event")
 
 
 class VideoLangViewSet(mixins.DestroyModelMixin, viewsets.GenericViewSet):

@@ -1,6 +1,7 @@
 from lib.serializers import ModelSerializerBase
 from gallery.models import Video, VideoLang
 from rest_framework.serializers import SerializerMethodField
+from common.serializers.tag import TagSerializerMini
 
 
 class VideoLangSerializer(ModelSerializerBase):
@@ -27,6 +28,7 @@ class VideoSerializer(ModelSerializerBase):
 
 
 class VideoSerializerPost(VideoSerializer):
+    tags = TagSerializerMini(many=True, required=False)
     date = None
 
     class Meta(VideoSerializer.Meta):

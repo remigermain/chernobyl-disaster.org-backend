@@ -5,6 +5,7 @@ from gallery.models import VideoLang, Video
 from django.urls import reverse
 from django.utils import timezone
 from timeline.models import Event
+from common.models import Tag
 
 
 @tag('video')
@@ -478,3 +479,16 @@ class VideoTest(BaseTest):
         self.assertNotEqual(Commit.objects.filter(uuid=uuid).count(), 0)
         langs.delete()
         self.assertEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+
+    def test_client_add_tags(self):
+        data = {
+            'title': 'title',
+            'video': 'https://peertube.com/emmferpfe',
+            'tags[0][name]': 'lalala',
+            'tags[1][name]': 'lalalafff',
+        }
+        response = self.factory.post(reverse("video-list"), data)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(Tag.objects.count(), 3)
+        instance = Video.objects.first()
+        self.assertListSame(instance.tags.values_list("name", flat=True), ["title", "lalala", "lalalafff"])

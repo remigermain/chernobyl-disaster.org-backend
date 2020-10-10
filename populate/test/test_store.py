@@ -13,8 +13,6 @@ class PopulateTest(BaseTest):
     def test_auth(self):
         response = self.client.get(reverse('populate_store'))
         self.assertEqual(response.status_code, 200)
-        response = self.client.get(reverse('populate_picture'))
-        self.assertEqual(response.status_code, 200)
         response = self.client.get(reverse('populate_people'))
         self.assertEqual(response.status_code, 200)
         response = self.client.get(reverse('populate_contributors'))
@@ -24,10 +22,6 @@ class PopulateTest(BaseTest):
 
     def test_store(self):
         response = self.factory.get(reverse('populate_store'))
-        self.assertEqual(response.status_code, 200)
-
-    def test_picture(self):
-        response = self.factory.get(reverse('populate_picture'))
         self.assertEqual(response.status_code, 200)
 
     def test_people(self):

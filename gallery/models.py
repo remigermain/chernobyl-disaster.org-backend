@@ -46,14 +46,6 @@ class Picture(DateMixins, EventExtraAbstract):
                                             format='JPEG',
                                             options={'quality': 60})
 
-    photographer = models.ForeignKey(
-        "gallery.People",
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="pictures"
-    )
-
     class Meta:
         ordering = ['-id']
 

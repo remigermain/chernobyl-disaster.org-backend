@@ -298,3 +298,11 @@ class TagTest(BaseTest):
         self.assertNotEqual(Commit.objects.filter(uuid=uuid).count(), 0)
         langs.delete()
         self.assertEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+
+    def test_client_delete_langs(self):
+        instance = self.test_create_serializer_lang()
+
+        response = self.factory.delete(reverse('taglang-detail', args=[instance.id]))
+        self.assertEqual(response.status_code, 403)
+        response = self.factory_admin.delete(reverse('taglang-detail', args=[instance.id]))
+        self.assertEqual(response.status_code, 204)

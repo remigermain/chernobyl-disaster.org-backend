@@ -18,13 +18,6 @@ def serialize(obj, display_name):
 
 
 @api_view(['GET'])
-def picture(request):
-    return Response({
-        'photographers': [serialize(obj, 'name') for obj in People.objects.all()]
-    })
-
-
-@api_view(['GET'])
 def people(request):
     lst = [
         {
