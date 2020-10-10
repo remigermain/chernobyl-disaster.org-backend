@@ -16,7 +16,7 @@ class PeopleSerializer(ModelSerializerBase):
 
     class Meta:
         model = People
-        fields = ['id', 'name', 'born', 'death', 'profil', 'wikipedia', 'langs', 'tags']
+        fields = ['id', 'name', 'born', 'death', 'profil', 'langs', 'tags']
 
     def get_profil(self, obj):
         if not obj.profil:

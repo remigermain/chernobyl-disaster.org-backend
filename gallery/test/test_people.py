@@ -410,22 +410,6 @@ class PeopleTest(BaseTest):
         serializer = PeopleSerializerPost(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
-    def test_create_serializer_empty_wiki(self):
-        data = {
-            'name': 'name',
-            'wikipedia': ''
-        }
-        serializer = PeopleSerializerPost(data=data, context=self.context)
-        self.assertTrue(serializer.is_valid())
-
-    def test_create_serializer_wrong_wiki(self):
-        data = {
-            'name': 'name',
-            'wikipedia': 'wrong_link'
-        }
-        serializer = PeopleSerializerPost(data=data, context=self.context)
-        self.assertFalse(serializer.is_valid())
-
     def test_delete_commit(self):
         from utils.function import contenttypes_uuid
         from utils.models import Commit
