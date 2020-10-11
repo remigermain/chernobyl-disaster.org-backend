@@ -33,8 +33,6 @@ def picture_path(instance, filename):
 
 
 class Picture(DateMixins, EventExtraAbstract):
-    date = models.DateTimeField(blank=True, null=True)
-
     picture = models.ImageField(upload_to=picture_path)
     picture_webp = ImageSpecField(source='picture', format='WEBP')
     picture_thumbnail_webp = ImageSpecField(source='picture',
@@ -54,8 +52,6 @@ class Picture(DateMixins, EventExtraAbstract):
 
 
 class Video(DateMixins, EventExtraAbstract):
-    date = models.DateTimeField(blank=True, null=True)
-
     video = models.URLField(unique=True)
 
     class Meta:

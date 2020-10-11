@@ -519,3 +519,75 @@ class PictureTest(BaseTest):
         self.assertEqual(Tag.objects.count(), 3)
         instance = Picture.objects.first()
         self.assertListSame(instance.tags.values_list("name", flat=True), ["title", "lalala", "lalalafff"])
+
+    def test_create_serializer_date_nothing(self):
+        data = {
+            'title': 'test-title',
+            'picture': self.picture,
+            'date': str(self.time),
+        }
+        serializer = PictureSerializerPost(data=data, context=self.context)
+        self.assertTrue(serializer.is_valid())
+        obj = serializer.save()
+        self.assertFalse(obj.have_hour)
+        self.assertFalse(obj.have_minute)
+        self.assertFalse(obj.have_second)
+
+    def test_create_serializer_date_have_hour(self):
+        data = {
+            'title': 'test-title',
+            'picture': self.picture,
+            'date': str(self.time),
+            'have_hour': True
+        }
+        serializer = PictureSerializerPost(data=data, context=self.context)
+        self.assertTrue(serializer.is_valid())
+        obj = serializer.save()
+        self.assertTrue(obj.have_hour)
+        self.assertFalse(obj.have_minute)
+        self.assertFalse(obj.have_second)
+
+    def test_create_serializer_date_have_minute(self):
+        data = {
+            'title': 'test-title',
+            'picture': self.picture,
+            'date': str(self.time),
+            'have_minute': True
+        }
+        serializer = PictureSerializerPost(data=data, context=self.context)
+        self.assertTrue(serializer.is_valid())
+        obj = serializer.save()
+        self.assertTrue(obj.have_hour)
+        self.assertTrue(obj.have_minute)
+        self.assertFalse(obj.have_second)
+
+    def test_create_serializer_date_have_second(self):
+        data = {
+            'title': 'test-title',
+            'picture': self.picture,
+            'date': str(self.time),
+            'have_second': True
+        }
+        serializer = PictureSerializerPost(data=data, context=self.context)
+        self.assertTrue(serializer.is_valid())
+        obj = serializer.save()
+        self.assertTrue(obj.have_hour)
+        self.assertTrue(obj.have_minute)
+        self.assertTrue(obj.have_second)
+
+    def test_create_serializer_date_have_fake(self):
+        data = {
+            'title': 'test-title',
+            'picture': self.picture,
+            'date': str(self.time),
+            'have_hour': False,
+            'have_minute': False,
+            'have_second': True
+        }
+        serializer = PictureSerializerPost(data=data, context=self.context)
+        self.assertTrue(serializer.is_valid())
+        obj = serializer.save()
+        self.assertTrue(obj.have_hour)
+        self.assertTrue(obj.have_minute)
+        self.assertTrue(obj.have_second)
+

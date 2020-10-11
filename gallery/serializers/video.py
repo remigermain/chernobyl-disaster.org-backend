@@ -34,6 +34,23 @@ class VideoSerializerPost(VideoSerializer):
     class Meta(VideoSerializer.Meta):
         fields = VideoSerializer.Meta.fields + ['have_hour', 'have_minute', 'have_second']
 
+    def validate(self, datas):
+        if 'have_second' not in datas:
+            datas['have_second'] = False
+        elif datas['have_second']:
+            datas['have_minute'] = True
+            datas['have_hour'] = True
+
+        if 'have_minute' not in datas:
+            datas['have_minute'] = False
+        elif datas['have_minute']:
+            datas['have_hour'] = True
+
+        if 'have_hour' not in datas:
+            datas['have_hour'] = False
+
+        return super().validate(datas)
+
 
 class VideoSerializerEvent(VideoSerializer):
     class Meta(VideoSerializer.Meta):

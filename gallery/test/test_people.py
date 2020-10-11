@@ -99,7 +99,6 @@ class PeopleTest(BaseTest):
         self.assertEqual(instance.langs.count(), 2)
         return instance
 
-    @tag('lala')
     def test_create_client(self):
         data = {
             'name': 'name',
@@ -276,7 +275,6 @@ class PeopleTest(BaseTest):
         self.assertEqual(Tag.objects.first().name, data['name'])
         return obj
 
-    @tag('t')
     def test_update_serializer_check_update_tags(self):
         instance = self.test_create_serializer_check_create_tags()
         data = {
