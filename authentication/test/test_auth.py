@@ -249,12 +249,6 @@ class AuthTest(BaseTest):
         self.assertEqual(response.status_code, 200)
         self.assertFalse(get_user_model().objects.filter(id=user.id).exists())
 
-    def test_account_delete(self):
-        self.test_register_valid()
-        user = self.user
-        response = self.client.post(reverse("account_delete"))
-        self.assertEqual(response.status_code, 403)
-
     def test_get_user(self):
         response = self.factory.get(reverse("rest_user_details"))
         self.assertEqual(response.status_code, 200)
@@ -266,3 +260,25 @@ class AuthTest(BaseTest):
                 'admin': self.user.is_superuser,
             }
         )
+
+    def test_settings_change(self):
+        data = {
+            'show_help': True,
+            'show_admin': False
+        }
+        response = self.factory.patch(reverse("rest_user_details"), data)
+        self.assertEqual(response.status_code, 200)
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.show_help)
+        self.assertFalse(self.user.show_help)
+
+    def test_settings_change2(self):
+        data = {
+            'show_help': False,
+            'show_admin': True
+        }
+        response = self.factory.patch(reverse("rest_user_details"), data)
+        self.assertEqual(response.status_code, 200)
+        self.user.refresh_from_db()
+        self.assertFalse(self.user.show_help)
+        self.assertTrue(self.user.show_help)

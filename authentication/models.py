@@ -6,6 +6,7 @@ from django.conf import settings
 class User(AbstractUser):
     amount = models.IntegerField(default=0)
     show_help = models.BooleanField(default=True)
+    show_admin = models.BooleanField(default=False)
 
     lang_choices = settings.LANGUAGES
     lang_default = settings.LANGUAGES_DEFAULT
