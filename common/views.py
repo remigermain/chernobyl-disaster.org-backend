@@ -1,8 +1,8 @@
 from lib.viewset import ModelViewSetBase
-from common.models import Tag, Translate, TranslateLang, TagLang
+from common.models import Tag, Translate, TranslateLang, TagLang, News
 from lib.permission import ReadOnlyLamda, ChernobylPermission
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from common.serializers import tag, translate
+from common.serializers import tag, translate, news
 from rest_framework import mixins, viewsets
 
 
@@ -38,3 +38,9 @@ class TranslateLangViewSet(ModelViewSetBase):
     queryset = TranslateLang.objects.all()
     serializer_class = translate.TranslateLangSerializer
     permission_classes = (ChernobylPermission, IsAuthenticated)
+
+
+class NewsViewSet(ModelViewSetBase):
+    queryset = News.objects.filter(is_active=True).select_related('author')
+    serializer_class = news.NewsSerializer
+    permission_classes = (ReadOnlyLamda, IsAuthenticated)

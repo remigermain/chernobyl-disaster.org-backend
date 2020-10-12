@@ -1,5 +1,6 @@
 from django.db import models
 from lib.models import ChernobylModelAbstract, LanguageAbstract
+from django.contrib.auth import get_user_model
 
 
 class Tag(ChernobylModelAbstract):
@@ -48,3 +49,23 @@ class TranslateLang(LanguageAbstract):
     @property
     def get_commit_id(self):
         return self.parent_key.id
+
+
+class News(ChernobylModelAbstract):
+    title = models.CharField(max_length=100, blank=False, null=False)
+    text = models.TextField(blank=False, null=False)
+    date = models.DateField(auto_now=True)
+    is_active = models.BooleanField(default=False)
+    author = models.ForeignKey(
+        get_user_model(),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="%(class)s_creator"
+    )
+
+    class Meta:
+        ordering = ['-date', 'title']
+
+    def __str__(self):
+        return self.title

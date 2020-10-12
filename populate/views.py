@@ -93,7 +93,16 @@ def overview(request):
 
     def conv_query(obj):
         if isinstance(obj.content_object, TranslateLang):
-            return {'query': {'id': obj.content_object.parent_key.id}, 'detail': obj.content_object.id}
+            return {
+                'params': {
+                    'id': obj.content_object.language,
+                },
+                'query': {
+                    'key': obj.content_object.parent_key.key.split('.')[0],
+                    'id': obj.content_object.id
+                },
+                'detail': False,
+            }
         return {}
 
     history = [
@@ -104,6 +113,7 @@ def overview(request):
             'display': str(commit.content_object),
             'uuid': conv_uuid(commit.content_object),
             'created': commit.created,
+            'detail': True,
             **conv_query(commit)
         }
         for commit in Commit.objects.all()
