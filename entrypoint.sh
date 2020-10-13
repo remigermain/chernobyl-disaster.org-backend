@@ -17,7 +17,7 @@ done
 echo "migrate..."
 ./manage.py migrate --no-input
 echo "collect static..."
-./manage.py collectstatic --no-input --clear --link
+./manage.py collectstatic --no-input --clear
 echo "fix commit..."
 ./manage.py fix_commit
 echo "generate images..."
