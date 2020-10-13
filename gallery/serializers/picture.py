@@ -1,6 +1,7 @@
 from lib.serializers import ModelSerializerBase
 from gallery.models import Picture, PictureLang
 from rest_framework.serializers import SerializerMethodField
+from common.serializers.tag import TagSerializerMini
 
 
 class PictureLangSerializer(ModelSerializerBase):
@@ -16,7 +17,7 @@ class PictureSerializer(ModelSerializerBase):
 
     class Meta:
         model = Picture
-        fields = ['id', 'title', 'event', 'picture', 'photographer', 'langs', 'tags', 'date']
+        fields = ['id', 'title', 'event', 'picture', 'langs', 'tags', 'date']
 
     def get_picture(self, obj):
         return {
@@ -36,13 +37,43 @@ class PictureSerializer(ModelSerializerBase):
 
 
 class PictureSerializerPost(PictureSerializer):
+    tags = TagSerializerMini(many=True, required=False)
     picture = None
     date = None
 
     class Meta(PictureSerializer.Meta):
         fields = PictureSerializer.Meta.fields + ['have_hour', 'have_minute', 'have_second']
 
+    def validate(self, datas):
+        if 'have_second' not in datas:
+            datas['have_second'] = False
+        elif datas['have_second']:
+            datas['have_minute'] = True
+            datas['have_hour'] = True
+
+        if 'have_minute' not in datas:
+            datas['have_minute'] = False
+        elif datas['have_minute']:
+            datas['have_hour'] = True
+
+        if 'have_hour' not in datas:
+            datas['have_hour'] = False
+
+        return super().validate(datas)
+
 
 class PictureSerializerEvent(PictureSerializer):
     class Meta(PictureSerializer.Meta):
         fields = ['id', 'title', 'picture', 'langs']
+
+
+class PictureSerializerMini(PictureSerializer):
+    event = SerializerMethodField()
+
+    class Meta(PictureSerializer.Meta):
+        fields = ['id', 'title', 'event']
+
+    def get_event(self, obj):
+        if obj.event:
+            return str(obj.event)
+        return None

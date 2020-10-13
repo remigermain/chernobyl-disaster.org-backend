@@ -1,7 +1,10 @@
-from gallery.views import VideoViewSet, PeopleViewSet, PictureViewSet
+from gallery import views
 
 drf_routers = [
-    ('people', PeopleViewSet),
-    ('picture', PictureViewSet),
-    ('video', VideoViewSet),
+    ('people', views.PeopleViewSet),
+    ('people-lang', views.PeopleLangViewSet),
+    ('picture', views.PictureViewSet),
+    ('picture-lang', views.PictureLangViewSet),
+    ('video', views.VideoViewSet),
+    ('video-lang', views.VideoLangViewSet),
 ]

@@ -25,6 +25,10 @@ class Event(DateMixins, ChernobylModelAbstract):
         self.slug = slugify(self.title)
         super().save(*args, **kwargs)
 
+    @property
+    def tag_fields(self):
+        return ['title', 'title']
+
 
 class EventLang(LanguageAbstract):
     """
@@ -55,6 +59,10 @@ class EventExtraAbstract(ChernobylModelAbstract):
 
     class Meta(ChernobylModelAbstract.Meta):
         abstract = True
+    
+    @property
+    def tag_fields(self):
+        return ['title']
 
 
 # Extra i18n

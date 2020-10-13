@@ -2,6 +2,7 @@ from django.test import tag
 from lib.test import BaseTest
 from timeline.serializers.event import EventSerializerPost
 from django.urls import reverse
+from timeline.models import EventLang
 
 
 @tag('event')
@@ -409,3 +410,100 @@ class EventTest(BaseTest):
         self.assertNotEqual(Commit.objects.filter(uuid=uuid).count(), 0)
         langs.delete()
         self.assertEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+
+    def test_client_auth(self):
+        instance = self.test_create_serializer_langs().langs.first()
+
+        response = self.client.get(reverse("eventlang-detail", args=[instance.pk]))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.patch(reverse("eventlang-detail", args=[instance.pk]))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.put(reverse("eventlang-detail", args=[instance.pk]))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.options(reverse("eventlang-detail", args=[instance.pk]))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.delete(reverse("eventlang-detail", args=[instance.pk]))
+        self.assertEqual(response.status_code, 403)
+
+        response = self.factory.get(reverse("eventlang-detail", args=[instance.pk]))
+        self.assertEqual(response.status_code, 403)
+        response = self.factory.patch(reverse("eventlang-detail", args=[instance.pk]))
+        self.assertEqual(response.status_code, 403)
+        response = self.factory.put(reverse("eventlang-detail", args=[instance.pk]))
+        self.assertEqual(response.status_code, 403)
+        response = self.factory.options(reverse("eventlang-detail", args=[instance.pk]))
+        self.assertEqual(response.status_code, 403)
+        response = self.factory.delete(reverse("eventlang-detail", args=[instance.pk]))
+        self.assertEqual(response.status_code, 403)
+
+        self.assertEqual(EventLang.objects.count(), 1)
+        response = self.factory_admin.delete(reverse("eventlang-detail", args=[instance.pk]))
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(EventLang.objects.count(), 0)
+
+    def test_create_serializer_date_nothing(self):
+        data = {
+            'title': 'test-title',
+            'date': str(self.time),
+        }
+        serializer = EventSerializerPost(data=data, context=self.context)
+        self.assertTrue(serializer.is_valid())
+        obj = serializer.save()
+        self.assertFalse(obj.have_hour)
+        self.assertFalse(obj.have_minute)
+        self.assertFalse(obj.have_second)
+
+    def test_create_serializer_date_have_hour(self):
+        data = {
+            'title': 'test-title',
+            'date': str(self.time),
+            'have_hour': True
+        }
+        serializer = EventSerializerPost(data=data, context=self.context)
+        self.assertTrue(serializer.is_valid())
+        obj = serializer.save()
+        self.assertTrue(obj.have_hour)
+        self.assertFalse(obj.have_minute)
+        self.assertFalse(obj.have_second)
+
+    def test_create_serializer_date_have_minute(self):
+        data = {
+            'title': 'test-title',
+            'date': str(self.time),
+            'have_minute': True
+        }
+        serializer = EventSerializerPost(data=data, context=self.context)
+        self.assertTrue(serializer.is_valid())
+        obj = serializer.save()
+        self.assertTrue(obj.have_hour)
+        self.assertTrue(obj.have_minute)
+        self.assertFalse(obj.have_second)
+
+    def test_create_serializer_date_have_second(self):
+        data = {
+            'title': 'test-title',
+            'date': str(self.time),
+            'have_second': True
+        }
+        serializer = EventSerializerPost(data=data, context=self.context)
+        self.assertTrue(serializer.is_valid())
+        obj = serializer.save()
+        self.assertTrue(obj.have_hour)
+        self.assertTrue(obj.have_minute)
+        self.assertTrue(obj.have_second)
+
+    def test_create_serializer_date_have_fake(self):
+        data = {
+            'title': 'test-title',
+            'date': str(self.time),
+            'have_hour': False,
+            'have_minute': False,
+            'have_second': True
+        }
+        serializer = EventSerializerPost(data=data, context=self.context)
+        self.assertTrue(serializer.is_valid())
+        obj = serializer.save()
+        self.assertTrue(obj.have_hour)
+        self.assertTrue(obj.have_minute)
+        self.assertTrue(obj.have_second)
+

@@ -11,7 +11,7 @@ logger = logging.getLogger("ParserMultiDimensional")
 class ParserMultiDimensional:
     _reg_split = re.compile(r"(\[.*?\])")
 
-    REG_NAME = r"\s*[a-zA-Z]\w*\s*"
+    REG_NAME = r"\s*[a-zA-Z_]\w*\s*"
     _reg_name = re.compile(r"^" + REG_NAME + r"$")
 
     REG_INDEX_LIST = r"\s*(\d+)?\s*"

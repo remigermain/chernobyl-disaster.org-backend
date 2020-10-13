@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from drf_writable_nested.serializers import WritableNestedModelSerializer
+from drf_writable_nested.mixins import UniqueFieldsMixin
 from django.core.exceptions import ValidationError
 from django.utils.text import capfirst
 from utils.models import Commit
@@ -44,11 +45,11 @@ class ModelSerializerBaseNested(WritableNestedModelSerializer):
         for item in self.get_initial().get('langs', []):
             pk = item.get('id', None)
             if pk:
-                atc = list(filter(lambda o: o['id'] == int(pk), exist))[0]
-                if not atc:
+                atc = list(filter(lambda o: o['id'] == int(pk), exist))
+                if not len(atc):
                     raise_error()
                 # reasign language in current object
-                atc['language'] = item.get('language')
+                atc[0]['language'] = item.get('language')
             else:
                 news.append(item.get('language'))
 
@@ -62,7 +63,7 @@ class ModelSerializerBaseNested(WritableNestedModelSerializer):
             raise_error()
         
         return datas
-
+    
     def __diff_field(self, old, new):
         """
             find field are changed before update
@@ -99,9 +100,6 @@ class ModelSerializerBaseNested(WritableNestedModelSerializer):
         t1 = self.__class__(instance=instance).data
 
         obj = super().update(instance, validated_data)
-        # clean multi select tags
-        if hasattr(self.Meta.model, 'tags') and 'tags' not in validated_data:
-            obj.tags.clear()
 
         # serialize new instance
         t2 = self.__class__(instance=obj).data

@@ -99,7 +99,6 @@ class PeopleTest(BaseTest):
         self.assertEqual(instance.langs.count(), 2)
         return instance
 
-    @tag('lala')
     def test_create_client(self):
         data = {
             'name': 'name',
@@ -251,7 +250,7 @@ class PeopleTest(BaseTest):
         serializer = PeopleSerializerPost(instance=instance, data=data, context=self.context, partial=True)
         self.assertTrue(serializer.is_valid())
         obj = serializer.save()
-        self.check_commit_update(obj, diff=['name', 'tags'])
+        self.check_commit_update(obj, diff=['name'])
 
     def test_update_serializer_only_date(self):
         instance = self.test_create_serializer()
@@ -261,7 +260,7 @@ class PeopleTest(BaseTest):
         serializer = PeopleSerializerPost(instance=instance, data=data, context=self.context, partial=True)
         self.assertTrue(serializer.is_valid())
         obj = serializer.save()
-        self.check_commit_update(obj, diff=['death', 'tags'])
+        self.check_commit_update(obj, diff=['death'])
 
     def test_create_serializer_check_create_tags(self):
         data = {
@@ -286,9 +285,8 @@ class PeopleTest(BaseTest):
         old_name = instance.name
         self.assertEqual(Tag.objects.filter(name=old_name).count(), 1)
         obj = serializer.save()
-        self.check_commit_update(obj, diff=['name', 'tags'])
-        self.assertEqual(Tag.objects.filter(name=old_name).count(), 0)
-        self.assertEqual(Tag.objects.count(), 1)
+        self.check_commit_update(obj, diff=['name'])
+        self.assertEqual(Tag.objects.count(), 2)
         self.assertEqual(Tag.objects.first().name, data['name'])
 
     def test_update_serializer_langs(self):
@@ -308,7 +306,7 @@ class PeopleTest(BaseTest):
         serializer = PeopleSerializerPost(instance=instance, data=data, context=self.context, partial=True)
         self.assertTrue(serializer.is_valid())
         obj = serializer.save()
-        self.check_commit_update(obj, diff=['tags', 'langs'])
+        self.check_commit_update(obj, diff=['langs'])
         self.assertEqual(obj.langs.count(), 2)
 
     def test_create_serializer_same_langs(self):
@@ -410,22 +408,6 @@ class PeopleTest(BaseTest):
         serializer = PeopleSerializerPost(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
-    def test_create_serializer_empty_wiki(self):
-        data = {
-            'name': 'name',
-            'wikipedia': ''
-        }
-        serializer = PeopleSerializerPost(data=data, context=self.context)
-        self.assertTrue(serializer.is_valid())
-
-    def test_create_serializer_wrong_wiki(self):
-        data = {
-            'name': 'name',
-            'wikipedia': 'wrong_link'
-        }
-        serializer = PeopleSerializerPost(data=data, context=self.context)
-        self.assertFalse(serializer.is_valid())
-
     def test_delete_commit(self):
         from utils.function import contenttypes_uuid
         from utils.models import Commit
@@ -455,3 +437,57 @@ class PeopleTest(BaseTest):
         self.assertNotEqual(Commit.objects.filter(uuid=uuid).count(), 0)
         langs.delete()
         self.assertEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+
+    def test_client_max_length_name(self):
+        data = {
+            'name': "a" * 120
+        }
+        response = self.factory.post(reverse("people-list"), data)
+        self.assertEqual(response.status_code, 400)
+
+    def test_client_max_length_name_tag(self):
+        data = {
+            'name': "a" * 80
+        }
+        response = self.factory.post(reverse("people-list"), data)
+        self.assertEqual(response.status_code, 201)
+
+    def test_client_add_tags(self):
+        data = {
+            'name': 'name',
+            'tags[0][name]': 'lalala',
+            'tags[1][name]': 'lalalafff',
+        }
+        response = self.factory.post(reverse("people-list"), data)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(Tag.objects.count(), 3)
+        instance = People.objects.first()
+        self.assertListSame(instance.tags.values_list("name", flat=True), ["name", "lalala", "lalalafff"])
+
+    def test_client_add_tags3(self):
+        data = {
+            'name': 'name',
+            'tags[0][name]': 'lalala',
+            'tags[1][name]': 'lalalafff',
+            'tags[2][name]': 'lalalafff',
+            'tags[3][name]': 'lalalafff',
+        }
+        response = self.factory.post(reverse("people-list"), data)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(Tag.objects.count(), 5)
+        # instance = People.objects.first()
+        # self.assertListSame(instance.tags.values_list("name", flat=True), ["name", "lalala", "lalalafff"])
+
+    def test_client_add_tags4(self):
+        tag = Tag.objects.create(name="test")
+        data = {
+            'name': 'name',
+            'tags[0][name]': 'lalala',
+            'tags[1][name]': 'test',
+            'tags[1][id]': tag.id,
+        }
+        response = self.factory.post(reverse("people-list"), data)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(Tag.objects.count(), 3)
+        instance = People.objects.first()
+        self.assertListSame(instance.tags.values_list("name", flat=True), ["name", "lalala", "test"])

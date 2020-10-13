@@ -90,7 +90,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
-
 AUTH_USER_MODEL = "authentication.User"
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -139,7 +138,8 @@ LANGUAGES = [
     # japan
     ('ja', _('日本語 (にほんご)')),
 ]
-LANGUAGES_DEFAULT = LANGUAGES[0][0]
+LANGUAGES.sort(key=lambda x: x[0])
+LANGUAGES_DEFAULT = 'en'
 
 #
 # rest framework

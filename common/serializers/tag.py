@@ -14,3 +14,8 @@ class TagSerializer(ModelSerializerBase):
     class Meta:
         model = Tag
         fields = ['id', 'name', 'langs']
+
+
+class TagSerializerMini(TagSerializer):
+    class Meta(TagSerializer.Meta):
+        fields = ['id', 'name']

@@ -33,8 +33,6 @@ def picture_path(instance, filename):
 
 
 class Picture(DateMixins, EventExtraAbstract):
-    date = models.DateTimeField(blank=True, null=True)
-
     picture = models.ImageField(upload_to=picture_path)
     picture_webp = ImageSpecField(source='picture', format='WEBP')
     picture_thumbnail_webp = ImageSpecField(source='picture',
@@ -46,14 +44,6 @@ class Picture(DateMixins, EventExtraAbstract):
                                             format='JPEG',
                                             options={'quality': 60})
 
-    photographer = models.ForeignKey(
-        "gallery.People",
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="pictures"
-    )
-
     class Meta:
         ordering = ['-id']
 
@@ -62,8 +52,6 @@ class Picture(DateMixins, EventExtraAbstract):
 
 
 class Video(DateMixins, EventExtraAbstract):
-    date = models.DateTimeField(blank=True, null=True)
-
     video = models.URLField(unique=True)
 
     class Meta:
@@ -94,7 +82,7 @@ class People(ChernobylModelAbstract):
     """
         models for personality of chernobyl
     """
-    name = models.CharField(max_length=80, unique=True, null=False, blank=False)
+    name = models.CharField(max_length=100, unique=True, null=False, blank=False)
     born = models.DateField(null=True, blank=True)
     death = models.DateField(null=True, blank=True)
     profil = models.ImageField(upload_to=profil_path, null=True, blank=True)
@@ -108,11 +96,14 @@ class People(ChernobylModelAbstract):
                                            format='JPEG',
                                            options={'quality': 60})
 
-    wikipedia = models.URLField(null=True, blank=True)
     tags = models.ManyToManyField(Tag, related_name="peoples", blank=True)
 
     def __str__(self):
         return self.name
+
+    @property
+    def tag_fields(self):
+        return ['name']
 
 
 class PeopleLang(LanguageAbstract):

@@ -9,7 +9,7 @@ class UserDetailsSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = get_user_model()
-        fields = ('username', 'email', 'scope')
+        fields = ('username', 'email', 'scope', 'show_help', 'show_admin', 'default_language')
         read_only_fields = ('email', 'scope')
 
     def get_scope(self, obj):

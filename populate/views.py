@@ -11,17 +11,11 @@ from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_204_NO
 from django.utils import timezone
 from utils.function import contenttypes_uuid
 from django.contrib.auth import get_user_model
+from lib.utils import to_bool
 
 
 def serialize(obj, display_name):
     return {'value': obj.id, 'display_name': getattr(obj, display_name)}
-
-
-@api_view(['GET'])
-def picture(request):
-    return Response({
-        'photographers': [serialize(obj, 'name') for obj in People.objects.all()]
-    })
 
 
 @api_view(['GET'])
@@ -61,7 +55,7 @@ def contributor(request):
                                                 .filter(
                                                     ~Q(username=settings.ADMIN_USERNAME),
                                                     count__gte=1
-                                                )
+                                                 )
                                                 .distinct()
                                                 .order_by('username')
                                                 .prefetch_related('commit_creator')
@@ -100,7 +94,16 @@ def overview(request):
 
     def conv_query(obj):
         if isinstance(obj.content_object, TranslateLang):
-            return {'query': {'id': obj.content_object.parent_key.id}, 'detail': obj.content_object.id}
+            return {
+                'params': {
+                    'id': obj.content_object.language,
+                },
+                'query': {
+                    'key': obj.content_object.parent_key.key.split('.')[0],
+                    'id': obj.content_object.parent_key.id
+                },
+                'detail': False,
+            }
         return {}
 
     history = [
@@ -111,14 +114,15 @@ def overview(request):
             'display': str(commit.content_object),
             'uuid': conv_uuid(commit.content_object),
             'created': commit.created,
+            'detail': True,
             **conv_query(commit)
         }
-        for commit in Commit.objects.all()
+        for commit in Commit.objects.filter(creator__isnull=False)
                                     .prefetch_related("content_object")
                                     .order_by('-date')[:50]
     ]
 
-    query = {
+    query = {   
         'week': lst_week,
         'total': lst_total,
         'results': history
@@ -182,8 +186,9 @@ def translate_json(request):
     except Exception as error:
         return Response(status=HTTP_400_BAD_REQUEST, data={'detail': str(error)})
 
-    deleted = 'on' in request.data['deleted'] if 'deleted' in request.data else False
-    merged = 'on' in request.data['merge'] if 'merge' in request.data else False
+    deleted = to_bool(request.data['delete']) if 'delete' in request.data else False
+    merged = to_bool(request.data['merge']) if 'merge' in request.data else False
+    parent = to_bool(request.data['parent']) if 'parent' in request.data else False
 
     def gen_path(path, key):
         return f"{path}.{key}" if path else key
@@ -238,7 +243,8 @@ def translate_json(request):
             bulk_update = []
             for ex in TranslateLang.objects.filter(language=language).select_related('parent_key'):
                 el = list(filter(lambda o: ex.parent_key.key == o['path'], lst))
-                if el:
+                # check if value is not a empty string
+                if el and el[0]['value']:
                     ex.value = el[0]['value']
                     bulk_update.append(ex)
             data['update'] = len(bulk_update)
@@ -257,5 +263,17 @@ def translate_json(request):
         ]
         TranslateLang.objects.bulk_create(bulk)
         data['createdLang'] = len(bulk)
+
+    # create first parent key
+    if parent:
+        def to_parent_key(key):
+            key = key.split('.')[0]
+            return f"menu.{key}"
+        keys = [to_parent_key(key) for key in list_path]
+        key_exists = Translate.objects.filter(key__in=keys).values_list('key', flat=True)
+        diff = list(set(key_exists) ^ set(keys))
+        bulk = [Translate(key=key) for key in diff]
+        Translate.objects.bulk_create(bulk)
+        data['createParentKeys'] = len(bulk)
 
     return Response(status=HTTP_200_OK, data=data)

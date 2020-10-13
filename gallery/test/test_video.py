@@ -1,10 +1,11 @@
 from django.test import tag
 from lib.test import BaseTest
-from gallery.serializers.video import VideoSerializer
+from gallery.serializers.video import VideoSerializerPost
 from gallery.models import VideoLang, Video
 from django.urls import reverse
 from django.utils import timezone
 from timeline.models import Event
+from common.models import Tag
 
 
 @tag('video')
@@ -50,7 +51,7 @@ class VideoTest(BaseTest):
             'title': 'title',
             'video': 'https://peertube.com/emmferpfe'
         }
-        serializer = VideoSerializer(data=data, context=self.context, partial=True)
+        serializer = VideoSerializerPost(data=data, context=self.context, partial=True)
         self.assertTrue(serializer.is_valid())
         instance = serializer.save()
         self.check_commit_created(instance)
@@ -62,7 +63,7 @@ class VideoTest(BaseTest):
             'video': 'https://peertube.com/emmferpfe',
             'event': self.event.id
         }
-        serializer = VideoSerializer(data=data, context=self.context, partial=True)
+        serializer = VideoSerializerPost(data=data, context=self.context, partial=True)
         self.assertTrue(serializer.is_valid())
         instance = serializer.save()
         self.check_commit_created(instance)
@@ -77,7 +78,7 @@ class VideoTest(BaseTest):
                 'language': self.lang,
             }]
         }
-        serializer = VideoSerializer(data=data, context=self.context, partial=True)
+        serializer = VideoSerializerPost(data=data, context=self.context, partial=True)
         self.assertTrue(serializer.is_valid())
         instance = serializer.save()
         self.check_commit_created(instance)
@@ -99,7 +100,7 @@ class VideoTest(BaseTest):
                 }
             ]
         }
-        serializer = VideoSerializer(data=data, context=self.context, partial=True)
+        serializer = VideoSerializerPost(data=data, context=self.context, partial=True)
         self.assertTrue(serializer.is_valid())
         instance = serializer.save()
         self.check_commit_created(instance)
@@ -160,7 +161,7 @@ class VideoTest(BaseTest):
         data = {
             'title': 'title title',
         }
-        serializer = VideoSerializer(instance=instance, data=data, context=self.context, partial=True)
+        serializer = VideoSerializerPost(instance=instance, data=data, context=self.context, partial=True)
         self.assertTrue(serializer.is_valid())
         instance = serializer.save()
         self.check_commit_update(instance, diff=['title'])
@@ -304,7 +305,7 @@ class VideoTest(BaseTest):
             'video': 'https://peertube.com/emmferpfe',
             'event': self.event.id + 2
         }
-        serializer = VideoSerializer(data=data, context=self.context, partial=True)
+        serializer = VideoSerializerPost(data=data, context=self.context, partial=True)
         self.assertFalse(serializer.is_valid())
 
     def test_create_serializer_empty_event(self):
@@ -313,7 +314,7 @@ class VideoTest(BaseTest):
             'video': 'https://peertube.com/emmferpfe',
             'event': ""
         }
-        serializer = VideoSerializer(data=data, context=self.context, partial=True)
+        serializer = VideoSerializerPost(data=data, context=self.context, partial=True)
         self.assertTrue(serializer.is_valid())
         instance = serializer.save()
         self.assertIsNone(instance.event)
@@ -333,7 +334,7 @@ class VideoTest(BaseTest):
                 }
             ]
         }
-        serializer = VideoSerializer(instance=instance, data=data, context=self.context, partial=True)
+        serializer = VideoSerializerPost(instance=instance, data=data, context=self.context, partial=True)
         self.assertTrue(serializer.is_valid())
         obj = serializer.save()
         self.check_commit_update(obj, diff=['title', 'langs'])
@@ -343,7 +344,7 @@ class VideoTest(BaseTest):
         data = {
             'video': 'https://peertube.com/emmferpfe'
         }
-        serializer = VideoSerializer(data=data, context=self.context)
+        serializer = VideoSerializerPost(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     def test_create_serializer_empty_title(self):
@@ -351,14 +352,14 @@ class VideoTest(BaseTest):
             'title': '',
             'video': 'https://peertube.com/emmferpfe'
         }
-        serializer = VideoSerializer(data=data, context=self.context)
+        serializer = VideoSerializerPost(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     def test_create_serializer_no_video(self):
         data = {
             'title': 'title',
         }
-        serializer = VideoSerializer(data=data, context=self.context)
+        serializer = VideoSerializerPost(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     def test_create_serializer_empty_video(self):
@@ -366,7 +367,7 @@ class VideoTest(BaseTest):
             'title': 'title',
             'video': ''
         }
-        serializer = VideoSerializer(data=data, context=self.context)
+        serializer = VideoSerializerPost(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     def test_create_serializer_wrong_video(self):
@@ -374,7 +375,7 @@ class VideoTest(BaseTest):
             'title': 'title',
             'video': 'worng_url'
         }
-        serializer = VideoSerializer(data=data, context=self.context)
+        serializer = VideoSerializerPost(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     def test_create_serializer_same_langs(self):
@@ -392,7 +393,7 @@ class VideoTest(BaseTest):
                 }
             ]
         }
-        serializer = VideoSerializer(data=data, context=self.context)
+        serializer = VideoSerializerPost(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     def test_create_serializer_wrong_lang(self):
@@ -406,7 +407,7 @@ class VideoTest(BaseTest):
                 }
             ]
         }
-        serializer = VideoSerializer(data=data, context=self.context,)
+        serializer = VideoSerializerPost(data=data, context=self.context,)
         self.assertFalse(serializer.is_valid())
 
     def test_create_serializer_no_langs(self):
@@ -419,7 +420,7 @@ class VideoTest(BaseTest):
                 }
             ]
         }
-        serializer = VideoSerializer(data=data, context=self.context)
+        serializer = VideoSerializerPost(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     def test_create_serializer_langs_no_title(self):
@@ -432,7 +433,7 @@ class VideoTest(BaseTest):
                 }
             ]
         }
-        serializer = VideoSerializer(data=data, context=self.context)
+        serializer = VideoSerializerPost(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     def test_create_serializer_langs_empty_title(self):
@@ -446,7 +447,7 @@ class VideoTest(BaseTest):
                 }
             ]
         }
-        serializer = VideoSerializer(data=data, context=self.context)
+        serializer = VideoSerializerPost(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     def test_delete_commit(self):
@@ -478,3 +479,87 @@ class VideoTest(BaseTest):
         self.assertNotEqual(Commit.objects.filter(uuid=uuid).count(), 0)
         langs.delete()
         self.assertEqual(Commit.objects.filter(uuid=uuid).count(), 0)
+
+    def test_client_add_tags(self):
+        data = {
+            'title': 'title',
+            'video': 'https://peertube.com/emmferpfe',
+            'tags[0][name]': 'lalala',
+            'tags[1][name]': 'lalalafff',
+        }
+        response = self.factory.post(reverse("video-list"), data)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(Tag.objects.count(), 3)
+        instance = Video.objects.first()
+        self.assertListSame(instance.tags.values_list("name", flat=True), ["title", "lalala", "lalalafff"])
+
+    def test_create_serializer_date_nothing(self):
+        data = {
+            'title': 'test-title',
+            'video': 'https://peertube.com',
+            'date': str(self.time),
+        }
+        serializer = VideoSerializerPost(data=data, context=self.context)
+        self.assertTrue(serializer.is_valid())
+        obj = serializer.save()
+        self.assertFalse(obj.have_hour)
+        self.assertFalse(obj.have_minute)
+        self.assertFalse(obj.have_second)
+
+    def test_create_serializer_date_have_hour(self):
+        data = {
+            'title': 'test-title',
+            'video': 'https://peertube.com',
+            'date': str(self.time),
+            'have_hour': True
+        }
+        serializer = VideoSerializerPost(data=data, context=self.context)
+        self.assertTrue(serializer.is_valid())
+        obj = serializer.save()
+        self.assertTrue(obj.have_hour)
+        self.assertFalse(obj.have_minute)
+        self.assertFalse(obj.have_second)
+
+    def test_create_serializer_date_have_minute(self):
+        data = {
+            'title': 'test-title',
+            'video': 'https://peertube.com',
+            'date': str(self.time),
+            'have_minute': True
+        }
+        serializer = VideoSerializerPost(data=data, context=self.context)
+        self.assertTrue(serializer.is_valid())
+        obj = serializer.save()
+        self.assertTrue(obj.have_hour)
+        self.assertTrue(obj.have_minute)
+        self.assertFalse(obj.have_second)
+
+    def test_create_serializer_date_have_second(self):
+        data = {
+            'title': 'test-title',
+            'video': 'https://peertube.com',
+            'date': str(self.time),
+            'have_second': True
+        }
+        serializer = VideoSerializerPost(data=data, context=self.context)
+        self.assertTrue(serializer.is_valid())
+        obj = serializer.save()
+        self.assertTrue(obj.have_hour)
+        self.assertTrue(obj.have_minute)
+        self.assertTrue(obj.have_second)
+
+    def test_create_serializer_date_have_fake(self):
+        data = {
+            'title': 'test-title',
+            'video': 'https://peertube.com',
+            'date': str(self.time),
+            'have_hour': False,
+            'have_minute': False,
+            'have_second': True
+        }
+        serializer = VideoSerializerPost(data=data, context=self.context)
+        self.assertTrue(serializer.is_valid())
+        obj = serializer.save()
+        self.assertTrue(obj.have_hour)
+        self.assertTrue(obj.have_minute)
+        self.assertTrue(obj.have_second)

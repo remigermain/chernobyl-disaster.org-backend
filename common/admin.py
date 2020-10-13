@@ -1,6 +1,8 @@
 from django.contrib import admin
-from common.models import Tag, TagLang, Translate, TranslateLang
+from common.models import Tag, TagLang, Translate, TranslateLang, News
 from lib.admin import AdminBase, AdminInlineBase
+from django.contrib.auth import get_user_model
+from django.db.models import Q
 
 
 class TagLangInline(AdminInlineBase):
@@ -27,3 +29,13 @@ class TranslateAdmin(AdminBase):
     inlines = [
         TranslateLangInline
     ]
+
+
+@admin.register(News)
+class NewsAdmin(AdminBase):
+    list_display = ('id', 'title', 'date', 'author', 'is_active')
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        form.base_fields['author'].queryset = get_user_model().objects.filter(Q(is_staff=True) | Q(is_superuser=True))
+        return form
