@@ -244,7 +244,7 @@ def translate_json(request):
             for ex in TranslateLang.objects.filter(language=language).select_related('parent_key'):
                 el = list(filter(lambda o: ex.parent_key.key == o['path'], lst))
                 # check if value is not a empty string
-                if el and el[0]['value']:
+                if el:
                     ex.value = el[0]['value']
                     bulk_update.append(ex)
             data['update'] = len(bulk_update)
@@ -259,7 +259,7 @@ def translate_json(request):
                 language=language,
                 parent_key=find_parent(obj['path'])
             )
-            for obj in diff
+            for obj in diff if obj['value']
         ]
         TranslateLang.objects.bulk_create(bulk)
         data['createdLang'] = len(bulk)

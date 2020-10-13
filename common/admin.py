@@ -18,6 +18,12 @@ class TagAdmin(AdminBase):
     ]
 
 
+@admin.register(TranslateLang)
+class TranslateLangAdmin(AdminBase):
+    list_display = ('language', 'parent_key')
+    search_fields = ('language', 'parent_key', 'value')
+
+
 class TranslateLangInline(AdminInlineBase):
     model = TranslateLang
 
