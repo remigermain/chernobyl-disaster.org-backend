@@ -268,7 +268,7 @@ def translate_json(request):
     if parent:
         def to_parent_key(key):
             key = key.split('.')[0]
-            return f"menu.{key}"
+            return f"menu-name.{key}"
         keys = [to_parent_key(key) for key in list_path]
         key_exists = Translate.objects.filter(key__in=keys).values_list('key', flat=True)
         diff = list(set(key_exists) ^ set(keys))
