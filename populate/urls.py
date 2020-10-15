@@ -9,7 +9,7 @@ translate = [
 
 urlpatterns = [
     path('store', views.populate, name="populate_store"),
-    path('people', views.people, name="populate_people"),
+    path('character', views.character, name="populate_character"),
     path('overview', views.overview, name="populate_overview"),
     path('contributors', views.contributor, name="populate_contributors"),
     path('translate/', include(translate))

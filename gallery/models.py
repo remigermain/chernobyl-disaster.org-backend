@@ -78,7 +78,7 @@ def profil_path(instance, filename):
     return "/".join(name)
 
 
-class People(ChernobylModelAbstract):
+class Character(ChernobylModelAbstract):
     """
         models for personality of chernobyl
     """
@@ -96,7 +96,7 @@ class People(ChernobylModelAbstract):
                                            format='JPEG',
                                            options={'quality': 60})
 
-    tags = models.ManyToManyField(Tag, related_name="peoples", blank=True)
+    tags = models.ManyToManyField(Tag, related_name="characters", blank=True)
 
     def __str__(self):
         return self.name
@@ -106,13 +106,13 @@ class People(ChernobylModelAbstract):
         return ['name']
 
 
-class PeopleLang(LanguageAbstract):
-    people = models.ForeignKey(People, on_delete=models.CASCADE, related_name="langs")
+class CharacterLang(LanguageAbstract):
+    character = models.ForeignKey(Character, on_delete=models.CASCADE, related_name="langs")
     biography = models.TextField()
 
     def __str__(self):
-        return str(self.people)
+        return str(self.character)
 
     @property
     def get_commit_id(self):
-        return self.people.id
+        return self.character.id

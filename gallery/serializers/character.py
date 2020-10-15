@@ -1,21 +1,21 @@
 from lib.serializers import ModelSerializerBase
 from rest_framework.serializers import SerializerMethodField
-from gallery.models import People, PeopleLang
+from gallery.models import Character, CharacterLang
 from common.serializers.tag import TagSerializerMini
 
 
-class PeopleLangSerializer(ModelSerializerBase):
+class CharacterLangSerializer(ModelSerializerBase):
     class Meta:
-        model = PeopleLang
+        model = CharacterLang
         fields = ['id', 'biography', 'language']
 
 
-class PeopleSerializer(ModelSerializerBase):
-    langs = PeopleLangSerializer(many=True, required=False)
+class CharacterSerializer(ModelSerializerBase):
+    langs = CharacterLangSerializer(many=True, required=False)
     profil = SerializerMethodField()
 
     class Meta:
-        model = People
+        model = Character
         fields = ['id', 'name', 'born', 'death', 'profil', 'langs', 'tags']
 
     def get_profil(self, obj):
@@ -29,14 +29,14 @@ class PeopleSerializer(ModelSerializerBase):
         }
 
 
-class PeopleSerializerPost(PeopleSerializer):
+class CharacterSerializerPost(CharacterSerializer):
     tags = TagSerializerMini(many=True, required=False)
     profil = None
 
-    class Meta(PeopleSerializer.Meta):
+    class Meta(CharacterSerializer.Meta):
         pass
 
 
-class PeopleSerializerMini(PeopleSerializer):
-    class Meta(PeopleSerializer.Meta):
+class CharacterSerializerMini(CharacterSerializer):
+    class Meta(CharacterSerializer.Meta):
         fields = ['id', 'name']

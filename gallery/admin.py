@@ -1,18 +1,18 @@
 from django.contrib import admin
-from gallery.models import People, PeopleLang, Video, VideoLang, Picture, PictureLang
+from gallery.models import Character, CharacterLang, Video, VideoLang, Picture, PictureLang
 from lib.admin import AdminBase, AdminInlineBase
 
 
-class PeopleLangInline(AdminInlineBase):
-    model = PeopleLang
+class CharacterLangInline(AdminInlineBase):
+    model = CharacterLang
 
 
-@admin.register(People)
-class PeopleAdmin(AdminBase):
+@admin.register(Character)
+class CharacterAdmin(AdminBase):
     list_display = ('id', 'name', 'langs_available', 'commit', 'issue')
     search_fields = ('id', 'name', 'born', 'death')
     inlines = [
-        PeopleLangInline
+        CharacterLangInline
     ]
 
     def pictures(self, obj):

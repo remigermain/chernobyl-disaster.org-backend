@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from django.conf import settings
 from timeline.models import Event
-from gallery.models import People
+from gallery.models import Character
 from common.models import Tag, Translate, TranslateLang
 from utils.models import Commit
 from django.db.models import Q, Count
@@ -19,7 +19,7 @@ def serialize(obj, display_name):
 
 
 @api_view(['GET'])
-def people(request):
+def character(request):
     lst = [
         {
             'id': obj.id,
@@ -29,9 +29,9 @@ def people(request):
                 'thumbnail_jpeg': obj.profil_thumbnail_jpeg.url,
             }
         }
-        for obj in People.objects.all().order_by('name')
+        for obj in Character.objects.all().order_by('name')
     ]
-    return Response({'peoples': lst})
+    return Response({'characters': lst})
 
 
 @api_view(['GET'])

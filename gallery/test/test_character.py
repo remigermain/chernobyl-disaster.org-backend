@@ -1,14 +1,14 @@
 from django.test import tag
 from lib.test import BaseTest
-from gallery.serializers.people import PeopleSerializerPost
-from gallery.models import PeopleLang, People
+from gallery.serializers.character import CharacterSerializerPost
+from gallery.models import CharacterLang, Character
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 from common.models import Tag
 
 
-@tag('people')
-class PeopleTest(BaseTest):
+@tag('character')
+class CharacterTest(BaseTest):
 
     def setUp(self):
         super().setUp()
@@ -22,31 +22,31 @@ class PeopleTest(BaseTest):
     def test_auth(self):
         instance = self.test_create_serializer()
 
-        response = self.client.get(reverse("people-list"))
+        response = self.client.get(reverse("character-list"))
         self.assertEqual(response.status_code, 200)
-        response = self.client.get(reverse("people-detail", args=[instance.id]))
+        response = self.client.get(reverse("character-detail", args=[instance.id]))
         self.assertEqual(response.status_code, 200)
 
     def test_delete(self):
         instance = self.test_create_serializer()
-        response = self.client.delete(reverse("people-detail", args=[instance.id]))
+        response = self.client.delete(reverse("character-detail", args=[instance.id]))
         self.assertEqual(response.status_code, 403)
-        response = self.factory.delete(reverse("people-detail", args=[instance.id]))
+        response = self.factory.delete(reverse("character-detail", args=[instance.id]))
         self.assertEqual(response.status_code, 403)
-        response = self.factory_admin.delete(reverse("people-detail", args=["wrong"]))
+        response = self.factory_admin.delete(reverse("character-detail", args=["wrong"]))
         self.assertEqual(response.status_code, 404)
-        response = self.factory_admin.delete(reverse("people-detail", args=[instance.id]))
+        response = self.factory_admin.delete(reverse("character-detail", args=[instance.id]))
         self.assertEqual(response.status_code, 204)
 
     def test_put(self):
         instance = self.test_create_serializer()
-        response = self.client.put(reverse("people-detail", args=[instance.id]), data={})
+        response = self.client.put(reverse("character-detail", args=[instance.id]), data={})
         self.assertEqual(response.status_code, 403)
-        response = self.factory.put(reverse("people-detail", args=[instance.id]), data={})
+        response = self.factory.put(reverse("character-detail", args=[instance.id]), data={})
         self.assertEqual(response.status_code, 403)
-        response = self.factory_admin.put(reverse("people-detail", args=["wrong"]), data={})
+        response = self.factory_admin.put(reverse("character-detail", args=["wrong"]), data={})
         self.assertEqual(response.status_code, 404)
-        response = self.factory_admin.put(reverse("people-detail", args=[instance.id]), data={})
+        response = self.factory_admin.put(reverse("character-detail", args=[instance.id]), data={})
         self.assertEqual(response.status_code, 400)
 
     def test_create_serializer(self):
@@ -56,7 +56,7 @@ class PeopleTest(BaseTest):
             'death': self.date,
             'born': self.date
         }
-        serializer = PeopleSerializerPost(data=data, context=self.context, partial=True)
+        serializer = CharacterSerializerPost(data=data, context=self.context, partial=True)
         self.assertTrue(serializer.is_valid())
         instance = serializer.save()
         self.check_commit_created(instance)
@@ -71,7 +71,7 @@ class PeopleTest(BaseTest):
                 'language': self.lang,
             }]
         }
-        serializer = PeopleSerializerPost(data=data, context=self.context, partial=True)
+        serializer = CharacterSerializerPost(data=data, context=self.context, partial=True)
         self.assertTrue(serializer.is_valid())
         instance = serializer.save()
         self.check_commit_created(instance)
@@ -92,7 +92,7 @@ class PeopleTest(BaseTest):
                 }
             ]
         }
-        serializer = PeopleSerializerPost(data=data, context=self.context, partial=True)
+        serializer = CharacterSerializerPost(data=data, context=self.context, partial=True)
         self.assertTrue(serializer.is_valid())
         instance = serializer.save()
         self.check_commit_created(instance)
@@ -103,9 +103,9 @@ class PeopleTest(BaseTest):
         data = {
             'name': 'name',
         }
-        response = self.client.post(reverse('people-list'), data=data)
+        response = self.client.post(reverse('character-list'), data=data)
         self.assertEqual(response.status_code, 403)
-        response = self.factory.post(reverse('people-list'), data=data)
+        response = self.factory.post(reverse('character-list'), data=data)
         self.assertEqual(response.status_code, 201)
 
     def test_create_client_profil(self):
@@ -113,7 +113,7 @@ class PeopleTest(BaseTest):
             'name': 'name',
             'profil': self.picture
         }
-        response = self.factory.post(reverse('people-list'), data=data)
+        response = self.factory.post(reverse('character-list'), data=data)
         self.assertEqual(response.status_code, 201)
 
     def test_create_client_langs(self):
@@ -122,9 +122,9 @@ class PeopleTest(BaseTest):
             'langs[0][biography]': 'lala',
             'langs[0][language]': self.lang,
         }
-        response = self.factory.post(reverse('people-list'), data=data)
+        response = self.factory.post(reverse('character-list'), data=data)
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(PeopleLang.objects.count(), 1)
+        self.assertEqual(CharacterLang.objects.count(), 1)
 
     def test_create_client_langs2(self):
         data = {
@@ -134,16 +134,16 @@ class PeopleTest(BaseTest):
             'langs[1][biography]': 'lala',
             'langs[1][language]': self.lang2,
         }
-        response = self.factory.post(reverse('people-list'), data=data)
+        response = self.factory.post(reverse('character-list'), data=data)
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(PeopleLang.objects.count(), 2)
+        self.assertEqual(CharacterLang.objects.count(), 2)
 
     def test_update_client(self):
         instance = self.test_create_serializer()
         data = {
             'name': 'title title',
         }
-        response = self.factory.patch(reverse('people-detail', args=[instance.id]), data=data)
+        response = self.factory.patch(reverse('character-detail', args=[instance.id]), data=data)
         self.assertEqual(response.status_code, 200)
 
     def test_update_client_langs(self):
@@ -155,10 +155,10 @@ class PeopleTest(BaseTest):
             'langs[1][biography]': 'lala',
             'langs[1][language]': self.lang2,
         }
-        response = self.factory.patch(reverse('people-detail', args=[instance.id]), data=data)
+        response = self.factory.patch(reverse('character-detail', args=[instance.id]), data=data)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(People.objects.count(), 1)
-        self.assertEqual(PeopleLang.objects.count(), 2)
+        self.assertEqual(Character.objects.count(), 1)
+        self.assertEqual(CharacterLang.objects.count(), 2)
 
     def test_update_client_langs_change(self):
         instance = self.test_create_serializer_langs2()
@@ -172,21 +172,21 @@ class PeopleTest(BaseTest):
             'langs[1][biography]': 'lala',
             'langs[1][language]': langs[0].language,
         }
-        response = self.factory.patch(reverse('people-detail', args=[instance.id]), data=data)
+        response = self.factory.patch(reverse('character-detail', args=[instance.id]), data=data)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(People.objects.count(), 1)
-        self.assertEqual(PeopleLang.objects.count(), 2)
+        self.assertEqual(Character.objects.count(), 1)
+        self.assertEqual(CharacterLang.objects.count(), 2)
 
     def test_create_client_no_biography(self):
         data = {}
-        response = self.factory.post(reverse('people-list'), data=data)
+        response = self.factory.post(reverse('character-list'), data=data)
         self.assertEqual(response.status_code, 400)
 
     def test_create_client_empty_biography(self):
         data = {
             'name': '',
         }
-        response = self.factory.post(reverse('people-list'), data=data)
+        response = self.factory.post(reverse('character-list'), data=data)
         self.assertEqual(response.status_code, 400)
 
     def test_create_client_same_langs(self):
@@ -197,7 +197,7 @@ class PeopleTest(BaseTest):
             'langs[1][biography]': 'lala',
             'langs[1][language]': self.lang,
         }
-        response = self.factory.post(reverse('people-list'), data=data)
+        response = self.factory.post(reverse('character-list'), data=data)
         self.assertEqual(response.status_code, 400)
 
     def test_create_client_wrong_lang(self):
@@ -206,7 +206,7 @@ class PeopleTest(BaseTest):
             'langs[0][biography]': 'lala',
             'langs[0][language]': "self.lang",
         }
-        response = self.factory.post(reverse('people-list'), data=data)
+        response = self.factory.post(reverse('character-list'), data=data)
         self.assertEqual(response.status_code, 400)
 
     def test_create_client_no_langs(self):
@@ -214,7 +214,7 @@ class PeopleTest(BaseTest):
             'name': 'name',
             'langs[0][biography]': 'lala',
         }
-        response = self.factory.post(reverse('people-list'), data=data)
+        response = self.factory.post(reverse('character-list'), data=data)
         self.assertEqual(response.status_code, 400)
 
     def test_create_client_langs_no_biography(self):
@@ -222,7 +222,7 @@ class PeopleTest(BaseTest):
             'name': 'name',
             'langs[0][language]': self.lang,
         }
-        response = self.factory.post(reverse('people-list'), data=data)
+        response = self.factory.post(reverse('character-list'), data=data)
         self.assertEqual(response.status_code, 400)
 
     def test_create_client_langs_empty_biography(self):
@@ -231,7 +231,7 @@ class PeopleTest(BaseTest):
             'langs[0][biography]': '',
             'langs[0][language]': self.lang,
         }
-        response = self.factory.post(reverse('people-list'), data=data)
+        response = self.factory.post(reverse('character-list'), data=data)
         self.assertEqual(response.status_code, 400)
 
     def test_update_client_profil_wrong(self):
@@ -239,7 +239,7 @@ class PeopleTest(BaseTest):
         data = {
             'profil': 'efrff',
         }
-        response = self.factory.patch(reverse('people-detail', args=[instance.id]), data=data)
+        response = self.factory.patch(reverse('character-detail', args=[instance.id]), data=data)
         self.assertEqual(response.status_code, 400)
 
     def test_update_serializer(self):
@@ -247,7 +247,7 @@ class PeopleTest(BaseTest):
         data = {
             'name': 'title title',
         }
-        serializer = PeopleSerializerPost(instance=instance, data=data, context=self.context, partial=True)
+        serializer = CharacterSerializerPost(instance=instance, data=data, context=self.context, partial=True)
         self.assertTrue(serializer.is_valid())
         obj = serializer.save()
         self.check_commit_update(obj, diff=['name'])
@@ -257,7 +257,7 @@ class PeopleTest(BaseTest):
         data = {
             'death': self.date2,
         }
-        serializer = PeopleSerializerPost(instance=instance, data=data, context=self.context, partial=True)
+        serializer = CharacterSerializerPost(instance=instance, data=data, context=self.context, partial=True)
         self.assertTrue(serializer.is_valid())
         obj = serializer.save()
         self.check_commit_update(obj, diff=['death'])
@@ -266,7 +266,7 @@ class PeopleTest(BaseTest):
         data = {
             'name': 'name tags create',
         }
-        serializer = PeopleSerializerPost(data=data, context=self.context)
+        serializer = CharacterSerializerPost(data=data, context=self.context)
         self.assertTrue(serializer.is_valid())
         self.assertEqual(Tag.objects.count(), 0)
         obj = serializer.save()
@@ -280,7 +280,7 @@ class PeopleTest(BaseTest):
         data = {
             'name': 'new change name tags create',
         }
-        serializer = PeopleSerializerPost(instance=instance, data=data, context=self.context, partial=True)
+        serializer = CharacterSerializerPost(instance=instance, data=data, context=self.context, partial=True)
         self.assertTrue(serializer.is_valid())
         old_name = instance.name
         self.assertEqual(Tag.objects.filter(name=old_name).count(), 1)
@@ -303,7 +303,7 @@ class PeopleTest(BaseTest):
                 }
             ]
         }
-        serializer = PeopleSerializerPost(instance=instance, data=data, context=self.context, partial=True)
+        serializer = CharacterSerializerPost(instance=instance, data=data, context=self.context, partial=True)
         self.assertTrue(serializer.is_valid())
         obj = serializer.save()
         self.check_commit_update(obj, diff=['langs'])
@@ -323,7 +323,7 @@ class PeopleTest(BaseTest):
                 }
             ]
         }
-        serializer = PeopleSerializerPost(data=data, context=self.context)
+        serializer = CharacterSerializerPost(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     def test_create_serializer_wrong_lang(self):
@@ -336,7 +336,7 @@ class PeopleTest(BaseTest):
                 }
             ]
         }
-        serializer = PeopleSerializerPost(data=data, context=self.context,)
+        serializer = CharacterSerializerPost(data=data, context=self.context,)
         self.assertFalse(serializer.is_valid())
 
     def test_create_serializer_no_langs(self):
@@ -348,7 +348,7 @@ class PeopleTest(BaseTest):
                 }
             ]
         }
-        serializer = PeopleSerializerPost(data=data, context=self.context)
+        serializer = CharacterSerializerPost(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     def test_create_serializer_langs_no_biography(self):
@@ -360,7 +360,7 @@ class PeopleTest(BaseTest):
                 }
             ]
         }
-        serializer = PeopleSerializerPost(data=data, context=self.context)
+        serializer = CharacterSerializerPost(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     def test_create_serializer_langs_empty_biography(self):
@@ -373,7 +373,7 @@ class PeopleTest(BaseTest):
                 }
             ]
         }
-        serializer = PeopleSerializerPost(data=data, context=self.context)
+        serializer = CharacterSerializerPost(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     def test_create_serializer_wrong_death(self):
@@ -381,7 +381,7 @@ class PeopleTest(BaseTest):
             'name': 'name',
             'death': 'ffefer'
         }
-        serializer = PeopleSerializerPost(data=data, context=self.context)
+        serializer = CharacterSerializerPost(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     def test_create_serializer_wrong_born(self):
@@ -389,7 +389,7 @@ class PeopleTest(BaseTest):
             'name': 'name',
             'born': 'ffefer'
         }
-        serializer = PeopleSerializerPost(data=data, context=self.context)
+        serializer = CharacterSerializerPost(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     def test_create_serializer_empty_death(self):
@@ -397,7 +397,7 @@ class PeopleTest(BaseTest):
             'name': 'name',
             'death': ''
         }
-        serializer = PeopleSerializerPost(data=data, context=self.context)
+        serializer = CharacterSerializerPost(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     def test_create_serializer_empty_born(self):
@@ -405,7 +405,7 @@ class PeopleTest(BaseTest):
             'name': 'name',
             'born': ''
         }
-        serializer = PeopleSerializerPost(data=data, context=self.context)
+        serializer = CharacterSerializerPost(data=data, context=self.context)
         self.assertFalse(serializer.is_valid())
 
     def test_delete_commit(self):
@@ -416,7 +416,7 @@ class PeopleTest(BaseTest):
 
         uuid = contenttypes_uuid(instance)
         self.assertNotEqual(Commit.objects.filter(uuid=uuid).count(), 0)
-        response = self.factory_admin.delete(reverse("people-detail", args=[instance.id]))
+        response = self.factory_admin.delete(reverse("character-detail", args=[instance.id]))
         self.assertEqual(response.status_code, 204)
         self.assertEqual(Commit.objects.filter(uuid=uuid).count(), 0)
 
@@ -442,14 +442,14 @@ class PeopleTest(BaseTest):
         data = {
             'name': "a" * 120
         }
-        response = self.factory.post(reverse("people-list"), data)
+        response = self.factory.post(reverse("character-list"), data)
         self.assertEqual(response.status_code, 400)
 
     def test_client_max_length_name_tag(self):
         data = {
             'name': "a" * 80
         }
-        response = self.factory.post(reverse("people-list"), data)
+        response = self.factory.post(reverse("character-list"), data)
         self.assertEqual(response.status_code, 201)
 
     def test_client_add_tags(self):
@@ -458,10 +458,10 @@ class PeopleTest(BaseTest):
             'tags[0][name]': 'lalala',
             'tags[1][name]': 'lalalafff',
         }
-        response = self.factory.post(reverse("people-list"), data)
+        response = self.factory.post(reverse("character-list"), data)
         self.assertEqual(response.status_code, 201)
         self.assertEqual(Tag.objects.count(), 3)
-        instance = People.objects.first()
+        instance = Character.objects.first()
         self.assertListSame(instance.tags.values_list("name", flat=True), ["name", "lalala", "lalalafff"])
 
     def test_client_add_tags3(self):
@@ -472,10 +472,10 @@ class PeopleTest(BaseTest):
             'tags[2][name]': 'lalalafff',
             'tags[3][name]': 'lalalafff',
         }
-        response = self.factory.post(reverse("people-list"), data)
+        response = self.factory.post(reverse("character-list"), data)
         self.assertEqual(response.status_code, 201)
         self.assertEqual(Tag.objects.count(), 5)
-        # instance = People.objects.first()
+        # instance = Character.objects.first()
         # self.assertListSame(instance.tags.values_list("name", flat=True), ["name", "lalala", "lalalafff"])
 
     def test_client_add_tags4(self):
@@ -486,8 +486,8 @@ class PeopleTest(BaseTest):
             'tags[1][name]': 'test',
             'tags[1][id]': tag.id,
         }
-        response = self.factory.post(reverse("people-list"), data)
+        response = self.factory.post(reverse("character-list"), data)
         self.assertEqual(response.status_code, 201)
         self.assertEqual(Tag.objects.count(), 3)
-        instance = People.objects.first()
+        instance = Character.objects.first()
         self.assertListSame(instance.tags.values_list("name", flat=True), ["name", "lalala", "test"])

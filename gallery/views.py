@@ -1,6 +1,6 @@
 from lib.viewset import ModelViewSetBase
-from gallery.models import Picture, Video, People, PictureLang, VideoLang, PeopleLang
-from gallery.serializers import picture, video, people
+from gallery.models import Picture, Video, Character, PictureLang, VideoLang, CharacterLang
+from gallery.serializers import picture, video, character
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework import mixins, viewsets
 
@@ -53,17 +53,17 @@ class VideoViewSet(ModelViewSetBase):
                       .select_related("event")
 
 
-class PeopleLangViewSet(mixins.DestroyModelMixin, viewsets.GenericViewSet):
-    queryset = PeopleLang.objects.all()
-    serializer_class = people.PeopleLangSerializer
+class CharacterLangViewSet(mixins.DestroyModelMixin, viewsets.GenericViewSet):
+    queryset = CharacterLang.objects.all()
+    serializer_class = character.CharacterLangSerializer
     permission_classes = (IsAdminUser, IsAuthenticated)
 
 
-class PeopleViewSet(ModelViewSetBase):
-    queryset = People.objects.all()
-    serializer_class = people.PeopleSerializer
-    serializer_class_post = people.PeopleSerializerPost
-    serializer_class_contribute = people.PeopleSerializerMini
+class CharacterViewSet(ModelViewSetBase):
+    queryset = Character.objects.all()
+    serializer_class = character.CharacterSerializer
+    serializer_class_post = character.CharacterSerializerPost
+    serializer_class_contribute = character.CharacterSerializerMini
     filterset_fields = ['id', 'name', 'born', 'death']
     search_fields = ['name', 'born', 'death', 'langs__biography', 'tags__name', 'tags__langs__name']
     search_fields = ['name', 'born', 'death', 'langs__biography']

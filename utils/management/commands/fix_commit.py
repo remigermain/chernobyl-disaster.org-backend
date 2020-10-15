@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from utils.models import Commit
 from common.models import Tag, TagLang, Translate, TranslateLang
 from timeline.models import Event, EventLang
-from gallery.models import People, PeopleLang, Picture, PictureLang, Video, VideoLang
+from gallery.models import Character, CharacterLang, Picture, PictureLang, Video, VideoLang
 from utils.function import contenttypes_uuid
 
 
@@ -13,7 +13,7 @@ class Command(BaseCommand):
 
         models = [
             Tag, TagLang, Translate, TranslateLang, Event, EventLang,
-            People, PeopleLang, Picture, PictureLang, Video, VideoLang
+            Character, CharacterLang, Picture, PictureLang, Video, VideoLang
         ]
 
         total = {'delete': 0, 'create': {}}
