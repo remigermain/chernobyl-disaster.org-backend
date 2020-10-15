@@ -190,6 +190,9 @@ def translate_json(request):
     merged = to_bool(request.data['merge']) if 'merge' in request.data else False
     parent = to_bool(request.data['parent']) if 'parent' in request.data else False
 
+    if 'percentage' in content:
+        del content['percentage']
+
     def gen_path(path, key):
         return f"{path}.{key}" if path else key
 
@@ -197,7 +200,7 @@ def translate_json(request):
         if isinstance(element, dict):
             for key, value in element.items():
                 depth_dict(gen_path(path, key), value)
-        elif isinstance(element, str):
+        elif type(element) in [str, int]:
             lst.append({'path': path, 'value': element})
         else:
             raise TypeError(f"file type error {type(element)}")
@@ -206,7 +209,7 @@ def translate_json(request):
     try:
         depth_dict("", content)
     except TypeError as e:
-        return Response(status=HTTP_400_BAD_REQUEST, data={'detail': e})
+        return Response(status=HTTP_400_BAD_REQUEST, data={'detail': str(e)})
 
     data = {
         'created': 0,
