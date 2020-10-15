@@ -259,24 +259,24 @@ class AuthTest(BaseTest):
 
     def test_settings_change(self):
         data = {
-            'show_help': True,
+            'show_helpers': True,
             'show_admin': False
         }
         response = self.factory.patch(reverse("rest_user_details"), data)
         self.assertEqual(response.status_code, 200)
         self.user.refresh_from_db()
-        self.assertTrue(self.user.show_help)
+        self.assertTrue(self.user.show_helpers)
         self.assertFalse(self.user.show_admin)
 
     def test_settings_change2(self):
         data = {
-            'show_help': False,
+            'show_helpers': False,
             'show_admin': True
         }
         response = self.factory.patch(reverse("rest_user_details"), data)
         self.assertEqual(response.status_code, 200)
         self.user.refresh_from_db()
-        self.assertFalse(self.user.show_help)
+        self.assertFalse(self.user.show_helpers)
         self.assertTrue(self.user.show_admin)
 
 
