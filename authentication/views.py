@@ -22,7 +22,7 @@ class PasswordReset(PasswordResetConfirmView):
     """
     def get(self, *args, **kwargs):
         query = f"uid={kwargs['uidb64']}&token={kwargs['token']}"
-        return redirect(f"{settings.FRONTEND_URL}/auth/change-password/?{query}")
+        return redirect(f"{settings.FRONTEND_URL}/auth/new-password/?{query}")
 
 
 class VerifyEmail(VerifyEmailView):
