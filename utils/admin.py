@@ -11,6 +11,8 @@ class IssueAdmin(admin.ModelAdmin):
 @admin.register(Commit)
 class CommitAdmin(admin.ModelAdmin):
     list_display = ('id', 'creator', 'content_type', 'content_object', 'created')
+    list_filter = ('id', 'uuid')
+    search_fields = ('id', 'uuid')
     exclude = ('uuid',)
 
     def get_queryset(self, request):

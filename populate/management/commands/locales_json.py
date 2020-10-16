@@ -1,9 +1,11 @@
 from django.core.management.base import BaseCommand
 from common.models import Translate, TranslateLang
 import json
+import os
 
 PATH = "locales"
 KEY_PERCENTAGE = "percentage"
+MINI = 100
 
 
 class Command(BaseCommand):
@@ -15,9 +17,12 @@ class Command(BaseCommand):
 
         langs = {}
         missing = {}
+        file_name = {}
         for locale in locales:
             langs[locale] = {}
             missing[locale] = []
+            file_name[locale] = locale
+        file_name['en'] = "us"
 
         for t in trans:
             keys = t.key.split(".")
@@ -41,8 +46,14 @@ class Command(BaseCommand):
             else:
                 percentage = 0
             langs[key][KEY_PERCENTAGE] = percentage
-            print(f"\t{key}: {percentage}%")
+
+        if not os.path.exists(PATH):
+            os.mkdir(PATH)
 
         for key, value in langs.items():
-            with open(f"{PATH}/{key.lower()}-{key.upper()}.json", "w") as f:
-                f.write(json.dumps(value))
+            if langs[key][KEY_PERCENTAGE] == MINI:
+                print(f"\t[ CREATE ] {key}: {langs[key][KEY_PERCENTAGE]}%")
+                with open(f"{PATH}/{key.lower()}-{file_name[key.lower()].upper()}.json", "w") as f:
+                    f.write(json.dumps(value))
+            else:
+                print(f"\t[ NO CREATE ] {key}: {langs[key][KEY_PERCENTAGE]}%")

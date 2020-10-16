@@ -19,7 +19,7 @@ def serialize(obj, display_name):
 
 
 @api_view(['GET'])
-def character(request):
+def characters(request):
     lst = [
         {
             'id': obj.id,
@@ -60,9 +60,9 @@ def contributor(request):
                                                 .order_by('username')
                                                 .prefetch_related('commit_creator')
                                                 .values_list('username', flat=True),
-        'donators': get_user_model().objects.filter(amount__gte=1)
-                                            .order_by('-amount')
-                                            .values_list('username', flat=True)
+        'donors': get_user_model().objects.filter(amount__gte=1)
+                                          .order_by('-amount')
+                                          .values_list('username', flat=True)
     })
 
 
