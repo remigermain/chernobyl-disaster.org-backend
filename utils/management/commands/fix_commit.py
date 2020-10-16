@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from utils.models import Commit
-from common.models import Tag, TagLang, Translate, TranslateLang
+from common.models import Tag, TagLang, TranslateLang
 from timeline.models import Event, EventLang
 from gallery.models import Character, CharacterLang, Picture, PictureLang, Video, VideoLang
 from utils.function import contenttypes_uuid
@@ -12,7 +12,7 @@ class Command(BaseCommand):
         user = get_user_model().objects.get(id=1)
 
         models = [
-            Tag, TagLang, Translate, TranslateLang, Event, EventLang,
+            Tag, TagLang, TranslateLang, Event, EventLang,
             Character, CharacterLang, Picture, PictureLang, Video, VideoLang
         ]
 
