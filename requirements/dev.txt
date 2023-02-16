@@ -2,5 +2,5 @@
 
 pydot==1.4.1
 pyparsing==2.4.7
-Werkzeug==1.0.1
+Werkzeug==2.2.3
 django-debug-toolbar
